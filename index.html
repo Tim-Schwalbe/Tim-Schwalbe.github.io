@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeisterTiefbau - Ihr Partner im Tiefbau</title>
+    <title>Glasfaser Atti - Ihr Experte für Glasfaserausbau in Deutschland</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: #1a2b44 url('img/background.jpg') no-repeat center center fixed;
+            background: #1a2b44 url('img/background.jpg') no-repeat center center scroll;
             background-size: cover;
             color: #ffffff;
             line-height: 1.6;
@@ -36,9 +36,25 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(10, 20, 36, 0.95);
+            background: rgba(113, 113, 113, 1);
             padding: 1rem;
             z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 2rem;
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 0 1rem;
         }
 
         nav ul {
@@ -46,6 +62,9 @@
             justify-content: center;
             list-style: none;
             flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+            width: 100%; /* Sicherstellen, dass das Menü die volle Breite nutzt */
         }
 
         nav ul li {
@@ -60,11 +79,30 @@
         }
 
         nav ul li a:hover {
-            color: #4a90e2;
+            color: #78b4f9;
+        }
+
+        /* Logo und Text in der Hauptmenüleiste */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-header img {
+            width: 40px; /* Größe des Logos */
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .nav-header span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffffff;
         }
 
         section {
-            padding: 100px 20px 60px; /* Oben mehr Platz wegen fixed Nav */
+            padding: 20px 20px 60px; /* Basis padding-top, wird dynamisch angepasst */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -78,7 +116,7 @@
             align-items: center;
             gap: 40px;
             flex-wrap: wrap;
-            background: rgba(87, 87, 87, 0.95); /* Dunkles Blau, 95% Deckkraft */
+            background: rgba(113, 113, 113, 0.9); /* Dunkles Blau, 95% Deckkraft */
             padding: 30px;
             border-radius: 15px;
             border: 1px solid #15273c; /* Dezenter blauer Rand */
@@ -112,13 +150,40 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .hamburger {
+                display: block; /* Hamburger-Button auf Mobilgeräten anzeigen */
+            }
+
             nav ul {
+                display: none; /* Menü standardmäßig ausblenden */
                 flex-direction: column;
                 align-items: center;
+                width: 100%;
+                background: rgba(122, 122, 122, 0.95);
+                position: absolute;
+                top: 100%;
+                left: 0;
+                padding: 1rem 0;
+            }
+
+            nav ul.active {
+                display: flex; /* Menü anzeigen, wenn aktiv */
+            }
+
+            nav ul li {
+                margin: 10px 0;
+            }
+
+            .nav-container {
+                justify-content: space-between; /* Logo links, Hamburger rechts */
+            }
+
+            .nav-header {
+                display: flex; /* Logo und Text auf Mobilgeräten anzeigen */
             }
 
             section {
-                padding: 80px 15px 40px;
+                padding: 20px 15px 40px;
             }
 
             .content {
@@ -144,73 +209,114 @@
             }
 
             section {
-                padding: 70px 10px 30px;
+                padding: 20px 10px 30px;
             }
 
             .content {
                 padding: 15px;
+            }
+
+            .nav-header img {
+                width: 30px; /* Kleinere Logo-Größe auf sehr kleinen Bildschirmen */
+                height: 30px;
+            }
+
+            .nav-header span {
+                font-size: 1rem; /* Kleinere Schriftgröße */
+            }
+        }
+
+        /* Sicherstellen, dass das Menü auf Desktop zentriert bleibt */
+        @media (min-width: 769px) {
+            .nav-container {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start; /* Logo links, Menü zentriert */
+            }
+
+            .hamburger {
+                display: none; /* Hamburger-Button auf Desktop ausblenden */
+            }
+
+            nav ul {
+                display: flex !important; /* Sicherstellen, dass das Menü immer sichtbar ist */
+                width: auto; /* Menü nicht die volle Breite nutzen */
+                flex: 1; /* Menü nimmt den verbleibenden Platz ein */
+                justify-content: center; /* Menü zentriert */
+            }
+
+            .nav-header {
+                display: flex; /* Logo und Text auf Desktop anzeigen */
+                margin-right: auto; /* Logo links ausrichten */
             }
         }
     </style>
 </head>
 <body>
     <nav>
-        <ul>
-            <li><a href="#home">Home</a></li>
-            <li><a href="#services">Leistungen</a></li>
-            <li><a href="#projects">Projekte</a></li>
-            <li><a href="#about">Über Uns</a></li>
-            <li><a href="#contact">Kontakt</a></li>
-            <li><a href="#impressum">Impressum</a></li>
-        </ul>
+        <div class="nav-container">
+            <div class="nav-header">
+                <img src="img/logo.jpg" alt="Glasfaser Atti Logo">
+                <span>Glasfaser Atti</span>
+            </div>
+            <button class="hamburger" aria-label="Menü öffnen/schließen">☰</button>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#services">Leistungen</a></li>
+                <li><a href="#projects">Projekte</a></li>
+                <li><a href="#about">Über Uns</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+                <li><a href="#impressum">Impressum</a></li>
+            </ul>
+        </div>
     </nav>
 
     <section id="home">
         <div class="content">
-            <img src="img/image_1.jpg" alt="Tiefbau Baustelle">
+            <img src="img/image_1.jpg" alt="Glasfaserausbau Baustelle">
             <div class="text">
-                <h1>MeisterTiefbau</h1>
-                <p>Willkommen bei MeisterTiefbau - Ihrem zuverlässigen Partner für alle Tiefbauprojekte. Mit jahrelanger Erfahrung bringen wir Ihr Bauvorhaben sicher zum Erfolg.</p>
+                <h1>Glasfaser Atti</h1>
+                <p>Willkommen bei Glasfaser Atti – Ihrem führenden Partner für den Glasfaserausbau in Deutschland. Wir bringen die Zukunft der digitalen Kommunikation direkt zu Ihnen nach Hause oder in Ihr Unternehmen. Mit modernster Technologie und jahrelanger Erfahrung sorgen wir für schnelle, zuverlässige und zukunftssichere Internetverbindungen, die den Anforderungen der digitalen Welt gerecht werden.</p>
             </div>
         </div>
     </section>
 
     <section id="services">
         <div class="content">
-            <img src="img/image_2.jpg" alt="Baumaschinen">
+            <img src="img/image_6.jpg" alt="Glasfaserkabel Verlegung">
             <div class="text">
                 <h1>Unsere Leistungen</h1>
-                <p>Von Kanalbau über Straßenbau bis hin zu Erdarbeiten - wir bieten ein umfassendes Leistungsspektrum für private und gewerbliche Kunden.</p>
+                <p>Wir bieten ein umfassendes Leistungsspektrum rund um den Glasfaserausbau: von der Planung und Projektierung über die Verlegung der Glasfaserkabel bis hin zur Installation und Inbetriebnahme. Unser Team aus Experten kümmert sich um den gesamten Prozess – sei es für private Haushalte, Wohnanlagen, Gewerbeimmobilien oder kommunale Projekte. Wir setzen auf modernste Technik, präzise Ausführung und höchste Qualitätsstandards, um Ihnen eine Internetverbindung mit maximaler Bandbreite und Stabilität zu garantieren.</p>
             </div>
         </div>
     </section>
 
     <section id="projects">
         <div class="content">
-            <img src="img/image_3.jpg" alt="Fertiggestelltes Projekt">
+            <img src="img/image_3.jpg" alt="Abgeschlossenes Glasfaserprojekt">
             <div class="text">
                 <h1>Unsere Projekte</h1>
-                <p>Entdecken Sie unsere abgeschlossenen Projekte, die unsere Kompetenz und Zuverlässigkeit im Tiefbau unter Beweis stellen.</p>
+                <p>Entdecken Sie unsere erfolgreich abgeschlossenen Glasfaserprojekte, die unsere Expertise und Zuverlässigkeit unter Beweis stellen. Von der Anbindung ganzer Stadtteile in urbanen Gebieten bis hin zur Versorgung ländlicher Regionen – wir haben zahlreiche Projekte in ganz Deutschland realisiert. Zu unseren Referenzen zählen die Versorgung von über 10.000 Haushalten in Nordrhein-Westfalen, die Anbindung von Gewerbeparks in Bayern und die Unterstützung kommunaler Glasfaserinitiativen in Sachsen. Lassen Sie sich von unserer Arbeit überzeugen!</p>
             </div>
         </div>
     </section>
 
     <section id="about">
         <div class="content">
-            <img src="img/image_1.jpg" alt="Tiefbau Team">
+            <img src="img/image_4.jpg" alt="Glasfaser Atti Team">
             <div class="text">
                 <h1>Über Uns</h1>
-                <p>Wir sind ein Familienunternehmen mit über 20 Jahren Erfahrung im Tiefbau. Unser Team aus qualifizierten Fachkräften steht für Qualität und Präzision bei jedem Projekt.</p>
+                <p>Glasfaser Atti ist ein spezialisiertes Unternehmen mit über 15 Jahren Erfahrung im Glasfaserausbau. Als Familienunternehmen mit Sitz in Deutschland stehen wir für Qualität, Zuverlässigkeit und Kundennähe. Unser Team aus hochqualifizierten Ingenieuren, Technikern und Projektmanagern arbeitet Hand in Hand, um maßgeschneiderte Lösungen für den Glasfaserausbau zu entwickeln. Wir sind stolz darauf, einen Beitrag zur Digitalisierung Deutschlands zu leisten und Gemeinden, Unternehmen und Privatpersonen mit modernster Glasfasertechnologie zu versorgen.</p>
             </div>
         </div>
     </section>
 
     <section id="contact">
         <div class="content">
-            <img src="img/image_5.jpg" alt="Kontakt Baustelle">
+            <img src="img/image_5.jpg" alt="Kontakt Glasfaserausbau">
             <div class="text">
                 <h1>Kontaktieren Sie uns</h1>
-                <p>Haben Sie Fragen oder möchten Sie ein Angebot? Kontaktieren Sie uns! Telefon: 0123/456789 | Email: info@meistertiefbau.de</p>
+                <p>Möchten Sie mehr über den Glasfaserausbau erfahren oder ein unverbindliches Angebot für Ihr Projekt einholen? Unser Team steht Ihnen gerne zur Verfügung! Kontaktieren Sie uns noch heute und lassen Sie sich von unseren Experten beraten. Telefon: 0123/456789 | E-Mail: info@glasfaseratti.de | Wir freuen uns darauf, Sie auf dem Weg zu einer schnellen und stabilen Internetverbindung zu begleiten!</p>
             </div>
         </div>
     </section>
@@ -221,36 +327,36 @@
                 <h1>Impressum</h1>
                 <h2>Angaben gemäß § 5 TMG</h2>
                 <p>
-                    MeisterTiefbau GmbH<br>
-                    Musterstraße 123<br>
-                    12345 Musterstadt<br>
+                    Glasfaser Atti GmbH<br>
+                    Glasfaserstraße 42<br>
+                    80331 München<br>
                     Deutschland
                 </p>
                 <p>
                     <strong>Vertreten durch:</strong><br>
-                    Max Mustermann (Geschäftsführer)
+                    Anna Müller (Geschäftsführerin)
                 </p>
                 <p>
                     <strong>Kontakt:</strong><br>
                     Telefon: 0123/456789<br>
-                    E-Mail: info@meistertiefbau.de
+                    E-Mail: info@glasfaseratti.de
                 </p>
                 <p>
                     <strong>Registereintrag:</strong><br>
                     Eintragung im Handelsregister<br>
-                    Registergericht: Amtsgericht Musterstadt<br>
-                    Registernummer: HRB 12345
+                    Registergericht: Amtsgericht München<br>
+                    Registernummer: HRB 98765
                 </p>
                 <p>
                     <strong>Umsatzsteuer-ID:</strong><br>
                     Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br>
-                    DE123456789
+                    DE987654321
                 </p>
                 <p>
                     <strong>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</strong><br>
-                    Max Mustermann<br>
-                    Musterstraße 123<br>
-                    12345 Musterstadt
+                    Anna Müller<br>
+                    Glasfaserstraße 42<br>
+                    80331 München
                 </p>
                 <p>
                     <strong>Haftungsausschluss:</strong><br>
@@ -261,12 +367,87 @@
     </section>
 
     <script>
+        // Hamburger-Menü Funktionalität
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('nav ul');
+
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            hamburger.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; // Symbol ändern
+            adjustSectionPadding(); // Padding anpassen, wenn das Menü geöffnet/geschlossen wird
+        });
+
+        // Menü schließen, wenn ein Link geklickt wird
+        document.querySelectorAll('nav ul li a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                hamburger.textContent = '☰'; // Symbol zurücksetzen
+                adjustSectionPadding(); // Padding anpassen, nachdem das Menü geschlossen wurde
+            });
+        });
+
+        // Debounce-Funktion, um das Scroll-Ereignis zu optimieren
+        const debounce = (func, wait) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        };
+
+        // Menü schließen beim Scrollen auf Mobilgeräten
+        let lastScrollTop = 0;
+        const closeMenuOnScroll = debounce(() => {
+            const isMobile = window.innerWidth <= 768;
+            const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            // Nur ausführen, wenn tatsächlich gescrollt wird
+            if (isMobile && navMenu.classList.contains('active') && Math.abs(currentScrollTop - lastScrollTop) > 5) {
+                navMenu.classList.remove('active');
+                hamburger.textContent = '☰'; // Symbol zurücksetzen
+                adjustSectionPadding(); // Padding anpassen, nachdem das Menü geschlossen wurde
+            }
+            lastScrollTop = currentScrollTop;
+        }, 50); // 50ms Verzögerung
+
+        window.addEventListener('scroll', closeMenuOnScroll);
+
+        // Funktion zum Anpassen des padding-top aller Sektionen basierend auf der Nav-Höhe
+        const adjustSectionPadding = () => {
+            const navHeight = document.querySelector('nav').offsetHeight;
+            const sections = document.querySelectorAll('section');
+            const isMobile = window.innerWidth <= 768;
+            const isMenuOpen = navMenu.classList.contains('active');
+            
+            // Berechne den padding-top basierend auf dem Zustand des Menüs
+            const paddingTop = isMobile && !isMenuOpen ? navHeight : navHeight + (isMobile ? navMenu.offsetHeight : 0);
+            
+            // Speichere die aktuelle Scroll-Position
+            const scrollPositionBefore = window.pageYOffset;
+            
+            // Passe den padding-top an
+            sections.forEach(section => {
+                section.style.paddingTop = `${paddingTop + 20}px`; // Nav-Höhe + zusätzlicher Abstand
+            });
+
+            // Berechne die neue Scroll-Position nach der Anpassung
+            const scrollPositionAfter = window.pageYOffset;
+            const scrollDifference = scrollPositionAfter - scrollPositionBefore;
+
+            // Korrigiere die Scroll-Position, um ein Springen zu verhindern
+            if (scrollDifference !== 0) {
+                window.scrollTo({
+                    top: scrollPositionBefore,
+                    behavior: 'instant'
+                });
+            }
+        };
+
         // Funktion zum Scrollen mit Offset
         const scrollToSection = (targetElement) => {
             const navHeight = document.querySelector('nav').offsetHeight;
-            // Ziel ist die .content-Box innerhalb der Sektion
             const contentBox = targetElement.querySelector('.content');
-            const targetPosition = contentBox.getBoundingClientRect().top + window.pageYOffset - navHeight - 10; // Zusätzlicher Abstand von 10px
+            const targetPosition = contentBox.getBoundingClientRect().top + window.pageYOffset - navHeight - 10;
             window.scrollTo({
                 top: targetPosition,
                 behavior: 'smooth'
@@ -285,6 +466,7 @@
 
         // Beim Laden der Seite
         window.addEventListener('load', () => {
+            adjustSectionPadding();
             const hash = window.location.hash;
             if (hash) {
                 const targetElement = document.querySelector(hash);
@@ -292,10 +474,14 @@
                     scrollToSection(targetElement);
                 }
             } else {
-                // Standardmäßig zur ersten Sektion scrollen
                 const homeSection = document.querySelector('#home');
                 scrollToSection(homeSection);
             }
+        });
+
+        // Bei Größenänderung des Fensters (z. B. Drehung des Geräts)
+        window.addEventListener('resize', () => {
+            adjustSectionPadding();
         });
     </script>
 </body>
