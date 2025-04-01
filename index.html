@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeisterTiefbau - Ihr Partner im Tiefbau</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #1a2b44 url('img/background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Abdunkelung des Hintergrunds für bessere Lesbarkeit */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 20, 36, 0.7); /* Dunkle Überlagerung */
+            z-index: -1;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 20, 36, 0.95);
+            padding: 1rem;
+            z-index: 1000;
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        nav ul li {
+            margin: 10px 20px;
+        }
+
+        nav ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #4a90e2;
+        }
+
+        section {
+            padding: 100px 20px 60px; /* Oben mehr Platz wegen fixed Nav */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            scroll-behavior: smooth;
+        }
+
+        .content {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            background: rgba(87, 87, 87, 0.95); /* Dunkles Blau, 95% Deckkraft */
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #15273c; /* Dezenter blauer Rand */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Leichter Schatten für Tiefe */
+        }
+
+        .content img {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            flex: 1; /* Bild nimmt eine Spalte ein */
+        }
+
+        .text {
+            flex: 1; /* Text nimmt die andere Spalte ein */
+            min-width: 300px; /* Mindestbreite für den Text */
+        }
+
+        h1 {
+            color: #82a1c4;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: clamp(1rem, 3vw, 1.1rem);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            section {
+                padding: 80px 15px 40px;
+            }
+
+            .content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .content img {
+                max-width: 100%;
+                height: 200px;
+            }
+
+            .text {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav ul li {
+                margin: 8px 0;
+            }
+
+            section {
+                padding: 70px 10px 30px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#services">Leistungen</a></li>
+            <li><a href="#projects">Projekte</a></li>
+            <li><a href="#about">Über Uns</a></li>
+            <li><a href="#contact">Kontakt</a></li>
+            <li><a href="#impressum">Impressum</a></li>
+        </ul>
+    </nav>
+
+    <section id="home">
+        <div class="content">
+            <img src="img/image_1.jpg" alt="Tiefbau Baustelle">
+            <div class="text">
+                <h1>MeisterTiefbau</h1>
+                <p>Willkommen bei MeisterTiefbau - Ihrem zuverlässigen Partner für alle Tiefbauprojekte. Mit jahrelanger Erfahrung bringen wir Ihr Bauvorhaben sicher zum Erfolg.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="services">
+        <div class="content">
+            <img src="img/image_2.jpg" alt="Baumaschinen">
+            <div class="text">
+                <h1>Unsere Leistungen</h1>
+                <p>Von Kanalbau über Straßenbau bis hin zu Erdarbeiten - wir bieten ein umfassendes Leistungsspektrum für private und gewerbliche Kunden.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <div class="content">
+            <img src="img/image_3.jpg" alt="Fertiggestelltes Projekt">
+            <div class="text">
+                <h1>Unsere Projekte</h1>
+                <p>Entdecken Sie unsere abgeschlossenen Projekte, die unsere Kompetenz und Zuverlässigkeit im Tiefbau unter Beweis stellen.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="content">
+            <img src="img/image_1.jpg" alt="Tiefbau Team">
+            <div class="text">
+                <h1>Über Uns</h1>
+                <p>Wir sind ein Familienunternehmen mit über 20 Jahren Erfahrung im Tiefbau. Unser Team aus qualifizierten Fachkräften steht für Qualität und Präzision bei jedem Projekt.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="content">
+            <img src="img/image_5.jpg" alt="Kontakt Baustelle">
+            <div class="text">
+                <h1>Kontaktieren Sie uns</h1>
+                <p>Haben Sie Fragen oder möchten Sie ein Angebot? Kontaktieren Sie uns! Telefon: 0123/456789 | Email: info@meistertiefbau.de</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="impressum">
+        <div class="content">
+            <div class="text">
+                <h1>Impressum</h1>
+                <h2>Angaben gemäß § 5 TMG</h2>
+                <p>
+                    MeisterTiefbau GmbH<br>
+                    Musterstraße 123<br>
+                    12345 Musterstadt<br>
+                    Deutschland
+                </p>
+                <p>
+                    <strong>Vertreten durch:</strong><br>
+                    Max Mustermann (Geschäftsführer)
+                </p>
+                <p>
+                    <strong>Kontakt:</strong><br>
+                    Telefon: 0123/456789<br>
+                    E-Mail: info@meistertiefbau.de
+                </p>
+                <p>
+                    <strong>Registereintrag:</strong><br>
+                    Eintragung im Handelsregister<br>
+                    Registergericht: Amtsgericht Musterstadt<br>
+                    Registernummer: HRB 12345
+                </p>
+                <p>
+                    <strong>Umsatzsteuer-ID:</strong><br>
+                    Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br>
+                    DE123456789
+                </p>
+                <p>
+                    <strong>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</strong><br>
+                    Max Mustermann<br>
+                    Musterstraße 123<br>
+                    12345 Musterstadt
+                </p>
+                <p>
+                    <strong>Haftungsausschluss:</strong><br>
+                    Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Funktion zum Scrollen mit Offset
+        const scrollToSection = (targetElement) => {
+            const navHeight = document.querySelector('nav').offsetHeight;
+            // Ziel ist die .content-Box innerhalb der Sektion
+            const contentBox = targetElement.querySelector('.content');
+            const targetPosition = contentBox.getBoundingClientRect().top + window.pageYOffset - navHeight - 10; // Zusätzlicher Abstand von 10px
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+        };
+
+        // Beim Klicken auf Menüpunkte
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                scrollToSection(targetElement);
+            });
+        });
+
+        // Beim Laden der Seite
+        window.addEventListener('load', () => {
+            const hash = window.location.hash;
+            if (hash) {
+                const targetElement = document.querySelector(hash);
+                if (targetElement) {
+                    scrollToSection(targetElement);
+                }
+            } else {
+                // Standardmäßig zur ersten Sektion scrollen
+                const homeSection = document.querySelector('#home');
+                scrollToSection(homeSection);
+            }
+        });
+    </script>
+</body>
+</html>
