@@ -1,0 +1,396 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #1a2b44 url('../img/background_2.jpg') no-repeat center center fixed;
+    background-size: cover; /* Bild wird so skaliert, dass es die gesamte Fläche abdeckt */
+    color: #ffffff;
+    line-height: 1.6;
+    position: relative;
+    min-height: 100vh; /* Sicherstellen, dass der Body die gesamte Höhe abdeckt */
+}
+
+/* Abdunkelung des Hintergrunds für bessere Lesbarkeit */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 20, 36, 0.7); /* Dunkle Überlagerung */
+    z-index: -1;
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #2c3e50 0%, #1a2b44 100%); /* Moderner Farbverlauf */
+    padding: 1.2rem;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Schatten für Tiefe */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtiler Rand */
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.hamburger {
+    display: none;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 0 1rem;
+    transition: transform 0.3s ease;
+}
+
+.hamburger:hover {
+    transform: rotate(90deg); /* Leichte Animation beim Hover */
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Sicherstellen, dass das Menü die volle Breite nutzt */
+}
+
+nav ul li {
+    margin: 10px 20px;
+}
+
+nav ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 8px 16px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+}
+
+nav ul li a:hover {
+    color: #78b4f9;
+    background: rgba(255, 255, 255, 0.1); /* Leichter Hintergrund beim Hover */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Schatten beim Hover */
+}
+
+/* Unterstreichungs-Effekt beim Hover */
+nav ul li a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #78b4f9;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after {
+    width: 50%;
+}
+
+/* Logo und Text in der Hauptmenüleiste */
+.nav-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-header span {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Leichter Textschatten */
+}
+
+section {
+    padding: 20px 20px 60px; /* Basis padding-top, wird dynamisch angepasst */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-behavior: smooth;
+}
+
+.content {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    background: rgba(113, 113, 113, 0.9); /* Dunkles Blau, 95% Deckkraft */
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #15273c; /* Dezenter blauer Rand */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Leichter Schatten für Tiefe */
+}
+
+.content img {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+    flex: 1; /* Bild nimmt eine Spalte ein */
+}
+
+.text {
+    flex: 1; /* Text nimmt die andere Spalte ein */
+    min-width: 300px; /* Mindestbreite für den Text */
+}
+
+h1 {
+    color: #82a1c4;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #ffffff;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin: 20px 0 10px;
+}
+
+h3 {
+    color: #ffffff;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    margin: 15px 0 10px;
+}
+
+p {
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    margin-bottom: 10px;
+}
+
+ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul li {
+    margin-bottom: 10px;
+}
+
+/* Spezielles 4x4-Design für die Sektion "Unsere Leistungen" */
+#services .content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 Spalten */
+    gap: 20px;
+    align-items: stretch; /* Sicherstellen, dass alle Elemente die gleiche Höhe haben */
+}
+
+#services .service-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    min-height: 400px; /* Erhöhte Mindesthöhe für alle Boxen, um Textüberdeckung zu vermeiden */
+    height: 100%; /* Sicherstellen, dass alle Boxen die gleiche Höhe haben */
+}
+
+#services .service-item .text-content {
+    flex: 1; /* Text nimmt den verfügbaren Platz ein */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Text gleichmäßig verteilen */
+    min-height: 200px; /* Erhöhte Mindesthöhe für den Textbereich, um Platz für längeren Text zu schaffen */
+}
+
+#services .service-item img {
+    width: 100%;
+    height: 150px; /* Feste Höhe für alle Bilder */
+    object-fit: cover; /* Bild wird skaliert, um die Box zu füllen */
+    border-radius: 10px;
+    margin-top: 15px; /* Erhöhter Abstand zwischen Text und Bild */
+}
+
+#services .service-item h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+#services .service-item p {
+    font-size: 0.9rem;
+    flex-grow: 1; /* Text wächst, um den Platz auszufüllen */
+}
+
+/* Neues Design für die "Voraussetzungen"-Sektion (ohne Bilder) */
+#services .requirements-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 Spalten */
+    gap: 20px;
+    margin-top: 20px;
+}
+
+#services .requirement-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+#services .requirement-item .requirement-text {
+    flex: 1;
+}
+
+#services .requirement-item h3 {
+    margin-top: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hamburger {
+        display: block; /* Hamburger-Button auf Mobilgeräten anzeigen */
+    }
+
+    nav ul {
+        display: none; /* Menü standardmäßig ausblenden */
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        background: linear-gradient(135deg, #2c3e50 0%, #1a2b44 100%); /* Farbverlauf auch im Dropdown */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        padding: 1rem 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Schatten für Dropdown */
+    }
+
+    nav ul.active {
+        display: flex; /* Menü anzeigen, wenn aktiv */
+    }
+
+    nav ul li {
+        margin: 10px 0;
+    }
+
+    nav ul li a {
+        font-size: 1.2rem;
+        padding: 10px 20px;
+    }
+
+    nav ul li a::after {
+        display: none; /* Unterstreichungseffekt im Dropdown deaktivieren */
+    }
+
+    .nav-container {
+        justify-content: space-between; /* Logo links, Hamburger rechts */
+    }
+
+    .nav-header {
+        display: flex; /* Logo und Text auf Mobilgeräten anzeigen */
+    }
+
+    section {
+        padding: 20px 15px 40px;
+    }
+
+    .content {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .content img {
+        max-width: 100%;
+        height: 200px;
+    }
+
+    .text {
+        text-align: center;
+    }
+
+    /* 4x4-Design auf Mobilgeräten anpassen */
+    #services .content {
+        grid-template-columns: 1fr; /* 1 Spalte auf Mobilgeräten */
+    }
+
+    #services .service-item {
+        min-height: auto; /* Mindesthöhe auf Mobilgeräten aufheben */
+    }
+
+    #services .service-item img {
+        height: 200px; /* Feste Höhe auch auf Mobilgeräten */
+    }
+
+    #services .service-item .text-content {
+        min-height: auto; /* Mindesthöhe auf Mobilgeräten aufheben */
+    }
+
+    /* Requirements-Grid auf Mobilgeräten anpassen */
+    #services .requirements-grid {
+        grid-template-columns: 1fr; /* 1 Spalte auf Mobilgeräten */
+    }
+}
+
+@media (max-width: 480px) {
+    nav ul li {
+        margin: 8px 0;
+    }
+
+    section {
+        padding: 20px 10px 30px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .nav-header span {
+        font-size: 1.2rem; /* Kleinere Schriftgröße */
+    }
+}
+
+/* Sicherstellen, dass das Menü auf Desktop zentriert bleibt */
+@media (min-width: 769px) {
+    .nav-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start; /* Logo links, Menü zentriert */
+    }
+
+    .hamburger {
+        display: none; /* Hamburger-Button auf Desktop ausblenden */
+    }
+
+    nav ul {
+        display: flex !important; /* Sicherstellen, dass das Menü immer sichtbar ist */
+        width: auto; /* Menü nicht die volle Breite nutzen */
+        flex: 1; /* Menü nimmt den verbleibenden Platz ein */
+        justify-content: center; /* Menü zentriert */
+    }
+
+    .nav-header {
+        display: flex; /* Logo und Text auf Desktop anzeigen */
+        margin-right: auto; /* Logo links ausrichten */
+    }
+}
