@@ -113,6 +113,97 @@
             /* Arbitrary large height */
             opacity: 1;
         }
+
+        /* Tutorial Overlay */
+        #tutorial-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s;
+            position: absolute;
+            /* Change to absolute to match page coordinates */
+        }
+
+        .tutorial-highlight {
+            position: relative;
+            z-index: 60 !important;
+            box-shadow: 0 0 0 4px #b8873b, 0 0 0 10000px rgba(0, 0, 0, 0.5);
+            background-color: transparent;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /* Tooltip */
+        .tutorial-tooltip {
+            position: absolute;
+            z-index: 70;
+            background: #b8873b;
+            /* Gold-500 */
+            color: white;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            max-width: 320px;
+            width: max-content;
+            animation: fadeIn 0.3s ease-out;
+            pointer-events: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tooltip Arrow Base */
+        .tutorial-tooltip::after,
+        .tutorial-tooltip::before {
+            content: '';
+            position: absolute;
+            border-style: solid;
+            display: block;
+        }
+
+        /* Right Arrow (Tooltip on Right, Arrow points Left) */
+        .tutorial-tooltip.tooltip-right::after {
+            top: 50%;
+            margin-top: -8px;
+            /* Half of border-width to center */
+            left: -8px;
+            border-width: 8px 8px 8px 0;
+            border-color: transparent #b8873b transparent transparent;
+        }
+
+        /* Remove double border pseudo-elements since we are solid color now */
+        .tutorial-tooltip.tooltip-right::before {
+            display: none;
+        }
+
+        /* Bottom Arrow (Tooltip on Bottom, Arrow points Up) */
+        .tutorial-tooltip.tooltip-bottom::after {
+            top: -8px;
+            left: 20px;
+            border-width: 0 8px 8px 8px;
+            border-color: transparent transparent #b8873b transparent;
+        }
+
+        .tutorial-tooltip.tooltip-bottom::before {
+            display: none;
+        }
+
+
+
+        /* Nav Link Active State */
+        .nav-link.active {
+            color: #b8873b;
+            font-weight: 600;
+            border-bottom: 2px solid #b8873b;
+        }
     </style>
 </head>
 
@@ -131,15 +222,36 @@
                 </h1>
             </div>
 
+
             <div id="status-indicator"
                 class="flex items-center gap-2 text-sm text-gold-600 bg-gold-100 px-3 py-1.5 rounded-full border border-gold-200">
                 <div class="loading-spinner"></div>
                 <span class="font-medium">Initializing Engine...</span>
             </div>
         </div>
+
+        <!-- Navigation -->
+        <nav class="container mx-auto px-6 pt-4 flex gap-8 text-sm text-slate-500 border-t border-gold-50 mt-4">
+            <button onclick="switchView('calculator')" id="nav-calculator"
+                class="nav-link active pb-3 hover:text-gold-600 transition">Calculator</button>
+            <button onclick="switchView('info')" id="nav-info"
+                class="nav-link pb-3 hover:text-gold-600 transition">Methodology</button>
+            <button onclick="switchView('satoshi')" id="nav-satoshi"
+                class="nav-link pb-3 hover:text-gold-600 transition">Satoshi Nakamoto</button>
+            <div class="flex-1"></div>
+            <button onclick="startTutorial()"
+                class="flex items-center gap-1.5 text-gold-600 font-medium pb-3 hover:text-gold-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
+                </svg>
+                <span>Take a Tour</span>
+            </button>
+        </nav>
     </header>
 
-    <div class="flex-1 flex">
+    <div id="view-calculator" class="flex-1 flex">
 
         <!-- Sidebar: Configuration -->
         <aside class="w-[420px] flex-none bg-white border-r border-gold-200 z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
@@ -226,7 +338,7 @@
 
                 <!-- Deep Tweak Section -->
                 <div class="space-y-4">
-                    <button onclick="toggleAdvanced()"
+                    <button id="btn-advanced-toggle" onclick="toggleAdvanced()"
                         class="w-full flex items-center justify-between text-xs font-bold text-gold-600 uppercase tracking-widest hover:text-gold-700 transition outline-none">
                         <span>Advanced Market Assumptions</span>
                         <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
@@ -517,6 +629,109 @@
             </div>
 
         </main>
+    </div>
+
+    <!-- VIEW: INFO / METHODOLOGY -->
+    <div id="view-info" class="hidden flex-1 overflow-y-auto bg-white p-10 animate-fade-in">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <h2 class="text-4xl font-serif font-bold text-slate-800 border-b border-gold-200 pb-4">Methodology &
+                Glossary</h2>
+
+            <section class="space-y-4">
+                <h3 class="text-2xl font-serif text-gold-600">Core Logic: Monte Carlo Simulation</h3>
+                <p class="text-slate-600 leading-relaxed">
+                    This calculator does not use historical backtesting (which is limited to one specific history).
+                    Instead, it uses
+                    <strong>Monte Carlo Simulation</strong> to generate thousands of possible future market scenarios
+                    based on statistical parameters.
+                    This allows us to stress-test your portfolio against millions of potential realities, including
+                    those worse than history.
+                </p>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">CAGR (Compound Annual Growth Rate)</h4>
+                    <p class="text-sm text-slate-500">The mean annual return. "Start" vs "End" allows decreasing returns
+                        over time (e.g., crypto maturing).</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">Volatility (Risk)</h4>
+                    <p class="text-sm text-slate-500">Standard deviation of returns. Higher volatility means wilder
+                        swings. We use a "Skewed Normal" distribution to model real-world fat tails.</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">Gaussian Copula (Correlation)</h4>
+                    <p class="text-sm text-slate-500">Mathematical method to link the random movements of Stocks and
+                        Crypto. "Correlation" (0 to 1) defines how often they move together.</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">Safe Withdrawal Rate (SWR)</h4>
+                    <p class="text-sm text-slate-500">The calculated percentage of your initial portfolio you can
+                        withdraw annually (adjusted for inflation) without running out of money.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- VIEW: SATOSHI NAKAMOTO -->
+    <div id="view-satoshi" class="hidden flex-1 overflow-y-auto bg-[#fbf8f2] p-10 animate-fade-in">
+        <article
+            class="max-w-3xl mx-auto bg-white shadow-xl shadow-gold-100/50 p-12 rounded-lg border border-gold-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gold-400 to-amber-600"></div>
+
+            <header class="mb-10 text-center">
+                <span class="text-xs font-bold tracking-[0.2em] text-gold-600 uppercase">The Origin</span>
+                <h1 class="text-5xl font-serif font-bold text-slate-900 mt-4 mb-6">Who is Satoshi Nakamoto?</h1>
+                <div class="w-16 h-1 bg-slate-200 mx-auto"></div>
+            </header>
+
+            <div class="prose prose-slate prose-lg mx-auto text-slate-600 font-serif leading-loose">
+                <p>
+                    <span class="text-6xl float-left mr-4 mt-[-10px] font-bold text-gold-500">O</span>n October 31,
+                    2008, a link to a paper titled
+                    <em>"Bitcoin: A Peer-to-Peer Electronic Cash System"</em> was posted to a cryptography mailing list.
+                    The author was
+                    <strong>Satoshi Nakamoto</strong>. To this day, the true identity of this person—or group of
+                    people—remains unknown.
+                </p>
+                <p>
+                    Satoshi didn't just write code; he architected a solution to the "Double-Spend Problem" without
+                    requiring a central authority.
+                    By combining cryptography, game theory, and computer science, he created the
+                    <strong>Blockchain</strong>.
+                </p>
+                <blockquote
+                    class="border-l-4 border-gold-400 pl-6 italic my-8 text-slate-500 bg-gold-50 py-4 pr-4 rounded-r-lg">
+                    "The root problem with conventional currency is all the trust that's required to make it work. The
+                    central bank must be trusted not to debase the currency, but the history of fiat currencies is full
+                    of breaches of that trust."
+                </blockquote>
+                <p>
+                    Satoshi mined the first block of the chain, known as the "Genesis Block," on January 3, 2009.
+                    Embedded in the code of this block was the text:
+                    <code
+                        class="text-sm bg-slate-100 px-1 py-0.5 rounded text-slate-700">The Times 03/Jan/2009 Chancellor on brink of second bailout for banks</code>.
+                    This was both a timestamp and a political statement on the instability of the fractional-reserve
+                    banking system.
+                </p>
+                <p>
+                    In 2011, Satoshi sent a final email stating he had "moved on to other things," and vanished. He left
+                    behind a network that is now secured by more computing power than any other network on Earth, and a
+                    wallet containing ~1.1 million Bitcoin that has never moved.
+                </p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-sans">WealthGuard Simulations • Est.
+                    2026</p>
+            </div>
+        </article>
+    </div>
+
+    <!-- TUTORIAL OVERLAY -->
+    <div id="tutorial-overlay" class="fixed inset-0 hidden z-50 pointer-events-none">
+        <!-- Highlight box and tooltip will be injected via JS -->
     </div>
 
     <!-- Python Logic  -->
@@ -868,6 +1083,163 @@ def run_full_simulation(args):
         const btnRun = document.getElementById("btn-run");
         let pyodide = null;
 
+        // --- NAVIGATION LOGIC ---
+        function switchView(viewName) {
+            // Hide all views
+            ['calculator', 'info', 'satoshi'].forEach(v => {
+                document.getElementById('view-' + v).classList.add('hidden');
+                document.getElementById('nav-' + v).classList.remove('active', 'text-gold-600');
+            });
+
+            // Show target
+            document.getElementById('view-' + viewName).classList.remove('hidden');
+            document.getElementById('nav-' + viewName).classList.add('active', 'text-gold-600');
+        }
+
+        // --- TUTORIAL LOGIC ---
+        const tutorialSteps = [
+            {
+                id: 'inp-years',
+                title: 'Time Horizon',
+                text: 'How long do you want to plan for? 50-60 years covers a long retirement.'
+            },
+            {
+                id: 'inp-buffer',
+                title: 'Cash Buffer',
+                text: 'Cash set aside for emergencies. This is kept separate from your invested wealth.'
+            },
+            {
+                id: 'inp-initial',
+                title: 'Invested Capital',
+                text: 'Your starting portfolio value. SWR (Safe Withdrawal Rate) is calculated based on this.'
+            },
+            {
+                id: 'inp-alloc-crypto-pct',
+                title: 'Asset Allocation',
+                text: 'Balance between High Risk (Crypto) and Stable Growth (Stocks). This calculator models their correlation.'
+            },
+            {
+                id: 'btn-advanced-toggle',
+                trigger: 'advanced', // Special flag to open panel
+                title: 'Advanced Assumptions',
+                text: 'Click here to tweak Market Returns, Inflation, and Stress Test items.'
+            },
+            {
+                id: 'inp-max-bad-years',
+                parent: 'pnl-advanced',
+                title: 'Stress Test: Recovery',
+                text: 'If returns are negative for this many years in a row, we stop inflation adjustments to save capital.'
+            },
+            {
+                id: 'div-crash-config', // Ideally parent container or checkbox
+                targetOverride: 'chk-force-start-crash',
+                parent: 'pnl-advanced',
+                title: 'Stress Test: Sequence Risk',
+                text: 'Force a "Bear Market" immediately at the start of retirement to see if you survive the worst case.',
+            },
+            {
+                id: 'btn-run',
+                title: 'Run Simulation',
+                text: 'Starts the Python Monte Carlo engine in your browser (Pyodide). Generates thousands of scenarios.'
+            }
+        ];
+
+        let currentStepIndex = -1;
+
+        function startTutorial() {
+            switchView('calculator'); // Ensure we are on calc view
+            currentStepIndex = 0;
+            document.getElementById('tutorial-overlay').classList.remove('hidden');
+            document.getElementById('tutorial-overlay').classList.remove('pointer-events-none');
+            showTutorialStep();
+        }
+
+        function endTutorial() {
+            currentStepIndex = -1;
+            document.getElementById('tutorial-overlay').classList.add('hidden');
+            document.getElementById('tutorial-overlay').classList.add('pointer-events-none');
+            document.getElementById('tutorial-overlay').innerHTML = ''; // Clear
+        }
+
+        function showTutorialStep() {
+            const step = tutorialSteps[currentStepIndex];
+            const el = document.getElementById(step.targetOverride || step.id);
+
+            // Handle Panels opening
+            if (step.parent === 'pnl-advanced') {
+                const panel = document.getElementById('pnl-advanced');
+                if (!panel.classList.contains('open')) toggleAdvanced();
+            }
+
+            if (!el) {
+                console.warn("Tutorial element not found:", step.id);
+                nextStep();
+                return;
+            }
+
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Create/Update Overlay Elements
+            const rect = el.getBoundingClientRect();
+
+            // Tooltip Positioning Logic
+            const sidebarWidth = 420;
+            const scrollY = window.scrollY;
+            const scrollX = window.scrollX;
+
+            // Default to bottom behavior
+            let top = rect.bottom + scrollY + 12;
+            let left = rect.left + scrollX;
+            let arrowClass = 'tooltip-bottom';
+
+            // If in sidebar (approx width check), try to put it on the right
+            if (rect.left < sidebarWidth && (rect.right + 320 < window.innerWidth)) {
+                // Center tooltip vertically with the input field
+                top = rect.top + scrollY + (rect.height / 2) - 70; // Adjusted to center arrow better
+                left = rect.right + scrollX + 16;
+                arrowClass = 'tooltip-right';
+            }
+
+            // Ensure tooltip stays within viewport width
+            if (left + 300 > window.innerWidth) {
+                left = window.innerWidth - 320;
+            }
+            if (left < 10) left = 10;
+
+            const tooltipHtml = `
+                <div class="tutorial-tooltip ${arrowClass}" style="top: ${top}px; left: ${left}px;">
+                     <div class="flex justify-between items-start mb-2 border-b border-white/20 pb-2">
+                        <h4 class="font-bold text-white text-sm">${step.title}</h4>
+                        <span class="text-xs text-white/80 font-mono bg-white/10 px-1.5 py-0.5 rounded ml-2">${currentStepIndex + 1}/${tutorialSteps.length}</span>
+                    </div>
+                    <p class="text-sm text-white/90 mb-4 leading-relaxed">${step.text}</p>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button onclick="endTutorial()" class="text-xs text-white/60 hover:text-white px-2 py-1 font-medium">Skip</button>
+                        <button onclick="nextStep()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-4 py-1.5 rounded-md transition shadow-sm border border-white/30">
+                            ${currentStepIndex === tutorialSteps.length - 1 ? 'Finish' : 'Next'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('tutorial-overlay').innerHTML = tooltipHtml;
+        }
+
+        function nextStep() {
+            currentStepIndex++;
+            if (currentStepIndex >= tutorialSteps.length) {
+                endTutorial();
+            } else {
+                showTutorialStep();
+            }
+        }
+
+        // Window Resize Handler to update positions
+        window.addEventListener('resize', () => {
+            if (currentStepIndex > -1) showTutorialStep();
+        });
+
+
         // --- ASSET ALLOCATION LOGIC ---
         function updateAllocations(source) {
             const cryptoEl = document.getElementById('inp-alloc-crypto-pct');
@@ -957,6 +1329,10 @@ def run_full_simulation(args):
 
         main();
     </script>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="fixed inset-0 hidden z-50 pointer-events-none"></div>
+
 </body>
 
 </html>
