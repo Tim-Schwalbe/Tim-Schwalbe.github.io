@@ -116,10 +116,10 @@
 
         /* Tutorial Overlay */
         #tutorial-overlay {
-            background: rgba(0, 0, 0, 0.5);
+            background: transparent;
+            /* No dark overlay since we removed the highlight box */
             transition: opacity 0.3s;
             position: absolute;
-            /* Change to absolute to match page coordinates */
         }
 
         .tutorial-highlight {
@@ -142,7 +142,7 @@
             border-radius: 0.5rem;
             border: none;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            max-width: 320px;
+            max-width: 380px;
             width: max-content;
             animation: fadeIn 0.3s ease-out;
             pointer-events: auto;
@@ -171,9 +171,8 @@
 
         /* Right Arrow (Tooltip on Right, Arrow points Left) */
         .tutorial-tooltip.tooltip-right::after {
-            top: 50%;
-            margin-top: -8px;
-            /* Half of border-width to center */
+            top: 18px;
+            /* Fixed position from top of tooltip */
             left: -8px;
             border-width: 8px 8px 8px 0;
             border-color: transparent #b8873b transparent transparent;
@@ -1193,9 +1192,10 @@ def run_full_simulation(args):
             let arrowClass = 'tooltip-bottom';
 
             // If in sidebar (approx width check), try to put it on the right
-            if (rect.left < sidebarWidth && (rect.right + 320 < window.innerWidth)) {
-                // Center tooltip vertically with the input field
-                top = rect.top + scrollY + (rect.height / 2) - 70; // Adjusted to center arrow better
+            if (rect.left < sidebarWidth && (rect.right + 380 < window.innerWidth)) {
+                // Arrow is at 18px from tooltip top, align it with field center
+                const fieldCenter = rect.top + scrollY + (rect.height / 2);
+                top = fieldCenter - 18; // Position so arrow (at 18px) aligns with field center
                 left = rect.right + scrollX + 16;
                 arrowClass = 'tooltip-right';
             }
@@ -1213,11 +1213,14 @@ def run_full_simulation(args):
                         <span class="text-xs text-white/80 font-mono bg-white/10 px-1.5 py-0.5 rounded ml-2">${currentStepIndex + 1}/${tutorialSteps.length}</span>
                     </div>
                     <p class="text-sm text-white/90 mb-4 leading-relaxed">${step.text}</p>
-                    <div class="flex justify-end gap-2 pt-2">
-                        <button onclick="endTutorial()" class="text-xs text-white/60 hover:text-white px-2 py-1 font-medium">Skip</button>
-                        <button onclick="nextStep()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-4 py-1.5 rounded-md transition shadow-sm border border-white/30">
-                            ${currentStepIndex === tutorialSteps.length - 1 ? 'Finish' : 'Next'}
-                        </button>
+                    <div class="flex justify-between gap-2 pt-2">
+                        <button onclick="prevStep()" class="text-xs text-white/60 hover:text-white px-2 py-1 font-medium ${currentStepIndex === 0 ? 'invisible' : ''}">Back</button>
+                        <div class="flex gap-2">
+                            <button onclick="endTutorial()" class="text-xs text-white/60 hover:text-white px-2 py-1 font-medium">Skip</button>
+                            <button onclick="nextStep()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-4 py-1.5 rounded-md transition shadow-sm border border-white/30">
+                                ${currentStepIndex === tutorialSteps.length - 1 ? 'Finish' : 'Next'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1230,6 +1233,13 @@ def run_full_simulation(args):
             if (currentStepIndex >= tutorialSteps.length) {
                 endTutorial();
             } else {
+                showTutorialStep();
+            }
+        }
+
+        function prevStep() {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
                 showTutorialStep();
             }
         }
