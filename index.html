@@ -138,14 +138,15 @@
             background: #b8873b;
             /* Gold-500 */
             color: white;
-            padding: 1.25rem;
-            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
             border: none;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            max-width: 380px;
+            max-width: 440px;
             width: max-content;
             animation: fadeIn 0.3s ease-out;
             pointer-events: auto;
+            line-height: 1.6;
         }
 
         @keyframes fadeIn {
@@ -171,8 +172,9 @@
 
         /* Right Arrow (Tooltip on Right, Arrow points Left) */
         .tutorial-tooltip.tooltip-right::after {
-            top: 18px;
-            /* Fixed position from top of tooltip */
+            top: 30px;
+            margin-top: -8px;
+            /* Correctly centers the 16px arrow triangle at the 30px mark */
             left: -8px;
             border-width: 8px 8px 8px 0;
             border-color: transparent #b8873b transparent transparent;
@@ -1130,11 +1132,12 @@ def run_full_simulation(args):
                 text: 'If returns are negative for this many years in a row, we stop inflation adjustments to save capital.'
             },
             {
-                id: 'div-crash-config', // Ideally parent container or checkbox
+                id: 'div-crash-config',
                 targetOverride: 'chk-force-start-crash',
                 parent: 'pnl-advanced',
                 title: 'Stress Test: Sequence Risk',
                 text: 'Force a "Bear Market" immediately at the start of retirement to see if you survive the worst case.',
+                offsetX: 280 // Move right to clear the checkbox label
             },
             {
                 id: 'btn-run',
@@ -1192,11 +1195,12 @@ def run_full_simulation(args):
             let arrowClass = 'tooltip-bottom';
 
             // If in sidebar (approx width check), try to put it on the right
-            if (rect.left < sidebarWidth && (rect.right + 380 < window.innerWidth)) {
-                // Arrow is at 18px from tooltip top, align it with field center
+            if (rect.left < sidebarWidth && (rect.right + 440 < window.innerWidth)) {
+                // Arrow center is at 30px from tooltip top. 
+                // Align those 30px with the field's vertical center.
                 const fieldCenter = rect.top + scrollY + (rect.height / 2);
-                top = fieldCenter - 18; // Position so arrow (at 18px) aligns with field center
-                left = rect.right + scrollX + 16;
+                top = fieldCenter - 30;
+                left = rect.right + scrollX + 16 + (step.offsetX || 0);
                 arrowClass = 'tooltip-right';
             }
 
