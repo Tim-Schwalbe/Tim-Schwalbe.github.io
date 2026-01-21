@@ -14,17 +14,17 @@
             theme: {
                 extend: {
                     colors: {
-                        gold: {
-                            50: '#fbf8f2',
-                            100: '#f5efe0',
-                            200: '#eadbb9',
-                            300: '#dec08a',
-                            400: '#d1a357',
-                            500: '#b8873b', /* Main Gold */
-                            600: '#9d6b2f',
-                            700: '#7e5228',
-                            800: '#684326',
-                            900: '#563822',
+                        bitcoin: {
+                            50: '#fff9f0',
+                            100: '#ffefd6',
+                            200: '#ffd9a3',
+                            300: '#ffbf70',
+                            400: '#fba13d',
+                            500: '#f7931a', /* Main Bitcoin Orange */
+                            600: '#db7a0d',
+                            700: '#b65f0a',
+                            800: '#914c0a',
+                            900: '#763f0b',
                         }
                     },
                     fontFamily: {
@@ -57,21 +57,21 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #fbf8f2;
+            background: #fff9f0;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #dec08a;
+            background: #ffbf70;
             border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #b8873b;
+            background: #f7931a;
         }
 
         .loading-spinner {
-            border: 3px solid #f5efe0;
-            border-top: 3px solid #b8873b;
+            border: 3px solid #ffefd6;
+            border-top: 3px solid #f7931a;
             border-radius: 50%;
             width: 20px;
             height: 20px;
@@ -125,7 +125,7 @@
         .tutorial-highlight {
             position: relative;
             z-index: 60 !important;
-            box-shadow: 0 0 0 4px #b8873b, 0 0 0 10000px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 4px #f7931a, 0 0 0 10000px rgba(0, 0, 0, 0.5);
             background-color: transparent;
             border-radius: 8px;
             pointer-events: none;
@@ -135,8 +135,8 @@
         .tutorial-tooltip {
             position: absolute;
             z-index: 70;
-            background: #b8873b;
-            /* Gold-500 */
+            background: #f7931a;
+            /* Bitcoin-500 */
             color: white;
             padding: 1.5rem;
             border-radius: 0.75rem;
@@ -177,7 +177,7 @@
             /* Correctly centers the 16px arrow triangle at the 30px mark */
             left: -8px;
             border-width: 8px 8px 8px 0;
-            border-color: transparent #b8873b transparent transparent;
+            border-color: transparent #f7931a transparent transparent;
         }
 
         /* Remove double border pseudo-elements since we are solid color now */
@@ -190,7 +190,7 @@
             top: -8px;
             left: 20px;
             border-width: 0 8px 8px 8px;
-            border-color: transparent transparent #b8873b transparent;
+            border-color: transparent transparent #f7931a transparent;
         }
 
         .tutorial-tooltip.tooltip-bottom::before {
@@ -201,47 +201,110 @@
 
         /* Nav Link Active State */
         .nav-link.active {
-            color: #b8873b;
+            color: #f7931a;
             font-weight: 600;
-            border-bottom: 2px solid #b8873b;
+            border-bottom: 2px solid #f7931a;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #f7931a;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+            color: white;
+        }
+
+        #loading-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        #rocket-anim {
+            font-size: 4rem;
+            position: absolute;
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+            opacity: 0;
+            transform: translateY(100px);
+        }
+
+        #rocket-anim.launch {
+            opacity: 1;
+            transform: translateY(-200vh);
+        }
+
+        .loading-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
         }
     </style>
 </head>
 
-<body class="bg-gold-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-bitcoin-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loader-spinner" id="main-spinner"></div>
+        <div id="rocket-anim">🚀</div>
+        <div class="loading-text" id="main-loading-text">Initializing WealthGuard Engine...</div>
+        <div class="mt-4 text-white/70 text-sm font-medium">Please wait while we load Python & Data</div>
+    </div>
 
     <!-- Header -->
-    <header class="bg-white border-b border-gold-200 px-6 py-4 shadow-sm flex-none z-10">
+    <header class="bg-white border-b border-bitcoin-200 px-6 py-4 shadow-sm flex-none z-10">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <!-- Simple Logo Icon -->
-                <div
-                    class="w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center text-white font-serif font-bold text-lg shadow-md">
-                    S</div>
+                <!-- Bitcoin Logo Icon -->
+                <div class="w-10 h-10 flex items-center justify-center text-white">
+                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-sm">
+                        <circle cx="256" cy="256" r="256" fill="#F7931A" />
+                        <path
+                            d="M351.4 191c4.1-27.2-16.7-41.8-45-51.6l9.2-36.7-22.3-5.6-9 35.9c-5.9-1.5-11.8-2.8-17.7-4.1l9-36-22.3-5.6-9.2 36.7c-4.8-1.1-9.7-2.3-14.4-3.4l.1-.4-30.8-7.7-6 23.9s16.6 3.8 16.3 4c9.1 2.3 10.7 8.3 10.4 13.1l-10.4 41.7c.6.2 1.5.5 2.4.9l-2.4-.6-14.6 58.5c-1.1 2.8-3.9 6.9-10.2 5.3.2.3-16.3-4.1-16.3-4.1l-11.1 25.6 29 7.2c5.4 1.3 10.7 2.7 15.9 4l-9.3 37.3 22.3 5.6 9.2-36.8c6.1 1.7 12 3.2 17.8 4.7l-9.1 36.5 22.3 5.6 9.3-37.1c38 7.2 66.6 4.3 78.6-30.1 9.6-27.7-1.1-43.7-21.1-54.1 14.5-3.3 25.5-12.8 28.5-32.3zm-51.1 71.5c-6.9 27.7-53.7 12.7-68.8 9l12.3-49.2c15.1 3.7 63.4 11 56.5 40.2zm5.7-71.7c-6.3 25.2-45.3 12.4-57.9 9.3l11.2-44.8c12.6 3.1 53 9 46.7 35.5z"
+                            fill="white" />
+                    </svg>
+                </div>
                 <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
-                    Wealth<span class="text-gold-500">Guard</span> Simulator
+                    Wealth<span class="text-bitcoin-500">Guard</span> Simulator
                 </h1>
             </div>
 
 
             <div id="status-indicator"
-                class="flex items-center gap-2 text-sm text-gold-600 bg-gold-100 px-3 py-1.5 rounded-full border border-gold-200">
+                class="flex items-center gap-2 text-sm text-bitcoin-600 bg-bitcoin-100 px-3 py-1.5 rounded-full border border-bitcoin-200">
                 <div class="loading-spinner"></div>
                 <span class="font-medium">Initializing Engine...</span>
             </div>
         </div>
 
         <!-- Navigation -->
-        <nav class="container mx-auto px-6 pt-4 flex gap-8 text-sm text-slate-500 border-t border-gold-50 mt-4">
+        <nav class="container mx-auto px-6 pt-4 flex gap-8 text-sm text-slate-500 border-t border-bitcoin-50 mt-4">
             <button onclick="switchView('calculator')" id="nav-calculator"
-                class="nav-link active pb-3 hover:text-gold-600 transition">Calculator</button>
+                class="nav-link active pb-3 hover:text-bitcoin-600 transition">Calculator</button>
             <button onclick="switchView('info')" id="nav-info"
-                class="nav-link pb-3 hover:text-gold-600 transition">Methodology</button>
+                class="nav-link pb-3 hover:text-bitcoin-600 transition">Methodology</button>
             <button onclick="switchView('satoshi')" id="nav-satoshi"
-                class="nav-link pb-3 hover:text-gold-600 transition">Satoshi Nakamoto</button>
+                class="nav-link pb-3 hover:text-bitcoin-600 transition">Satoshi Nakamoto</button>
             <div class="flex-1"></div>
             <button onclick="startTutorial()"
-                class="flex items-center gap-1.5 text-gold-600 font-medium pb-3 hover:text-gold-700 transition">
+                class="flex items-center gap-1.5 text-bitcoin-600 font-medium pb-3 hover:text-bitcoin-700 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -255,13 +318,14 @@
     <div id="view-calculator" class="flex-1 flex">
 
         <!-- Sidebar: Configuration -->
-        <aside class="w-[420px] flex-none bg-white border-r border-gold-200 z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <aside
+            class="w-[420px] flex-none bg-white border-r border-bitcoin-200 z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
             <div class="p-6 space-y-8">
 
                 <!-- Section 1: Portfolio -->
                 <div class="space-y-4">
-                    <div class="flex items-center gap-2 pb-2 border-b border-gold-100">
-                        <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-2 pb-2 border-b border-bitcoin-100">
+                        <svg class="w-5 h-5 text-bitcoin-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>
@@ -274,12 +338,12 @@
                             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Horizon
                                 (Years)</label>
                             <input type="number" id="inp-years" value="50"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition shadow-sm">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 focus:ring-1 focus:ring-bitcoin-400 transition shadow-sm">
                         </div>
                         <div class="col-span-1">
                             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Cash Buffer</label>
                             <input type="number" id="inp-buffer" value="0"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition shadow-sm">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 focus:ring-1 focus:ring-bitcoin-400 transition shadow-sm">
                         </div>
                     </div>
 
@@ -288,13 +352,13 @@
                             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Invested Amount
                                 (€)</label>
                             <input type="number" id="inp-initial" value="0"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 font-medium">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 font-medium">
                         </div>
                         <div class="col-span-1">
                             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Desired Exp.
                                 (€/yr)</label>
                             <input type="number" id="inp-target-annual" value="60000"
-                                class="w-full bg-white border border-gold-200 rounded-lg px-3 py-2 text-gold-700 text-sm focus:outline-none focus:border-gold-400 font-bold shadow-sm">
+                                class="w-full bg-white border border-bitcoin-200 rounded-lg px-3 py-2 text-bitcoin-700 text-sm focus:outline-none focus:border-bitcoin-400 font-bold shadow-sm">
                         </div>
                     </div>
                 </div>
@@ -342,18 +406,18 @@
                     <div class="col-span-1">
                         <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Simulations</label>
                         <input type="number" id="inp-num-sims" value="1000"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 transition shadow-sm">
                     </div>
                     <div class="col-span-1">
                         <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Target %</label>
                         <input type="number" id="inp-target-success" value="95"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 transition shadow-sm">
                     </div>
                 </div>
                 <!-- Simulation Button -->
                 <div class="pt-2 pb-2">
                     <button id="btn-run" disabled onclick="runSimulation()"
-                        class="w-full bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-gold-200/50 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
+                        class="w-full bg-gradient-to-r from-bitcoin-500 to-amber-500 hover:from-bitcoin-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-bitcoin-200/50 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
@@ -367,8 +431,8 @@
                 </div>
                 <!-- Asset Allocation -->
                 <div class="space-y-4">
-                    <div class="flex items-center gap-2 pb-2 border-b border-gold-100">
-                        <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-2 pb-2 border-b border-bitcoin-100">
+                        <svg class="w-5 h-5 text-bitcoin-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -377,7 +441,7 @@
                         <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Asset Allocation</h3>
                     </div>
 
-                    <div class="bg-gold-50/50 rounded-xl p-4 border border-gold-100 space-y-6">
+                    <div class="bg-bitcoin-50/50 rounded-xl p-4 border border-bitcoin-100 space-y-6">
                         <!-- Crypto Slider -->
                         <div>
                             <div class="flex justify-between text-xs mb-2">
@@ -411,7 +475,7 @@
                 <!-- Deep Tweak Section -->
                 <div class="space-y-4">
                     <button id="btn-advanced-toggle" onclick="toggleAdvanced()"
-                        class="w-full flex items-center justify-between text-xs font-bold text-gold-600 uppercase tracking-widest hover:text-gold-700 transition outline-none">
+                        class="w-full flex items-center justify-between text-xs font-bold text-bitcoin-600 uppercase tracking-widest hover:text-bitcoin-700 transition outline-none">
                         <span>Advanced Market Assumptions</span>
                         <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -560,8 +624,8 @@
             <!-- Welcome / Empty State -->
             <div id="results-placeholder" class="text-center mt-32 opacity-40">
                 <div
-                    class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm border border-gold-100 mb-6">
-                    <svg class="w-10 h-10 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm border border-bitcoin-100 mb-6">
+                    <svg class="w-10 h-10 text-bitcoin-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
                         </path>
@@ -577,10 +641,10 @@
                 <!-- SECTION 1: THE VISION (Required For Goal) -->
                 <div class="space-y-6">
                     <div class="flex items-center gap-4">
-                        <h2 class="text-xs font-black text-gold-500 uppercase tracking-[0.2em] whitespace-nowrap">The
+                        <h2 class="text-xs font-black text-bitcoin-500 uppercase tracking-[0.2em] whitespace-nowrap">The
                             Vision
                             (Required For Target Goal)</h2>
-                        <div class="h-px bg-gold-200 flex-1"></div>
+                        <div class="h-px bg-bitcoin-200 flex-1"></div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -609,7 +673,7 @@
                         <div
                             class="md:col-span-2 bg-slate-800 rounded-3xl p-8 shadow-xl relative overflow-hidden group">
                             <div
-                                class="absolute -right-16 -top-16 w-64 h-64 bg-gold-500/10 rounded-full group-hover:scale-110 transition-transform duration-1000">
+                                class="absolute -right-16 -top-16 w-64 h-64 bg-bitcoin-500/10 rounded-full group-hover:scale-110 transition-transform duration-1000">
                             </div>
                             <div
                                 class="flex flex-col md:flex-row md:items-center justify-between h-full relative z-10 gap-8">
@@ -624,7 +688,7 @@
                                 <div
                                     class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600 min-w-[200px] flex flex-col justify-center items-center">
                                     <p id="lbl-shortfall"
-                                        class="text-[13px] text-gold-400 font-black uppercase tracking-widest text-center">
+                                        class="text-[13px] text-bitcoin-400 font-black uppercase tracking-widest text-center">
                                         --</p>
                                     <p
                                         class="text-[9px] text-slate-400 mt-2 uppercase font-bold text-center tracking-tighter">
@@ -701,11 +765,11 @@
                         <div
                             class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col justify-between group overflow-hidden relative">
                             <div
-                                class="absolute -right-6 -top-6 w-24 h-24 bg-gold-50 rounded-full opacity-60 group-hover:scale-125 transition-transform duration-500">
+                                class="absolute -right-6 -top-6 w-24 h-24 bg-bitcoin-50 rounded-full opacity-60 group-hover:scale-125 transition-transform duration-500">
                             </div>
                             <div>
                                 <p
-                                    class="text-[10px] font-bold text-gold-600 uppercase tracking-widest relative z-10 mb-2">
+                                    class="text-[10px] font-bold text-bitcoin-600 uppercase tracking-widest relative z-10 mb-2">
                                     Safe Withdrawal Rate</p>
                                 <p id="res-swr-val"
                                     class="text-6xl font-serif font-bold text-slate-800 text-right relative z-10">--%
@@ -714,7 +778,7 @@
                             <p
                                 class="text-[10px] text-slate-400 font-medium mt-4 relative z-10 border-t border-slate-50 pt-4 leading-relaxed">
                                 <span class="block font-bold text-slate-600 mb-1">Portfolio Efficiency</span>
-                                <span id="res-target-disp-desc" class="italic text-gold-600/70">Optimized for your
+                                <span id="res-target-disp-desc" class="italic text-bitcoin-600/70">Optimized for your
                                     survival
                                     odds</span>
                             </p>
@@ -792,12 +856,12 @@
     <!-- VIEW: INFO / METHODOLOGY -->
     <div id="view-info" class="hidden flex-1 overflow-y-auto bg-white p-10 animate-fade-in">
         <div class="max-w-4xl mx-auto space-y-8">
-            <h2 class="text-4xl font-serif font-bold text-slate-800 text-right border-b border-gold-200 pb-4">
+            <h2 class="text-4xl font-serif font-bold text-slate-800 text-right border-b border-bitcoin-200 pb-4">
                 Methodology &
                 Glossary</h2>
 
             <section class="space-y-4">
-                <h3 class="text-2xl font-serif text-gold-600">Core Logic: Monte Carlo Simulation</h3>
+                <h3 class="text-2xl font-serif text-bitcoin-600">Core Logic: Monte Carlo Simulation</h3>
                 <p class="text-slate-600 leading-relaxed">
                     This calculator does not use historical backtesting (which is limited to one specific history).
                     Instead, it uses
@@ -834,20 +898,20 @@
     </div>
 
     <!-- VIEW: SATOSHI NAKAMOTO -->
-    <div id="view-satoshi" class="hidden flex-1 overflow-y-auto bg-[#fbf8f2] p-10 animate-fade-in">
+    <div id="view-satoshi" class="hidden flex-1 overflow-y-auto bg-bitcoin-50 p-10 animate-fade-in">
         <article
-            class="max-w-3xl mx-auto bg-white shadow-xl shadow-gold-100/50 p-12 rounded-lg border border-gold-100 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gold-400 to-amber-600"></div>
+            class="max-w-3xl mx-auto bg-white shadow-xl shadow-bitcoin-100/50 p-12 rounded-lg border border-bitcoin-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-bitcoin-400 to-bitcoin-600"></div>
 
             <header class="mb-10 text-center">
-                <span class="text-xs font-bold tracking-[0.2em] text-gold-600 uppercase">The Origin</span>
+                <span class="text-xs font-bold tracking-[0.2em] text-bitcoin-600 uppercase">The Origin</span>
                 <h1 class="text-5xl font-serif font-bold text-slate-900 mt-4 mb-6">Who is Satoshi Nakamoto?</h1>
                 <div class="w-16 h-1 bg-slate-200 mx-auto"></div>
             </header>
 
             <div class="prose prose-slate prose-lg mx-auto text-slate-600 font-serif leading-loose">
                 <p>
-                    <span class="text-6xl float-left mr-4 mt-[-10px] font-bold text-gold-500">O</span>n October 31,
+                    <span class="text-6xl float-left mr-4 mt-[-10px] font-bold text-bitcoin-500">O</span>n October 31,
                     2008, a link to a paper titled
                     <em>"Bitcoin: A Peer-to-Peer Electronic Cash System"</em> was posted to a cryptography mailing list.
                     The author was
@@ -861,7 +925,7 @@
                     <strong>Blockchain</strong>.
                 </p>
                 <blockquote
-                    class="border-l-4 border-gold-400 pl-6 italic my-8 text-slate-500 bg-gold-50 py-4 pr-4 rounded-r-lg">
+                    class="border-l-4 border-bitcoin-400 pl-6 italic my-8 text-slate-500 bg-bitcoin-50 py-4 pr-4 rounded-r-lg">
                     "The root problem with conventional currency is all the trust that's required to make it work. The
                     central bank must be trusted not to debase the currency, but the history of fiat currencies is full
                     of breaches of that trust."
@@ -1125,7 +1189,7 @@ def run_full_simulation(args):
             'CEILING_LATE': float(js.document.getElementById("inp-ceiling-late").value),
         }
 
-        js.update_status(f"Simulating {num_sims} Scenarios...", "text-gold-600")
+        js.update_status(f"Simulating {num_sims} Scenarios...", "text-bitcoin-600")
         log_r_c, log_r_s = generate_market_data(num_sims, years, configs)
 
         js.update_status("Calculating Risk Profiles...", "text-purple-500")
@@ -1206,7 +1270,7 @@ def run_full_simulation(args):
         
         js.document.getElementById("results-placeholder").classList.add("hidden")
         js.document.getElementById("results-container").classList.remove("hidden")
-        js.update_status("Ready", "text-gold-700")
+        js.update_status("Ready", "text-bitcoin-700")
 
     except Exception as e:
         js.console.error(str(e))
@@ -1219,7 +1283,7 @@ def render_plot(total_final_values, years):
     fig.patch.set_facecolor('#f8fafc') 
     
     plot_data = total_final_values[total_final_values < 100_000_000] / 1e6
-    plt.hist(plot_data, bins=50, density=True, color='#b8873b', alpha=0.8, edgecolor='#7e5228')
+    plt.hist(plot_data, bins=50, density=True, color='#f7931a', alpha=0.8, edgecolor='#db7a0d')
     plt.axvline(0, color='#ef4444', linewidth=2, linestyle='--', label='Bankruptcy')
     
     plt.title(f"Wealth Distribution (End of {years} Years)", fontsize=12, pad=15)
@@ -1247,12 +1311,12 @@ def render_plot(total_final_values, years):
             // Hide all views
             ['calculator', 'info', 'satoshi'].forEach(v => {
                 document.getElementById('view-' + v).classList.add('hidden');
-                document.getElementById('nav-' + v).classList.remove('active', 'text-gold-600');
+                document.getElementById('nav-' + v).classList.remove('active', 'text-bitcoin-600');
             });
 
             // Show target
             document.getElementById('view-' + viewName).classList.remove('hidden');
-            document.getElementById('nav-' + viewName).classList.add('active', 'text-gold-600');
+            document.getElementById('nav-' + viewName).classList.add('active', 'text-bitcoin-600');
         }
 
         // --- TUTORIAL LOGIC ---
@@ -1477,18 +1541,35 @@ def render_plot(total_final_values, years):
 
         async function main() {
             try {
-                update_status("Loading Pyodide...", "text-gold-700");
+                // Overlay is visible by default
+                update_status("Loading Pyodide...", "text-bitcoin-700");
                 pyodide = await loadPyodide();
 
-                update_status("Loading Packages...", "text-gold-700");
+                update_status("Loading Packages...", "text-bitcoin-700");
                 await pyodide.loadPackage(["numpy", "scipy", "matplotlib"]);
 
-                update_status("Initializing Engine...", "text-gold-700");
+                update_status("Initializing Engine...", "text-bitcoin-700");
                 const pyCode = document.getElementById("py-logic").innerText;
                 await pyodide.runPythonAsync(pyCode);
 
-                update_status("Engine Ready", "text-gold-700");
+                update_status("Engine Ready", "text-bitcoin-700");
                 btnRun.disabled = false;
+
+                // Launch Rocket and Fade Out
+                const spinner = document.getElementById('main-spinner');
+                const rocket = document.getElementById('rocket-anim');
+                const text = document.getElementById('main-loading-text');
+                const overlay = document.getElementById('loading-overlay');
+
+                spinner.style.display = 'none';
+                text.innerText = "System Ready. Let's Go!";
+
+                setTimeout(() => {
+                    rocket.classList.add('launch');
+                    setTimeout(() => {
+                        overlay.classList.add('fade-out');
+                    }, 400);
+                }, 600);
 
             } catch (err) {
                 console.error(err);
