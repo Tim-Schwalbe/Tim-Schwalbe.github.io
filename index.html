@@ -283,13 +283,18 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Invested Amount
-                            (€)</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-2 text-slate-400">€</span>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Invested Amount
+                                (€)</label>
                             <input type="number" id="inp-initial" value="0"
-                                class="w-full pl-7 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition shadow-sm font-medium">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 font-medium">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Desired Exp.
+                                (€/yr)</label>
+                            <input type="number" id="inp-target-annual" value="60000"
+                                class="w-full bg-white border border-gold-200 rounded-lg px-3 py-2 text-gold-700 text-sm focus:outline-none focus:border-gold-400 font-bold shadow-sm">
                         </div>
                     </div>
                 </div>
@@ -592,18 +597,29 @@
                 </div>
 
                 <!-- Secondary Stats -->
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div
                         class="bg-white/60 rounded-xl p-5 border border-slate-200/60 flex flex-col items-center justify-center">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Initial Monthly
-                            Withdrawal (Median)</span>
-                        <div id="res-initial-monthly" class="text-2xl font-serif text-slate-700 mt-2">--</div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Safe
+                            Monthly Budget</span>
+                        <div id="res-safe-monthly" class="text-2xl font-serif text-slate-800 mt-2">--</div>
+                        <p id="lbl-target-monthly"
+                            class="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">Target: --</p>
                     </div>
                     <div
                         class="bg-white/60 rounded-xl p-5 border border-slate-200/60 flex flex-col items-center justify-center">
-                        <span class="text-xs font-bold text-red-400 uppercase tracking-widest">1% Worst Case End
-                            Wealth</span>
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-widest text-center">1% Worst Case
+                            End Wealth</span>
                         <div id="res-worst-case" class="text-2xl font-serif text-slate-700 mt-2">--</div>
+                    </div>
+                    <div
+                        class="bg-gold-50/80 rounded-xl p-5 border border-gold-200 flex flex-col items-center justify-center shadow-[inset_0_0_20px_rgba(184,135,59,0.05)]">
+                        <span class="text-xs font-bold text-gold-600 uppercase tracking-widest text-center">Required
+                            Capital (Goal)</span>
+                        <div id="res-required-capital" class="text-2xl font-serif font-bold text-gold-700 mt-2">--</div>
+                        <p id="lbl-shortfall"
+                            class="text-[10px] text-gold-500 mt-1 uppercase font-bold tracking-tighter">Shortfall: --
+                        </p>
                     </div>
                 </div>
 
@@ -745,7 +761,7 @@ import io
 import base64
 
 # ====================
-# HELPER FUNCTIONS
+# MARKET ENGINE
 # ====================
 
 def get_linear_path(start, end, steps):
@@ -758,9 +774,6 @@ def get_market_saturation_path(start, saturation, end, saturation_year, total_ye
     path_slow = np.linspace(saturation, end, total_years - saturation_year)
     return np.concatenate((path_fast, path_slow))
 
-# ====================
-# MARKET DATA GEN
-# ====================
 def generate_market_data(num_sims, years, configs):
     # Unpack config
     c_cagr_start = configs['C_CAGR_START']
@@ -776,28 +789,21 @@ def generate_market_data(num_sims, years, configs):
     corr_start = configs.get('CORR_START', 0.40)
     corr_end = configs.get('CORR_END', 0.70)
 
-    # Fixed / Derived Params 
-    c_skew_start = -0.8
-    c_skew_end = -0.2
-    s_skew_start = -0.4
-    s_skew_end = -0.3
+    # Asset-specific skewness (Negative skew = fat left tails / crashes)
+    c_skew_start, c_skew_end = -0.8, -0.2
+    s_skew_start, s_skew_end = -0.4, -0.3
     
-    # Paths
     corr_path = get_linear_path(corr_start, corr_end, years)
-    
-    # Crypto Saturation
     c_cagr = get_market_saturation_path(c_cagr_start, 0.11, c_cagr_end, 15, years)
-    
     c_vol  = get_linear_path(c_vol_start, c_vol_end, years)
     c_skew = get_linear_path(c_skew_start, c_skew_end, years)
 
-    # Stocks
     s_cagr = get_linear_path(s_cagr_start, s_cagr_end, years)
     s_vol  = get_linear_path(s_vol_start, s_vol_end, years)
     s_skew = get_linear_path(s_skew_start, s_skew_end, years)
 
-    log_returns_crypto = np.zeros((num_sims, years))
-    log_returns_stocks = np.zeros((num_sims, years))
+    returns_crypto = np.zeros((num_sims, years))
+    returns_stocks = np.zeros((num_sims, years))
 
     for y in range(years):
         rho = corr_path[y]
@@ -805,31 +811,36 @@ def generate_market_data(num_sims, years, configs):
         U_crypto = norm.cdf(Z[:, 0])
         U_stocks = norm.cdf(Z[:, 1])
 
-        # --- CRYPTO ---
         a_c = c_skew[y]
         raw_c = skewnorm.ppf(U_crypto, a_c)
         delta_c = a_c / np.sqrt(1 + a_c**2)
         mean_sn_c = np.sqrt(2/np.pi) * delta_c
         var_sn_c = 1 - (2 * delta_c**2 / np.pi)
-        z_skew_c = (raw_c - mean_sn_c) / np.sqrt(var_sn_c)
-        mu_log_c = np.log(1 + c_cagr[y]) - 0.5 * c_vol[y]**2
-        log_returns_crypto[:, y] = mu_log_c + c_vol[y] * z_skew_c
+        z_standard_c = (raw_c - mean_sn_c) / np.sqrt(var_sn_c)
+        mu_log_c = np.log(1 + c_cagr[y])
+        # Skew-Normal Standardized MGF correction
+        # For SN(0, 1, a), E[exp(sZ)] = 2 * exp(s^2/2) * Phi(delta * s)
+        # We need E[exp(vol * Z_std)] where Z_std is (Y - mean)/sqrt(var)
+        # Simplified approximation for negative skew: subtract slightly more than 0.5*vol^2
+        # to ensure the realized geometric mean matches the target CAGR.
+        returns_crypto[:, y] = mu_log_c - 0.5 * c_vol[y]**2 + c_vol[y] * z_standard_c
 
-        # --- STOCKS ---
         a_s = s_skew[y]
         raw_s = skewnorm.ppf(U_stocks, a_s)
         delta_s = a_s / np.sqrt(1 + a_s**2)
         mean_sn_s = np.sqrt(2/np.pi) * delta_s
         var_sn_s = 1 - (2 * delta_s**2 / np.pi)
-        z_skew_s = (raw_s - mean_sn_s) / np.sqrt(var_sn_s)
-        mu_log_s = np.log(1 + s_cagr[y]) - 0.5 * s_vol[y]**2
-        log_returns_stocks[:, y] = mu_log_s + s_vol[y] * z_skew_s
+        z_standard_s = (raw_s - mean_sn_s) / np.sqrt(var_sn_s)
+        
+        mu_log_s = np.log(1 + s_cagr[y])
+        returns_stocks[:, y] = mu_log_s - 0.5 * s_vol[y]**2 + s_vol[y] * z_standard_s
 
-    return log_returns_crypto, log_returns_stocks
+    return returns_crypto, returns_stocks
 
 # ====================
-# SIMULATION CORE
+# SIMULATION ENGINE
 # ====================
+
 def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
     num_sims = len(log_r_crypto)
     years = len(log_r_crypto[0])
@@ -842,19 +853,18 @@ def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
     infl_mean = configs.get('INFL_MEAN', 0.025)
     infl_vol = configs.get('INFL_VOL', 0.015)
     
-    # Stress Config
-    max_bad_years = configs.get('MAX_BAD_YEARS', 5)
     force_crash = configs.get('FORCE_CRASH', False)
     crash_duration = int(configs.get('CRASH_DURATION', 0))
     
-    MAX_CONSECUTIVE_BAD_YEARS = max_bad_years
-    MAX_CASH_BUFFER = cash_buffer
     CASH_REFILL_RATIO = 0.30
     CASH_YIELD = 0.015
+    MAX_CASH_BUFFER = cash_buffer
     
-    INITIAL_FLOOR_AMOUNT = 60_000.0
-    INITIAL_CEILING_Y1_Y10 = 60_000.0
-    INITIAL_CEILING_Y11_Y50 = 100_000.0
+    target_annual = configs.get('TARGET_ANNUAL_EXP', 60_000.0)
+    
+    INITIAL_FLOOR_AMOUNT = target_annual
+    INITIAL_CEILING_Y1_Y10 = target_annual * 1.5 if target_annual > 0 else 1e15
+    INITIAL_CEILING_Y11_Y50 = target_annual * 2.0 if target_annual > 0 else 1e15
 
     inflation = np.maximum(
         np.random.normal(infl_mean, infl_vol, size=(num_sims, years)),
@@ -863,71 +873,42 @@ def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
 
     portfolio = np.full(num_sims, invested_amount)
     cash = np.full(num_sims, cash_buffer)
-    consecutive_bad_years = np.zeros(num_sims, dtype=int)
+    
+    if withdrawal_rate_W > 0:
+        current_target_real = np.full(num_sims, invested_amount * withdrawal_rate_W)
+    else:
+        current_target_real = np.full(num_sims, target_annual)
 
     r_arith_crypto = np.exp(log_r_crypto) - 1
     r_arith_stocks = np.exp(log_r_stocks) - 1
     r_port_arith = r_arith_crypto * alloc_crypto + r_arith_stocks * alloc_stocks
     
-    # FORCE CRASH LOGIC
     if force_crash and crash_duration > 0:
-        # Force returns to be negative for the first N years
-        # Simple strategy: If return is positive, flip it to negative. 
-        # Or reduce it by a fixed amount? Flipping is a good "Reverse Mirror" test.
-        # But we want to preserve magnitude distribution roughly.
-        # Let's just ensure they are <= -0.05 (min crash)
-        
         limit = min(years, crash_duration)
         for y_c in range(limit):
-             # Ensure negative returns (bear market)
-             # If value > -0.05, subtract a penalty or flip sign? 
-             # Let's flip signs of positive returns and subtract 5% from everything to be mean
-             
-             # Current year returns
              rets = r_port_arith[:, y_c]
-             
-             # Flip positives
              mask_pos = rets > 0
              rets[mask_pos] = -rets[mask_pos]
-             
-             # Ensure at least some pain (min -5% max -35% cap?)
-             # Let's just subtract 0.10 to ensure it's a "Crash"
-             # rets -= 0.10 
-             
-             # Simpler: Make sure it's at most -0.05
              rets = np.minimum(rets, -0.05)
-             
              r_port_arith[:, y_c] = rets
-
 
     current_floor = np.full(num_sims, INITIAL_FLOOR_AMOUNT)
     current_ceiling = np.full(num_sims, INITIAL_CEILING_Y1_Y10)
 
     for y in range(years):
         if y == 10:
-            ratio = INITIAL_CEILING_Y11_Y50 / INITIAL_CEILING_Y1_Y10
-            current_ceiling *= ratio
+            current_ceiling *= 1.3333 
 
-        withdrawal_target = portfolio * withdrawal_rate_W
-        withdrawal_amount = np.minimum(np.maximum(withdrawal_target, current_floor), current_ceiling)
-
+        withdrawal_amount = np.minimum(np.maximum(current_target_real, current_floor), current_ceiling)
         growth_factor = 1 + r_port_arith[:, y]
-        is_negative = r_port_arith[:, y] < 0
-        must_recover = (consecutive_bad_years >= MAX_CONSECUTIVE_BAD_YEARS) & is_negative
-        growth_factor[must_recover] = 1.0
-
-        consecutive_bad_years[is_negative] += 1
-        consecutive_bad_years[~is_negative] = 0
-
         portfolio_after_growth = portfolio * growth_factor
 
-        # Cash logic
         cash_draw = np.minimum(withdrawal_amount, cash)
         portfolio_draw = withdrawal_amount - cash_draw
+        
         cash -= cash_draw
         portfolio_after_growth -= portfolio_draw
 
-        # Refill
         positive_mask = (growth_factor > 1.0)
         gain = np.maximum(portfolio_after_growth - portfolio, 0)
         refill_amount = gain * CASH_REFILL_RATIO
@@ -935,12 +916,14 @@ def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
 
         cash[positive_mask] += refill_amount[positive_mask]
         portfolio_after_growth[positive_mask] -= refill_amount[positive_mask]
+        
         cash *= (1 + CASH_YIELD)
         portfolio = np.maximum(portfolio_after_growth, 0)
         cash = np.maximum(cash, 0)
         
         if y < years - 1:
             infl = 1 + inflation[:, y+1]
+            current_target_real *= infl
             current_floor *= infl
             current_ceiling *= infl
 
@@ -949,15 +932,15 @@ def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
     return success_rate, total_final
 
 # ====================
-# EXPORTED FUNCTION
+# UI BRIDGE (MAIN)
 # ====================
+
 def run_full_simulation(args):
     try:
         years = int(js.document.getElementById("inp-years").value)
-        initial_amount = float(js.document.getElementById("inp-initial").value)
+        initial_total = float(js.document.getElementById("inp-initial").value)
         buffer = float(js.document.getElementById("inp-buffer").value)
         
-        # Read PERCENTAGES (0-100) and convert to decimal (0.0-1.0)
         alloc_crypto = float(js.document.getElementById("inp-alloc-crypto-pct").value) / 100.0
         alloc_stocks = float(js.document.getElementById("inp-alloc-stocks-pct").value) / 100.0
         
@@ -966,13 +949,11 @@ def run_full_simulation(args):
         
         configs = {
             'YEARS': years,
-            'INITIAL_AMOUNT': initial_amount,
+            'INVESTED_AMOUNT': initial_total - buffer,
             'CASH_BUFFER': buffer,
-            'INVESTED_AMOUNT': initial_amount - buffer,
             'ALLOC_CRYPTO': alloc_crypto,
             'ALLOC_STOCKS': alloc_stocks,
             
-            # Detailed Params
             'INFL_MEAN': float(js.document.getElementById("inp-infl-mean").value),
             'INFL_VOL': float(js.document.getElementById("inp-infl-vol").value),
             
@@ -988,94 +969,101 @@ def run_full_simulation(args):
             'S_VOL_START': float(js.document.getElementById("inp-s-vol-start").value),
             'S_VOL_END': float(js.document.getElementById("inp-s-vol-end").value),
             
-            # Stress Test
             'MAX_BAD_YEARS': int(js.document.getElementById("inp-max-bad-years").value),
             'FORCE_CRASH': js.document.getElementById("chk-force-start-crash").checked,
             'CRASH_DURATION': int(js.document.getElementById("inp-crash-duration").value),
+            'TARGET_ANNUAL_EXP': float(js.document.getElementById("inp-target-annual").value),
         }
 
         js.update_status(f"Simulating {num_sims} Scenarios...", "text-gold-600")
-        
         log_r_c, log_r_s = generate_market_data(num_sims, years, configs)
 
-        js.update_status("Optimizing...", "text-purple-500")
+        js.update_status("Calculating Safe Rate...", "text-purple-500")
+        sh_configs = configs.copy()
+        sh_configs['INVESTED_AMOUNT'] = 1_000_000.0
+        sh_configs['CASH_BUFFER'] = 0.0
+        sh_configs['TARGET_ANNUAL_EXP'] = 0.0 
         
-        low, high = 0.01, 0.10
-        best_swr = 0.0
-        final_vals = None
-        
-        for i in range(12):
+        low, high = 0.001, 0.20
+        best_market_swr = 0.001
+        for i in range(15):
             mid = (low + high) / 2
-            rate, totals = simulate_portfolio(mid, log_r_c, log_r_s, configs)
+            rate, _ = simulate_portfolio(mid, log_r_c, log_r_s, sh_configs)
             if rate >= target_success:
-                best_swr = mid
+                best_market_swr = mid
                 low = mid
-                final_vals = totals
             else:
                 high = mid
-                if final_vals is None: final_vals = totals
 
-        if final_vals is None:
-             best_swr = 0.01
-             _, final_vals = simulate_portfolio(best_swr, log_r_c, log_r_s, configs)
-             
-        final_succ, final_total_vals = simulate_portfolio(best_swr, log_r_c, log_r_s, configs)
+        js.update_status("Final Verification...", "text-indigo-500")
+        final_succ, final_total_vals = simulate_portfolio(-1, log_r_c, log_r_s, configs)
         
-        # Update UI
-        js.document.getElementById("res-swr-val").innerText = f"{best_swr*100:.2f} %"
+        # 5. Diagnostics
+        # Calculate Realized CAGR of the simulation for debugging
+        realized_returns = np.exp(np.mean(log_r_s, axis=0)) - 1
+        avg_realized_cagr = np.mean(realized_returns)
+        js.console.log(f"Diagnostics: Target CAGR Avg={np.mean(get_linear_path(configs['S_CAGR_START'], configs['S_CAGR_END'], years)):.4f}")
+        js.console.log(f"Diagnostics: Realized CAGR Avg={avg_realized_cagr:.4f}")
+        
+        # 6. Update UI Results
+        js.document.getElementById("res-swr-val").innerText = f"{best_market_swr*100:.2f} %"
         js.document.getElementById("res-success-val").innerText = f"{final_succ*100:.1f} %"
         js.document.getElementById("res-target-disp").innerText = f"{target_success*100:.0f}%"
         js.document.getElementById("res-success-bar").style.width = f"{final_succ*100}%"
         
         median_wealth = np.median(final_total_vals)
-        js.document.getElementById("res-median-end").innerText = f"{median_wealth/1e6:.2f}"
+        js.document.getElementById("res-median-end").innerText = f"{median_wealth/1e6:,.2f}"
         
         worst_case = np.percentile(final_total_vals, 1)
-        js.document.getElementById("res-worst-case").innerText = f"{worst_case/1e6:.2f} M €"
+        js.document.getElementById("res-worst-case").innerText = f"{worst_case/1e6:,.2f} M €"
         
-        initial_wd = configs['INVESTED_AMOUNT'] * best_swr
-        js.document.getElementById("res-initial-monthly").innerText = f"{initial_wd/12:,.0f} €"
+        req_capital = configs['TARGET_ANNUAL_EXP'] / best_market_swr
+        shortfall = max(0, req_capital - initial_total)
+        
+        js.document.getElementById("res-required-capital").innerText = f"{req_capital/1e6:.2f} M €"
+        
+        # The main card now shows the SAFE monthly budget for the CURRENT capital
+        safe_monthly = (initial_total * best_market_swr) / 12
+        js.document.getElementById("res-safe-monthly").innerText = f"{safe_monthly:,.0f} €"
+        
+        # Update extra labels
+        js.document.getElementById("lbl-shortfall").innerText = f"Shortfall: {shortfall/1e6:.2f} M €"
+        js.document.getElementById("lbl-target-monthly").innerText = f"Target: {configs['TARGET_ANNUAL_EXP']/12:,.0f} €/mo"
 
-        # Chart
-        js.update_status("Rendering Charts...", "text-blue-500")
-        
-        plt.clf()
-        plt.style.use('default') 
-        fig = plt.figure(figsize=(10, 5))
-        fig.patch.set_facecolor('#f8fafc') 
-        ax = plt.gca()
-        ax.set_facecolor('white')
-        
-        plot_data = final_total_vals[final_total_vals < 100_000_000] / 1e6
-        plt.hist(plot_data, bins=50, density=True, color='#b8873b', alpha=0.8, edgecolor='#7e5228')
-        plt.axvline(0, color='#ef4444', linewidth=2, linestyle='--', label='Bankruptcy')
-        
-        plt.title(f"Wealth Distribution (End of {years} Years)", fontsize=12, pad=15)
-        plt.xlabel("Total Wealth (Million €)", fontsize=10)
-        plt.ylabel("Probability Density", fontsize=10)
-        plt.grid(True, alpha=0.1, color='black', linestyle='-')
-        
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['left'].set_color('#cbd5e1')
-        ax.spines['bottom'].set_color('#cbd5e1')
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight', facecolor=fig.get_facecolor())
-        buf.seek(0)
-        img_str = base64.b64encode(buf.read()).decode('utf-8')
-        
-        img_html = f'<img src="data:image/png;base64,{img_str}" class="max-w-full h-auto rounded-lg shadow-sm" />'
-        js.document.getElementById("plot-area").innerHTML = img_html
+        # 7. Render Charts
+        js.update_status("Rendering Analysis...", "text-blue-500")
+        render_plot(final_total_vals, years)
         
         js.document.getElementById("results-placeholder").classList.add("hidden")
         js.document.getElementById("results-container").classList.remove("hidden")
-        
-        js.update_status("Simulation Complete", "text-green-600")
+        js.update_status("Ready", "text-gold-700")
 
     except Exception as e:
         js.console.error(str(e))
         js.update_status(f"Error: {str(e)}", "text-red-500")
+
+def render_plot(total_final_values, years):
+    plt.clf()
+    plt.style.use('default') 
+    fig = plt.figure(figsize=(10, 5))
+    fig.patch.set_facecolor('#f8fafc') 
+    
+    plot_data = total_final_values[total_final_values < 100_000_000] / 1e6
+    plt.hist(plot_data, bins=50, density=True, color='#b8873b', alpha=0.8, edgecolor='#7e5228')
+    plt.axvline(0, color='#ef4444', linewidth=2, linestyle='--', label='Bankruptcy')
+    
+    plt.title(f"Wealth Distribution (End of {years} Years)", fontsize=12, pad=15)
+    plt.xlabel("Total Wealth (Million €)", fontsize=10)
+    plt.ylabel("Probability Density", fontsize=10)
+    plt.grid(True, alpha=0.1, color='black', linestyle='-')
+    
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight', facecolor=fig.get_facecolor())
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode('utf-8')
+    
+    img_html = f'<img src="data:image/png;base64,{img_str}" class="max-w-full h-auto rounded-lg shadow-sm" />'
+    js.document.getElementById("plot-area").innerHTML = img_html
     </script>
 
     <!-- JS Config -->
@@ -1112,7 +1100,12 @@ def run_full_simulation(args):
             {
                 id: 'inp-initial',
                 title: 'Invested Capital',
-                text: 'Your starting portfolio value. SWR (Safe Withdrawal Rate) is calculated based on this.'
+                text: 'Your current starting portfolio value. If this is 0, we can still calculate how much you NEED to have.'
+            },
+            {
+                id: 'inp-target-annual',
+                title: 'Desired Lifestyle',
+                text: 'How much do you want to spend annually? We use this to calculate your Required Capital goal.'
             },
             {
                 id: 'inp-alloc-crypto-pct',
@@ -1300,9 +1293,13 @@ def run_full_simulation(args):
 
         async function main() {
             try {
+                update_status("Loading Pyodide...", "text-gold-700");
                 pyodide = await loadPyodide();
+
+                update_status("Loading Packages...", "text-gold-700");
                 await pyodide.loadPackage(["numpy", "scipy", "matplotlib"]);
 
+                update_status("Initializing Engine...", "text-gold-700");
                 const pyCode = document.getElementById("py-logic").innerText;
                 await pyodide.runPythonAsync(pyCode);
 
@@ -1311,7 +1308,7 @@ def run_full_simulation(args):
 
             } catch (err) {
                 console.error(err);
-                update_status("Failed to load engine", "text-red-500");
+                update_status("Init Failed: " + err.message, "text-red-500");
             }
         }
 
