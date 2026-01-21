@@ -299,211 +299,59 @@
                     </div>
                 </div>
 
-                <!-- Asset Allocation -->
-                <div class="space-y-4">
-                    <div class="flex items-center gap-2 pb-2 border-b border-gold-100">
-                        <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                        </svg>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Asset Allocation</h3>
+                <!-- Withdrawal Guardrails (Moved to Portfolio Setup) -->
+                <div class="bg-indigo-50/50 rounded-lg p-3 border border-indigo-100 mt-2">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-[10px] uppercase font-bold text-indigo-500">Withdrawal Guardrails</p>
+                        <div class="group relative cursor-help">
+                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div
+                                class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                                Defines your lifestyle safety net (Floor) and limits excess spending in boom markets
+                                (Ceiling).
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="bg-gold-50/50 rounded-xl p-4 border border-gold-100 space-y-6">
-                        <!-- Crypto Slider -->
+                    <div class="space-y-3">
                         <div>
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="flex items-center gap-1 font-bold text-slate-700">
-                                    <span class="text-orange-500">●</span> Crypto (BTC)
-                                </span>
-                                <span id="lbl-crypto-pct" class="font-mono text-slate-600 font-bold">5%</span>
-                            </div>
-                            <input type="range"
-                                class="w-full accent-orange-500 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="5"
-                                oninput="updateAllocations('crypto')">
+                            <label class="block text-[10px] text-slate-500 mb-1">Floor Multiplier</label>
+                            <input type="number" step="0.05" id="inp-floor-mult" value="1.0"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-400 focus:outline-none transition">
                         </div>
-
-                        <!-- Stocks Slider -->
-                        <div>
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="flex items-center gap-1 font-bold text-slate-700">
-                                    <span class="text-blue-600">●</span> Stocks (ETF)
-                                </span>
-                                <span id="lbl-stocks-pct" class="font-mono text-slate-600 font-bold">95%</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Ceiling (Y1-10)</label>
+                                <input type="number" step="0.1" id="inp-ceiling-early" value="1.5"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-400 focus:outline-none transition">
                             </div>
-                            <input type="range"
-                                class="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="95"
-                                oninput="updateAllocations('stocks')">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Deep Tweak Section -->
-                <div class="space-y-4">
-                    <button id="btn-advanced-toggle" onclick="toggleAdvanced()"
-                        class="w-full flex items-center justify-between text-xs font-bold text-gold-600 uppercase tracking-widest hover:text-gold-700 transition outline-none">
-                        <span>Advanced Market Assumptions</span>
-                        <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </button>
-
-                    <div id="pnl-advanced" class="advanced-panel space-y-6">
-
-                        <!-- Stress Test Parameters (New) -->
-                        <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
-                            <p class="text-[10px] uppercase font-bold text-red-500 mb-2">Stress Test / Bad Years</p>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Max Consecutive Bad Years
-                                        (Limit)</label>
-                                    <input type="number" id="inp-max-bad-years" value="5"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                    <p class="text-[9px] text-slate-400 mt-0.5">Limits recovery logic after this many
-                                        down years.</p>
-                                </div>
-
-                                <div class="flex items-center gap-2 pt-1 border-t border-red-100/50">
-                                    <input type="checkbox" id="chk-force-start-crash"
-                                        class="w-3 h-3 accent-red-500 rounded border-gray-300 focus:ring-red-500">
-                                    <label for="chk-force-start-crash"
-                                        class="text-[10px] font-bold text-red-600 select-none cursor-pointer">Force
-                                        Crash at Start</label>
-                                </div>
-
-                                <div id="div-crash-config" class="hidden pl-5 space-y-2 border-l-2 border-red-100">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Crash Duration
-                                            (Years)</label>
-                                        <input type="number" id="inp-crash-duration" value="3"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                    </div>
-                                    <p class="text-[9px] text-red-400 italic">Forces returns to be negative for the
-                                        first N years.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Inflation -->
-                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
-                                    <input type="number" step="0.001" id="inp-infl-mean" value="0.025"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
-                                    <input type="number" step="0.001" id="inp-infl-vol" value="0.015"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Correlation -->
-                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Asset Correlation</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
-                                    <input type="number" step="0.05" id="inp-corr-start" value="0.40"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
-                                    <input type="number" step="0.05" id="inp-corr-end" value="0.70"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Crypto Params -->
-                        <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
-                            <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                    <input type="number" step="0.01" id="inp-c-cagr-start" value="0.32"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                    <input type="number" step="0.01" id="inp-c-cagr-end" value="0.08"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
-                                    <input type="number" step="0.01" id="inp-c-vol-start" value="0.40"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
-                                    <input type="number" step="0.01" id="inp-c-vol-end" value="0.20"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Stock Params -->
-                        <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
-                            <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                    <input type="number" step="0.01" id="inp-s-cagr-start" value="0.08"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                    <input type="number" step="0.01" id="inp-s-cagr-end" value="0.06"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
-                                    <input type="number" step="0.01" id="inp-s-vol-start" value="0.18"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
-                                    <input type="number" step="0.01" id="inp-s-vol-end" value="0.16"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Ceiling (Y11-50)</label>
+                                <input type="number" step="0.1" id="inp-ceiling-late" value="2.0"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-400 focus:outline-none transition">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sim Settings -->
-                <div class="space-y-4 pt-4 border-t border-gold-100">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Number of
-                                Simulations</label>
-                            <input type="number" id="inp-num-sims" value="1000"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Target Success
-                                (%)</label>
-                            <input type="number" id="inp-target-success" value="95"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
-                        </div>
+                <!-- Simulation Settings -->
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="col-span-1">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Simulations</label>
+                        <input type="number" id="inp-num-sims" value="1000"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Target %</label>
+                        <input type="number" id="inp-target-success" value="95"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
                     </div>
                 </div>
-
                 <!-- Simulation Button -->
-                <div class="pt-2 pb-6">
+                <div class="pt-2 pb-2">
                     <button id="btn-run" disabled onclick="runSimulation()"
                         class="w-full bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-gold-200/50 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -517,141 +365,417 @@
                     </button>
                     <p class="text-center text-[10px] text-slate-400 mt-2">Running python client-side (Pyodide)</p>
                 </div>
-
-            </div>
-        </aside>
-
-        <!-- Main Content: Results -->
-        <main class="flex-1 bg-slate-50 p-10 relative">
-
-            <!-- Welcome / Empty State -->
-            <div id="results-placeholder" class="text-center mt-32 opacity-40">
-                <div
-                    class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm border border-gold-100 mb-6">
-                    <svg class="w-10 h-10 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Asset Allocation -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-gold-100">
+                    <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                    </svg>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Asset Allocation</h3>
+                </div>
+
+                <div class="bg-gold-50/50 rounded-xl p-4 border border-gold-100 space-y-6">
+                    <!-- Crypto Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-2">
+                            <span class="flex items-center gap-1 font-bold text-slate-700">
+                                <span class="text-orange-500">●</span> Crypto (BTC)
+                            </span>
+                            <span id="lbl-crypto-pct" class="font-mono text-slate-600 font-bold">5%</span>
+                        </div>
+                        <input type="range"
+                            class="w-full accent-orange-500 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                            min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="5"
+                            oninput="updateAllocations('crypto')">
+                    </div>
+
+                    <!-- Stocks Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-2">
+                            <span class="flex items-center gap-1 font-bold text-slate-700">
+                                <span class="text-blue-600">●</span> Stocks (ETF)
+                            </span>
+                            <span id="lbl-stocks-pct" class="font-mono text-slate-600 font-bold">95%</span>
+                        </div>
+                        <input type="range"
+                            class="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                            min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="95"
+                            oninput="updateAllocations('stocks')">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Tweak Section -->
+            <div class="space-y-4">
+                <button id="btn-advanced-toggle" onclick="toggleAdvanced()"
+                    class="w-full flex items-center justify-between text-xs font-bold text-gold-600 uppercase tracking-widest hover:text-gold-700 transition outline-none">
+                    <span>Advanced Market Assumptions</span>
+                    <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                         </path>
                     </svg>
+                </button>
+
+                <div id="pnl-advanced" class="advanced-panel space-y-6">
+
+                    <!-- Stress Test Parameters (New) -->
+                    <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
+                        <p class="text-[10px] uppercase font-bold text-red-500 mb-2">Stress Test / Bad Years</p>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Max Consecutive Bad Years
+                                    (Limit)</label>
+                                <input type="number" id="inp-max-bad-years" value="5"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                <p class="text-[9px] text-slate-400 mt-0.5">Limits recovery logic after this many
+                                    down years.</p>
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-1 border-t border-red-100/50">
+                                <input type="checkbox" id="chk-force-start-crash"
+                                    class="w-3 h-3 accent-red-500 rounded border-gray-300 focus:ring-red-500">
+                                <label for="chk-force-start-crash"
+                                    class="text-[10px] font-bold text-red-600 select-none cursor-pointer">Force
+                                    Crash at Start</label>
+                            </div>
+
+                            <div id="div-crash-config" class="hidden pl-5 space-y-2 border-l-2 border-red-100">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Crash Duration
+                                        (Years)</label>
+                                    <input type="number" id="inp-crash-duration" value="3"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                                <p class="text-[9px] text-red-400 italic">Forces returns to be negative for the
+                                    first N years.</p>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                <h2 class="text-3xl font-serif text-slate-700 mb-2">Ready to Simulate</h2>
-                <p class="text-slate-500">Configure your portfolio parameters on the left to begin.</p>
+
+                <!-- Inflation -->
+                <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
+                            <input type="number" step="0.001" id="inp-infl-mean" value="0.025"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
+                            <input type="number" step="0.001" id="inp-infl-vol" value="0.005"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Correlation -->
+                <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Asset Correlation</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
+                            <input type="number" step="0.05" id="inp-corr-start" value="0.25"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
+                            <input type="number" step="0.05" id="inp-corr-end" value="0.70"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crypto Params -->
+                <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
+                    <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                            <input type="number" step="0.01" id="inp-c-cagr-start" value="0.32"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                            <input type="number" step="0.01" id="inp-c-cagr-end" value="0.08"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                            <input type="number" step="0.01" id="inp-c-vol-start" value="0.40"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                            <input type="number" step="0.01" id="inp-c-vol-end" value="0.20"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Params -->
+                <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                    <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                            <input type="number" step="0.01" id="inp-s-cagr-start" value="0.08"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                            <input type="number" step="0.01" id="inp-s-cagr-end" value="0.06"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                            <input type="number" step="0.01" id="inp-s-vol-start" value="0.18"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                            <input type="number" step="0.01" id="inp-s-vol-end" value="0.16"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                        </div>
+                    </div>
+                </div>
             </div>
+    </div>
 
-            <!-- Results Container (Hidden initially) -->
-            <div id="results-container" class="hidden space-y-8 max-w-6xl mx-auto animate-fade-in">
+    </aside>
 
-                <!-- KPI Cards Row -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Main Content: Results -->
+    <main class="flex-1 bg-slate-50 p-10 relative">
 
-                    <!-- Result Card 1 -->
-                    <div
-                        class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
-                        <div
-                            class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-gold-100 to-transparent rounded-full opacity-50">
-                        </div>
-                        <h3 class="text-gold-600 font-bold uppercase text-xs tracking-widest mb-1">Safe Withdrawal Rate
-                        </h3>
+        <!-- Welcome / Empty State -->
+        <div id="results-placeholder" class="text-center mt-32 opacity-40">
+            <div
+                class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm border border-gold-100 mb-6">
+                <svg class="w-10 h-10 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                    </path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-serif text-slate-700 mb-2">Ready to Simulate</h2>
+            <p class="text-slate-500">Configure your portfolio parameters on the left to begin.</p>
+        </div>
 
-                        <div class="mt-4 flex items-baseline gap-2 relative z-10">
-                            <span id="res-swr-val" class="text-5xl font-serif font-medium text-slate-900">--%</span>
-                        </div>
-                        <p class="text-sm text-slate-400 mt-2 font-medium">Variable Rate optimized for <span
-                                id="res-target-disp">--</span> success</p>
-                    </div>
+        <!-- Results Container (Hidden initially) -->
+        <div id="results-container" class="hidden space-y-16 max-w-6xl ml-0 mr-auto animate-fade-in pb-20">
 
-                    <!-- Result Card 2 -->
-                    <div
-                        class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
-                        <div
-                            class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-blue-50 to-transparent rounded-full opacity-50">
-                        </div>
-                        <h3 class="text-blue-500 font-bold uppercase text-xs tracking-widest mb-1">Success Probability
-                        </h3>
-
-                        <div class="mt-4 flex items-baseline gap-2 relative z-10">
-                            <span id="res-success-val" class="text-5xl font-serif font-medium text-slate-900">--%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-4">
-                            <div id="res-success-bar"
-                                class="bg-blue-500 h-1.5 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                                style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Result Card 3 -->
-                    <div
-                        class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
-                        <div
-                            class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-purple-50 to-transparent rounded-full opacity-50">
-                        </div>
-                        <h3 class="text-purple-500 font-bold uppercase text-xs tracking-widest mb-1">Median End Wealth
-                        </h3>
-
-                        <div class="mt-4 flex items-baseline gap-2 relative z-10">
-                            <span id="res-median-end" class="text-4xl font-serif font-medium text-slate-900">-- €</span>
-                            <span class="text-sm text-slate-400">M</span>
-                        </div>
-                        <p class="text-sm text-slate-400 mt-2 font-medium">Expected outcome (50th percentile)</p>
-                    </div>
+            <!-- SECTION 1: THE REALITY (Possible Today) -->
+            <div class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">The
+                        Reality (Supported by Current Wealth)</h2>
+                    <div class="h-px bg-slate-200 flex-1"></div>
                 </div>
 
-                <!-- Secondary Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Safe Monthly Range (Colspan 2) -->
                     <div
-                        class="bg-white/60 rounded-xl p-5 border border-slate-200/60 flex flex-col items-center justify-center">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Safe
-                            Monthly Budget</span>
-                        <div id="res-safe-monthly" class="text-2xl font-serif text-slate-800 mt-2">--</div>
-                        <p id="lbl-target-monthly"
-                            class="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">Target: --</p>
+                        class="md:col-span-2 bg-indigo-50/50 p-8 rounded-3xl border border-indigo-100/60 shadow-sm relative overflow-hidden group">
+                        <div
+                            class="absolute top-0 right-0 w-48 h-48 bg-indigo-100/40 rounded-full -mr-24 -mt-24 group-hover:scale-110 transition-transform duration-700">
+                        </div>
+
+                        <div class="flex items-center justify-between mb-8 relative z-10">
+                            <div>
+                                <p class="text-[10px] uppercase font-bold tracking-[0.2em] text-indigo-500 mb-1">Safe
+                                    Monthly Budget</p>
+                                <h3 class="text-xl font-serif font-bold text-slate-800">Risk Profile Categories</h3>
+                            </div>
+                            <span
+                                class="text-[10px] bg-indigo-600 text-white px-4 py-1.5 rounded-full font-bold shadow-sm whitespace-nowrap">Boom
+                                Peak: <span id="res-max-monthly">--</span> €</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
+                            <div class="space-y-2 border-r border-indigo-200/50 pr-4">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Conservative
+                                    (99%)</p>
+                                <p id="res-safe-99" class="text-3xl font-serif font-bold text-slate-700">-- €</p>
+                                <p class="text-[10px] text-slate-400 font-medium italic">Ultra-safe baseline</p>
+                            </div>
+                            <div class="space-y-2 border-r border-indigo-200/50 pr-4">
+                                <p class="text-[10px] text-indigo-600 font-bold uppercase tracking-tight">Your Target
+                                    (<span id="res-target-ptr">--</span>%)</p>
+                                <p id="res-safe-monthly"
+                                    class="text-4xl font-serif font-bold text-slate-900 leading-tight">-- €</p>
+                                <p class="text-[10px] text-indigo-500 font-bold italic">Recommended Safe Rate</p>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Aggressive
+                                    (90%)</p>
+                                <p id="res-safe-90" class="text-3xl font-serif font-bold text-slate-700">-- €</p>
+                                <p class="text-[10px] text-slate-400 font-medium italic">Higher lifestyle risk</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="mt-8 pt-5 border-t border-indigo-200/40 flex justify-between items-center relative z-10">
+                            <span class="text-[11px] text-slate-400 font-medium">Desired Lifestyle: <span
+                                    id="lbl-target-monthly" class="font-bold text-slate-600">--</span> /mo</span>
+                            <span class="text-[9px] text-indigo-400 uppercase font-black opacity-40">Capital Dependent
+                                Realization</span>
+                        </div>
                     </div>
+
+                    <!-- SWR Efficiency -->
                     <div
-                        class="bg-white/60 rounded-xl p-5 border border-slate-200/60 flex flex-col items-center justify-center">
-                        <span class="text-xs font-bold text-red-400 uppercase tracking-widest text-center">1% Worst Case
-                            End Wealth</span>
-                        <div id="res-worst-case" class="text-2xl font-serif text-slate-700 mt-2">--</div>
-                    </div>
-                    <div
-                        class="bg-gold-50/80 rounded-xl p-5 border border-gold-200 flex flex-col items-center justify-center shadow-[inset_0_0_20px_rgba(184,135,59,0.05)]">
-                        <span class="text-xs font-bold text-gold-600 uppercase tracking-widest text-center">Required
-                            Capital (Goal)</span>
-                        <div id="res-required-capital" class="text-2xl font-serif font-bold text-gold-700 mt-2">--</div>
-                        <p id="lbl-shortfall"
-                            class="text-[10px] text-gold-500 mt-1 uppercase font-bold tracking-tighter">Shortfall: --
+                        class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col justify-between group overflow-hidden relative">
+                        <div
+                            class="absolute -right-6 -top-6 w-24 h-24 bg-gold-50 rounded-full opacity-60 group-hover:scale-125 transition-transform duration-500">
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gold-600 uppercase tracking-widest relative z-10 mb-2">
+                                Safe Withdrawal Rate</p>
+                            <p id="res-swr-val" class="text-6xl font-serif font-bold text-slate-800 text-right relative z-10">--%
+                            </p>
+                        </div>
+                        <p
+                            class="text-[10px] text-slate-400 font-medium mt-4 relative z-10 border-t border-slate-50 pt-4 leading-relaxed">
+                            <span class="block font-bold text-slate-600 mb-1">Portfolio Efficiency</span>
+                            <span id="res-target-disp-desc" class="italic text-gold-600/70">Optimized for your survival
+                                odds</span>
                         </p>
                     </div>
                 </div>
 
-                <!-- Plot -->
-                <div class="bg-white rounded-2xl p-8 shadow-[0_4px_30px_rgba(0,0,0,0.04)] border border-slate-100">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
-                                </path>
-                            </svg>
+                <!-- Row 2: Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Median Outcome -->
+                    <div
+                        class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group flex items-center justify-between">
+                        <div
+                            class="absolute -right-6 -top-6 w-24 h-24 bg-purple-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
                         </div>
-                        <h3 class="text-lg font-serif font-bold text-slate-800">Wealth Distribution Analysis</h3>
+                        <div class="relative z-10">
+                            <p class="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-1">Median
+                                Projected Wealth</p>
+                            <div class="flex items-baseline gap-1">
+                                <p id="res-median-end" class="text-5xl font-serif font-bold text-slate-800 text-right">--</p>
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Million
+                                    €</span>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-medium max-w-[140px] text-right italic relative z-10">
+                            Outcome in 50% of simulated futures.</p>
                     </div>
 
-                    <!-- Chart Area -->
-                    <div id="plot-area"
-                        class="w-full flex justify-center items-center bg-slate-50 rounded-xl p-4 border border-slate-100 min-h-[300px]">
-                        <span class="text-slate-400 text-sm">Chart will render here...</span>
+                    <!-- Safety Margin -->
+                    <div
+                        class="bg-red-50/10 rounded-3xl p-8 border border-red-100/60 shadow-sm relative overflow-hidden group flex items-center justify-between">
+                        <div
+                            class="absolute -right-6 -top-6 w-24 h-24 bg-red-100/20 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+                        </div>
+                        <div class="relative z-10">
+                            <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">1% Worst Case
+                                Margin</p>
+                            <p id="res-worst-case" class="text-4xl font-serif font-bold text-slate-800 text-right">--</p>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-medium max-w-[140px] text-right italic relative z-10">
+                            Statistical "Zero Bound" for capital safety.</p>
                     </div>
                 </div>
-
             </div>
 
-        </main>
+            <!-- SECTION 2: THE VISION (Required For Goal) -->
+            <div class="space-y-6 pt-4">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-xs font-black text-gold-500 uppercase tracking-[0.2em] whitespace-nowrap">The Vision
+                        (Required For Target Goal)</h2>
+                    <div class="h-px bg-gold-200 flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Success Probability -->
+                    <div
+                        class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+                        <div
+                            class="absolute -right-6 -top-6 w-32 h-32 bg-blue-50/50 rounded-full group-hover:scale-110 transition-transform">
+                        </div>
+                        <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest relative z-10 mb-2">
+                            Success Probability</p>
+                        <p id="res-success-val" class="text-7xl font-serif font-bold text-slate-800 text-right relative z-10">--%
+                        </p>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 mt-6 relative z-10 overflow-hidden">
+                            <div id="res-success-bar"
+                                class="bg-blue-500 h-full rounded-full shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-1000"
+                                style="width: 0%"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-medium mt-5 leading-relaxed">Percentage of scenarios
+                            where your capital survived the full term.</p>
+                    </div>
+
+                    <!-- Required Capital -->
+                    <div class="md:col-span-2 bg-slate-800 rounded-3xl p-8 shadow-xl relative overflow-hidden group">
+                        <div
+                            class="absolute -right-16 -top-16 w-64 h-64 bg-gold-500/10 rounded-full group-hover:scale-110 transition-transform duration-1000">
+                        </div>
+                        <div
+                            class="flex flex-col md:flex-row md:items-center justify-between h-full relative z-10 gap-8">
+                            <div class="space-y-2">
+                                <p class="text-[10px] font-bold text-gold-400 uppercase tracking-[0.2em]">Required
+                                    Capital (Goal)</p>
+                                <p id="res-required-capital" class="text-6xl font-serif font-bold text-white">--</p>
+                                <p class="text-[10px] text-slate-400 font-medium italic">Amount needed to achieve your
+                                    target success probability.</p>
+                            </div>
+                            <div
+                                class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600 min-w-[200px] flex flex-col justify-center items-center">
+                                <p id="lbl-shortfall"
+                                    class="text-[13px] text-gold-400 font-black uppercase tracking-widest text-center">
+                                    --</p>
+                                <p
+                                    class="text-[9px] text-slate-400 mt-2 uppercase font-bold text-center tracking-tighter">
+                                    Current Funding Gap</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plot -->
+            <div class="bg-white rounded-2xl p-8 shadow-[0_4px_30px_rgba(0,0,0,0.04)] border border-slate-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-serif font-bold text-slate-800">Wealth Distribution Analysis</h3>
+                </div>
+
+                <!-- Chart Area -->
+                <div id="plot-area"
+                    class="w-full flex justify-center items-center bg-slate-50 rounded-xl p-4 border border-slate-100 min-h-[300px]">
+                    <span class="text-slate-400 text-sm">Chart will render here...</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
     </div>
 
     <!-- VIEW: INFO / METHODOLOGY -->
     <div id="view-info" class="hidden flex-1 overflow-y-auto bg-white p-10 animate-fade-in">
         <div class="max-w-4xl mx-auto space-y-8">
-            <h2 class="text-4xl font-serif font-bold text-slate-800 border-b border-gold-200 pb-4">Methodology &
+            <h2 class="text-4xl font-serif font-bold text-slate-800 text-right border-b border-gold-200 pb-4">Methodology &
                 Glossary</h2>
 
             <section class="space-y-4">
@@ -811,20 +935,19 @@ def generate_market_data(num_sims, years, configs):
         U_crypto = norm.cdf(Z[:, 0])
         U_stocks = norm.cdf(Z[:, 1])
 
+        # Crypto Calculation
         a_c = c_skew[y]
         raw_c = skewnorm.ppf(U_crypto, a_c)
         delta_c = a_c / np.sqrt(1 + a_c**2)
         mean_sn_c = np.sqrt(2/np.pi) * delta_c
         var_sn_c = 1 - (2 * delta_c**2 / np.pi)
         z_standard_c = (raw_c - mean_sn_c) / np.sqrt(var_sn_c)
-        mu_log_c = np.log(1 + c_cagr[y])
-        # Skew-Normal Standardized MGF correction
-        # For SN(0, 1, a), E[exp(sZ)] = 2 * exp(s^2/2) * Phi(delta * s)
-        # We need E[exp(vol * Z_std)] where Z_std is (Y - mean)/sqrt(var)
-        # Simplified approximation for negative skew: subtract slightly more than 0.5*vol^2
-        # to ensure the realized geometric mean matches the target CAGR.
-        returns_crypto[:, y] = mu_log_c - 0.5 * c_vol[y]**2 + c_vol[y] * z_standard_c
 
+        # Standard Geometric Drift: ensures median path follows CAGR
+        mu_log_c = np.log(1 + c_cagr[y])
+        returns_crypto[:, y] = mu_log_c + c_vol[y] * z_standard_c
+
+        # Stocks Calculation
         a_s = s_skew[y]
         raw_s = skewnorm.ppf(U_stocks, a_s)
         delta_s = a_s / np.sqrt(1 + a_s**2)
@@ -833,7 +956,7 @@ def generate_market_data(num_sims, years, configs):
         z_standard_s = (raw_s - mean_sn_s) / np.sqrt(var_sn_s)
         
         mu_log_s = np.log(1 + s_cagr[y])
-        returns_stocks[:, y] = mu_log_s - 0.5 * s_vol[y]**2 + s_vol[y] * z_standard_s
+        returns_stocks[:, y] = mu_log_s + s_vol[y] * z_standard_s
 
     return returns_crypto, returns_stocks
 
@@ -862,14 +985,17 @@ def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
     
     target_annual = configs.get('TARGET_ANNUAL_EXP', 60_000.0)
     
-    INITIAL_FLOOR_AMOUNT = target_annual
-    INITIAL_CEILING_Y1_Y10 = target_annual * 1.5 if target_annual > 0 else 1e15
-    INITIAL_CEILING_Y11_Y50 = target_annual * 2.0 if target_annual > 0 else 1e15
+    floor_mult = configs.get('FLOOR_MULT', 1.0)
+    ceiling_early_mult = configs.get('CEILING_EARLY', 1.5)
+    ceiling_late_mult = configs.get('CEILING_LATE', 2.0)
 
-    inflation = np.maximum(
-        np.random.normal(infl_mean, infl_vol, size=(num_sims, years)),
-        0.0
-    )
+    INITIAL_FLOOR_AMOUNT = target_annual * floor_mult
+    INITIAL_CEILING_Y1_Y10 = target_annual * ceiling_early_mult if target_annual > 0 else 1e15
+    INITIAL_CEILING_Y11_Y50 = target_annual * ceiling_late_mult if target_annual > 0 else 1e15
+
+    # Refined Inflation: Allow deflation (standard economic model) 
+    # to maintain the exact Mean requested by user.
+    inflation = np.random.normal(infl_mean, infl_vol, size=(num_sims, years))
 
     portfolio = np.full(num_sims, invested_amount)
     cash = np.full(num_sims, cash_buffer)
@@ -897,8 +1023,10 @@ def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
 
     for y in range(years):
         if y == 10:
-            current_ceiling *= 1.3333 
-
+            # Shift from Early Ceiling to Late Ceiling
+            # Calculate the ratio increase relative to target
+            target_ceiling_late = INITIAL_CEILING_Y11_Y50 
+            current_ceiling = np.full(num_sims, target_ceiling_late) * (current_ceiling / INITIAL_CEILING_Y1_Y10)
         withdrawal_amount = np.minimum(np.maximum(current_target_real, current_floor), current_ceiling)
         growth_factor = 1 + r_port_arith[:, y]
         portfolio_after_growth = portfolio * growth_factor
@@ -973,27 +1101,37 @@ def run_full_simulation(args):
             'FORCE_CRASH': js.document.getElementById("chk-force-start-crash").checked,
             'CRASH_DURATION': int(js.document.getElementById("inp-crash-duration").value),
             'TARGET_ANNUAL_EXP': float(js.document.getElementById("inp-target-annual").value),
+            
+            'FLOOR_MULT': float(js.document.getElementById("inp-floor-mult").value),
+            'CEILING_EARLY': float(js.document.getElementById("inp-ceiling-early").value),
+            'CEILING_LATE': float(js.document.getElementById("inp-ceiling-late").value),
         }
 
         js.update_status(f"Simulating {num_sims} Scenarios...", "text-gold-600")
         log_r_c, log_r_s = generate_market_data(num_sims, years, configs)
 
-        js.update_status("Calculating Safe Rate...", "text-purple-500")
+        js.update_status("Calculating Risk Profiles...", "text-purple-500")
         sh_configs = configs.copy()
         sh_configs['INVESTED_AMOUNT'] = 1_000_000.0
         sh_configs['CASH_BUFFER'] = 0.0
         sh_configs['TARGET_ANNUAL_EXP'] = 0.0 
         
-        low, high = 0.001, 0.20
-        best_market_swr = 0.001
-        for i in range(15):
-            mid = (low + high) / 2
-            rate, _ = simulate_portfolio(mid, log_r_c, log_r_s, sh_configs)
-            if rate >= target_success:
-                best_market_swr = mid
-                low = mid
-            else:
-                high = mid
+        def find_swr(target_odds):
+            low, high = 0.001, 0.20
+            best_r = 0.001
+            for i in range(15):
+                mid = (low + high) / 2
+                rate, _ = simulate_portfolio(mid, log_r_c, log_r_s, sh_configs)
+                if rate >= target_odds:
+                    best_r = mid
+                    low = mid
+                else:
+                    high = mid
+            return best_r
+
+        best_market_swr = find_swr(target_success)
+        swr_99 = find_swr(0.99)
+        swr_90 = find_swr(0.90)
 
         js.update_status("Final Verification...", "text-indigo-500")
         final_succ, final_total_vals = simulate_portfolio(-1, log_r_c, log_r_s, configs)
@@ -1006,9 +1144,10 @@ def run_full_simulation(args):
         js.console.log(f"Diagnostics: Realized CAGR Avg={avg_realized_cagr:.4f}")
         
         # 6. Update UI Results
-        js.document.getElementById("res-swr-val").innerText = f"{best_market_swr*100:.2f} %"
-        js.document.getElementById("res-success-val").innerText = f"{final_succ*100:.1f} %"
-        js.document.getElementById("res-target-disp").innerText = f"{target_success*100:.0f}%"
+        js.document.getElementById("res-swr-val").innerText = f"{best_market_swr*100:.2f}%"
+        js.document.getElementById("res-success-val").innerText = f"{final_succ*100:.1f}%"
+        js.document.getElementById("res-target-disp-desc").innerText = f"Optimal for {target_success*100:.0f}% survival odds"
+        js.document.getElementById("res-target-ptr").innerText = f"{target_success*100:.0f}"
         js.document.getElementById("res-success-bar").style.width = f"{final_succ*100}%"
         
         median_wealth = np.median(final_total_vals)
@@ -1022,13 +1161,26 @@ def run_full_simulation(args):
         
         js.document.getElementById("res-required-capital").innerText = f"{req_capital/1e6:.2f} M €"
         
-        # The main card now shows the SAFE monthly budget for the CURRENT capital
+        # Safe monthly based on Current Capital vs Target profiles
+        target_monthly = configs['TARGET_ANNUAL_EXP'] / 12
         safe_monthly = (initial_total * best_market_swr) / 12
-        js.document.getElementById("res-safe-monthly").innerText = f"{safe_monthly:,.0f} €"
+        m_99 = (initial_total * swr_99) / 12
+        m_90 = (initial_total * swr_90) / 12
         
-        # Update extra labels
-        js.document.getElementById("lbl-shortfall").innerText = f"Shortfall: {shortfall/1e6:.2f} M €"
-        js.document.getElementById("lbl-target-monthly").innerText = f"Target: {configs['TARGET_ANNUAL_EXP']/12:,.0f} €/mo"
+        peak_monthly = target_monthly * configs.get('CEILING_LATE', 2.0)
+        # If target lifestyle is higher than possible, peak is based on target
+        # If target lifestyle is 0, peak is based on safe
+        if target_monthly == 0: peak_monthly = safe_monthly
+
+        js.document.getElementById("res-safe-monthly").innerText = f"{safe_monthly:,.0f} €"
+        js.document.getElementById("res-safe-99").innerText = f"{m_99:,.0f} €"
+        js.document.getElementById("res-safe-90").innerText = f"{m_90:,.0f} €"
+        js.document.getElementById("res-max-monthly").innerText = f"{peak_monthly:,.0f}"
+        
+        # Update labels
+        goal_text = "Goal Reached" if shortfall <= 0 else f"Goal distance: {shortfall/1e6:.2f} M €"
+        js.document.getElementById("lbl-shortfall").innerText = goal_text
+        js.document.getElementById("lbl-target-monthly").innerText = f"{target_monthly:,.0f} €"
 
         # 7. Render Charts
         js.update_status("Rendering Analysis...", "text-blue-500")
@@ -1093,19 +1245,29 @@ def render_plot(total_final_values, years):
                 text: 'How long do you want to plan for? 50-60 years covers a long retirement.'
             },
             {
-                id: 'inp-buffer',
-                title: 'Cash Buffer',
-                text: 'Cash set aside for emergencies. This is kept separate from your invested wealth.'
-            },
-            {
                 id: 'inp-initial',
                 title: 'Invested Capital',
                 text: 'Your current starting portfolio value. If this is 0, we can still calculate how much you NEED to have.'
             },
             {
+                id: 'inp-buffer',
+                title: 'Cash Buffer',
+                text: 'Cash set aside for emergencies. This is kept separate from your invested wealth.'
+            },
+            {
                 id: 'inp-target-annual',
                 title: 'Desired Lifestyle',
                 text: 'How much do you want to spend annually? We use this to calculate your Required Capital goal.'
+            },
+            {
+                id: 'inp-floor-mult',
+                title: 'Guardrails: Floor',
+                text: 'Your lifestyle safety net. 1.0 means you always withdraw at least 100% of your target budget.'
+            },
+            {
+                id: 'inp-ceiling-early',
+                title: 'Guardrails: Ceiling',
+                text: 'Limits "lifestyle creep". During boom markets, we cap withdrawals (e.g., 1.5x) to preserve wealth.'
             },
             {
                 id: 'inp-alloc-crypto-pct',
@@ -1162,6 +1324,10 @@ def render_plot(total_final_values, years):
 
             // Handle Panels opening
             if (step.parent === 'pnl-advanced') {
+                const panel = document.getElementById('pnl-advanced');
+                if (!panel.classList.contains('open')) toggleAdvanced();
+            }
+            if (step.trigger === 'advanced') {
                 const panel = document.getElementById('pnl-advanced');
                 if (!panel.classList.contains('open')) toggleAdvanced();
             }
