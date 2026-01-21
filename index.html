@@ -941,6 +941,7 @@ def run_full_simulation(args):
             setTimeout(async () => {
                 try {
                     await pyodide.runPythonAsync(`run_full_simulation(None)`);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 } catch (err) {
                     console.error(err);
                     update_status("Runtime Error", "text-red-600");
