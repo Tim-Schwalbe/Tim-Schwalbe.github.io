@@ -1,221 +1,961 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TiefConnect GmbH - Ihr Partner für Glasfaser- und Tiefbau-Lösungen</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>SWR Wealth Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fbf8f2',
+                            100: '#f5efe0',
+                            200: '#eadbb9',
+                            300: '#dec08a',
+                            400: '#d1a357',
+                            500: '#b8873b', /* Main Gold */
+                            600: '#9d6b2f',
+                            700: '#7e5228',
+                            800: '#684326',
+                            900: '#563822',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #fbf8f2;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #dec08a;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b8873b;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f5efe0;
+            border-top: 3px solid #b8873b;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* HIDE SCROLLBAR FOR SIDEBAR */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Expansion Panel Animation */
+        .advanced-panel {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .advanced-panel.open {
+            max-height: 2000px;
+            /* Arbitrary large height */
+            opacity: 1;
+        }
+    </style>
 </head>
-<body>
-    <nav>
-        <div class="nav-container">
-            <div class="nav-header">
-                <span>TiefConnect GmbH</span>
-            </div>
-            <button class="hamburger" aria-label="Menü öffnen/schließen">☰</button>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#services">Leistungen</a></li>
-                <li><a href="#why-us">Warum wir?</a></li>
-                <li><a href="#about">Über Uns</a></li>
-                <li><a href="#contact">Kontakt</a></li>
-                <li><a href="#impressum">Impressum</a></li>
-            </ul>
-        </div>
-    </nav>
 
-    <section id="home">
-        <div class="content">
-            <img src="img/image_1.jpg" alt="Glasfaserausbau Baustelle">
-            <div class="text">
-                <h1>Willkommen bei TiefConnect GmbH</h1>
-                <h2>Ihr Partner für Glasfaser- und Tiefbau-Lösungen</h2>
-                <p>Wir sind ein innovatives und digitalisiertes Unternehmen, spezialisiert auf die Planung, Realisierung und Wartung von Glasfaser-Netzwerken und Tiefbauprojekten. Unser Ziel ist es, schnelle, zuverlässige und zukunftssichere Internet- und Kommunikationslösungen bereitzustellen – für Privatkunden, Unternehmen und öffentliche Einrichtungen.</p>
+<body class="bg-gold-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gold-200 px-6 py-4 shadow-sm flex-none z-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Simple Logo Icon -->
+                <div
+                    class="w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center text-white font-serif font-bold text-lg shadow-md">
+                    S</div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
+                    Wealth<span class="text-gold-500">Guard</span> Simulator
+                </h1>
+            </div>
+
+            <div id="status-indicator"
+                class="flex items-center gap-2 text-sm text-gold-600 bg-gold-100 px-3 py-1.5 rounded-full border border-gold-200">
+                <div class="loading-spinner"></div>
+                <span class="font-medium">Initializing Engine...</span>
             </div>
         </div>
-    </section>
+    </header>
 
-    <section id="services">
-        <div class="content">
-            <div class="text" style="grid-column: 1 / -1;">
-                <h1>Unsere Leistungen</h1>
-            </div>
-            <div class="service-item">
-                <div class="text-content">
-                    <h2>Glasfaser-Verlegung</h2>
-                    <p>Wir sorgen für eine leistungsstarke und stabile Internetanbindung, indem wir Glasfaserkabel fachgerecht und effizient für Privat- und Geschäftskunden verlegen.</p>
-                </div>
-                <img src="img/image_1.jpg" alt="Glasfaser-Verlegung">
-            </div>
-            <div class="service-item">
-                <div class="text-content">
-                    <h2>Tiefbauarbeiten</h2>
-                    <p>Unsere Experten führen alle erforderlichen Tiefbauarbeiten durch – von der Trassenplanung bis zur Verlegung von Leitungen für Glasfaser- und Kommunikationsnetze.</p>
-                </div>
-                <img src="img/image_2.jpg" alt="Tiefbauarbeiten">
-            </div>
-            <div class="service-item">
-                <div class="text-content">
-                    <h2>Planung & Umsetzung</h2>
-                    <p>Mit modernster Technologie wie BIM (Building Information Modeling) und GIS (Geographic Information System) planen und realisieren wir unsere Projekte präzise, effizient und ressourcenschonend.</p>
-                </div>
-                <img src="img/image_3.jpg" alt="Digitalisierte Planung & Umsetzung">
-            </div>
-            <div class="service-item">
-                <div class="text-content">
-                    <h2>Wartung & Reparatur</h2>
-                    <p>Wir übernehmen die regelmäßige Wartung und schnelle Reparatur von Glasfaserinfrastrukturen, um eine dauerhafte Stabilität und Leistungsfähigkeit zu gewährleisten.</p>
-                </div>
-                <img src="img/image_4.jpg" alt="Wartung & Reparatur">
-            </div>
-            <div class="text" style="grid-column: 1 / -1;">
-                <h2>Voraussetzungen für das Verlegen von Glasfaser</h2>
-                <p>Das Verlegen von Glasfaser erfordert einige wichtige Voraussetzungen, sowohl in technischer als auch in administrativer Hinsicht. Hier sind die wichtigsten Punkte, die du beachten solltest.</p>
-                <div class="requirements-grid">
-                    <div class="requirement-item">
-                        <div class="requirement-text">
-                            <h3>1. Genehmigungen und Vorschriften</h3>
-                            <ul>
-                                <li><strong>Baugenehmigungen</strong>: In vielen Regionen benötigst du eine Genehmigung, bevor du Glasfaserleitungen verlegen darfst, insbesondere wenn sie auf öffentlichem Grund oder in öffentlichen Straßen verlegt werden müssen.</li>
-                                <li><strong>Bauordnung</strong>: Je nach Land und Region können spezifische bauliche Vorschriften für das Verlegen von Glasfaserleitungen gelten, die du einhalten musst.</li>
-                            </ul>
+    <div class="flex-1 flex">
+
+        <!-- Sidebar: Configuration -->
+        <aside class="w-[420px] flex-none bg-white border-r border-gold-200 z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+            <div class="p-6 space-y-8">
+
+                <!-- Section 1: Portfolio -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 pb-2 border-b border-gold-100">
+                        <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Portfolio Setup</h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Horizon
+                                (Years)</label>
+                            <input type="number" id="inp-years" value="60"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition shadow-sm">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Cash Buffer</label>
+                            <input type="number" id="inp-buffer" value="100000"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition shadow-sm">
                         </div>
                     </div>
-                    <div class="requirement-item">
-                        <div class="requirement-text">
-                            <h3>2. Technische Voraussetzungen</h3>
-                            <ul>
-                                <li><strong>Passende Glasfaserkabel</strong>: Es gibt verschiedene Arten von Glasfaserkabeln, wie Singlemode oder Multimode, die jeweils unterschiedliche Anforderungen an den Installationsprozess stellen. Die Wahl des richtigen Kabeltyps hängt vom Verwendungszweck ab.</li>
-                                <li><strong>Zugangsstellen</strong>: Du musst sicherstellen, dass es an deinem Gebäude geeignete Zugangspunkte gibt, wie z. B. einen Hausanschlussraum oder eine Technikzentrale, um die Glasfaser ordnungsgemäß ins Gebäude zu führen.</li>
-                                <li><strong>Verkabelungstechnik</strong>: Die Verkabelung muss sachgemäß erfolgen, um Signalverluste zu minimieren und die Qualität der Verbindung sicherzustellen. Glasfaserkabel müssen in speziellen Kanälen oder Rohrsystemen verlegt werden, um sie vor äußeren Einflüssen zu schützen.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="requirement-item">
-                        <div class="requirement-text">
-                            <h3>3. Verfügbarkeit des Glasfasernetzes</h3>
-                            <ul>
-                                <li><strong>Zugang zum Glasfasernetz</strong>: In vielen Fällen musst du sicherstellen, dass in deiner Region oder deinem Wohngebiet Glasfaserkabel bereits verlegt sind oder das Glasfasernetz verfügbar ist. Wenn nicht, kann es notwendig sein, einen Anbieter zu kontaktieren, um die Infrastruktur zu erweitern.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="requirement-item">
-                        <div class="requirement-text">
-                            <h3>4. Koordination mit dem Anbieter</h3>
-                            <ul>
-                                <li><strong>Anbieterwahl</strong>: Du solltest klären, welcher Internetanbieter Glasfaseranschlüsse in deinem Gebiet anbietet und welche Tarife oder Verträge verfügbar sind.</li>
-                                <li><strong>Installation durch Fachleute</strong>: Das Verlegen von Glasfaser kann spezielle Fachkenntnisse erfordern. Die Installation sollte daher oft von professionellen Technikern oder spezialisierten Firmen durchgeführt werden, um Fehler zu vermeiden und sicherzustellen, dass die Installation ordnungsgemäß erfolgt.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="requirement-item">
-                        <div class="requirement-text">
-                            <h3>5. Kosten</h3>
-                            <ul>
-                                <li><strong>Kosten für Material und Installation</strong>: Glasfaserinstallationen können mit hohen Kosten verbunden sein, insbesondere wenn die Infrastruktur noch nicht vorhanden ist und extra verlegt werden muss.</li>
-                                <li><strong>Fördermöglichkeiten</strong>: In einigen Regionen gibt es Förderprogramme oder Zuschüsse, die bei den Kosten für die Glasfaserinstallation unterstützen können. Informiere dich über solche Programme, um mögliche Einsparungen zu erzielen.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="requirement-item">
-                        <div class="requirement-text">
-                            <h3>6. Zukunftssicherheit und Kapazität</h3>
-                            <ul>
-                                <li><strong>Skalierbarkeit</strong>: Wenn du Glasfaser verlegst, achte darauf, dass das System auch zukünftige Anforderungen abdecken kann, z. B. durch ausreichend Bandbreite und mögliche Erweiterungen.</li>
-                            </ul>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Invested Amount
+                            (€)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-slate-400">€</span>
+                            <input type="number" id="inp-initial" value="6000000"
+                                class="w-full pl-7 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition shadow-sm font-medium">
                         </div>
                     </div>
                 </div>
-                <p>Je nachdem, ob du als Privatperson oder als Unternehmen Glasfaser verlegen möchtest, können die Anforderungen variieren. Es lohnt sich, sich frühzeitig mit den zuständigen Behörden oder Dienstleistern in Verbindung zu setzen, um eine reibungslose Installation sicherzustellen.</p>
-            </div>
-        </div>
-    </section>
 
-    <section id="why-us">
-        <div class="content">
-            <img src="img/image_4.jpg" alt="Warum TiefConnect GmbH">
-            <div class="text">
-                <h1>Warum wir?</h1>
-                <ul>
-                    <li>Schnelle & stabile Verbindungen – Unsere Glasfaser-Netzwerke stehen für maximale Geschwindigkeit und Zuverlässigkeit.</li>
-                    <li>Innovative Technologien – Durch digitale Planungstools optimieren wir Arbeitsprozesse und steigern die Effizienz.</li>
-                    <li>Qualität & Sicherheit – Wir setzen auf höchste Standards und garantieren präzise, langlebige Lösungen.</li>
-                    <li>Kundenorientierte Lösungen – Individuelle Beratung und maßgeschneiderte Projekte stehen für uns an erster Stelle.</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+                <!-- Asset Allocation -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 pb-2 border-b border-gold-100">
+                        <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                        </svg>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Asset Allocation</h3>
+                    </div>
 
-    <section id="about">
-        <div class="content">
-            <img src="img/image_6.jpg" alt="TiefConnect GmbH Team">
-            <div class="text">
-                <h1>Über Uns</h1>
-                <h2>Unsere Philosophie</h2>
-                <p>Wir verstehen uns nicht nur als Dienstleister, sondern als Partner für die digitale Zukunft. Durch enge Zusammenarbeit mit unseren Kunden entwickeln wir maßgeschneiderte Lösungen, die langfristigen Mehrwert bieten.</p>
-            </div>
-        </div>
-    </section>
+                    <div class="bg-gold-50/50 rounded-xl p-4 border border-gold-100 space-y-6">
+                        <!-- Crypto Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="flex items-center gap-1 font-bold text-slate-700">
+                                    <span class="text-orange-500">●</span> Crypto (BTC)
+                                </span>
+                                <span id="lbl-crypto-pct" class="font-mono text-slate-600 font-bold">80%</span>
+                            </div>
+                            <input type="range"
+                                class="w-full accent-orange-500 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="80"
+                                oninput="updateAllocations('crypto')">
+                        </div>
 
-    <section id="contact">
-        <div class="content">
-            <img src="img/image_5.jpg" alt="Kontakt TiefConnect GmbH">
-            <div class="text">
-                <h1>Kontaktieren Sie uns</h1>
-                <p>Haben Sie Fragen oder wünschen eine persönliche Beratung? Wir freuen uns auf Ihre Anfrage!</p>
-                <p>📧 E-Mail: info@tiefconnect.de</p>
-                <p>📞 Telefon: +49 176 57651049</p>
-                <p>📍 Adresse: Herforderstr.195<br>32130 Enger</p>
-                <p>Wir sind Ihr Partner für leistungsstarke Glasfaser- und Tiefbaulösungen – lassen Sie uns gemeinsam die digitale Zukunft gestalten!</p>
-            </div>
-        </div>
-    </section>
+                        <!-- Stocks Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="flex items-center gap-1 font-bold text-slate-700">
+                                    <span class="text-blue-600">●</span> Stocks (ETF)
+                                </span>
+                                <span id="lbl-stocks-pct" class="font-mono text-slate-600 font-bold">20%</span>
+                            </div>
+                            <input type="range"
+                                class="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="20"
+                                oninput="updateAllocations('stocks')">
+                        </div>
+                    </div>
+                </div>
 
-    <section id="impressum">
-        <div class="content">
-            <div class="text">
-                <h1>Impressum</h1>
-                <h2>Angaben gemäß § 5 TMG</h2>
-                <p>
-                    TiefConnect GmbH<br>
-                    Herforderstr. 195<br>
-                    32130 Enger<br>
-                    Deutschland
-                </p>
-                <p>
-                    <strong>Vertreten durch:</strong><br>
-                    [Geschäftsführer nicht angegeben, bitte einfügen]<br>
-                </p>
-                <p>
-                    <strong>Kontakt:</strong><br>
-                    Telefon: +49 176 57651049<br>
-                    E-Mail: info@tiefconnect.de
-                </p>
-                <p>
-                    <strong>Registereintrag:</strong><br>
-                    Eintragung im Handelsregister<br>
-                    Registergericht: [Registergericht nicht angegeben, bitte einfügen]<br>
-                    Registernummer: [Registernummer nicht angegeben, bitte einfügen]
-                </p>
-                <p>
-                    <strong>Umsatzsteuer-ID:</strong><br>
-                    Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br>
-                    [Umsatzsteuer-ID nicht angegeben, bitte einfügen]
-                </p>
-                <p>
-                    <strong>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</strong><br>
-                    [Verantwortlicher nicht angegeben, bitte einfügen]<br>
-                    Herforderstr. 195<br>
-                    32130 Enger
-                </p>
-                <p>
-                    <strong>Haftungsausschluss:</strong><br>
-                    Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
-                </p>
-            </div>
-        </div>
-    </section>
+                <!-- Deep Tweak Section -->
+                <div class="space-y-4">
+                    <button onclick="toggleAdvanced()"
+                        class="w-full flex items-center justify-between text-xs font-bold text-gold-600 uppercase tracking-widest hover:text-gold-700 transition outline-none">
+                        <span>Advanced Market Assumptions</span>
+                        <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
 
-    <script src="js/scripts.js"></script>
+                    <div id="pnl-advanced" class="advanced-panel space-y-6">
+
+                        <!-- Stress Test Parameters (New) -->
+                        <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
+                            <p class="text-[10px] uppercase font-bold text-red-500 mb-2">Stress Test / Bad Years</p>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Max Consecutive Bad Years
+                                        (Limit)</label>
+                                    <input type="number" id="inp-max-bad-years" value="5"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                    <p class="text-[9px] text-slate-400 mt-0.5">Limits recovery logic after this many
+                                        down years.</p>
+                                </div>
+
+                                <div class="flex items-center gap-2 pt-1 border-t border-red-100/50">
+                                    <input type="checkbox" id="chk-force-start-crash"
+                                        class="w-3 h-3 accent-red-500 rounded border-gray-300 focus:ring-red-500">
+                                    <label for="chk-force-start-crash"
+                                        class="text-[10px] font-bold text-red-600 select-none cursor-pointer">Force
+                                        Crash at Start</label>
+                                </div>
+
+                                <div id="div-crash-config" class="hidden pl-5 space-y-2 border-l-2 border-red-100">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-1">Crash Duration
+                                            (Years)</label>
+                                        <input type="number" id="inp-crash-duration" value="3"
+                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                    </div>
+                                    <p class="text-[9px] text-red-400 italic">Forces returns to be negative for the
+                                        first N years.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inflation -->
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
+                                    <input type="number" step="0.001" id="inp-infl-mean" value="0.025"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
+                                    <input type="number" step="0.001" id="inp-infl-vol" value="0.015"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Correlation -->
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Asset Correlation</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
+                                    <input type="number" step="0.05" id="inp-corr-start" value="0.40"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
+                                    <input type="number" step="0.05" id="inp-corr-end" value="0.70"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Crypto Params -->
+                        <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
+                            <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                    <input type="number" step="0.01" id="inp-c-cagr-start" value="0.32"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                    <input type="number" step="0.01" id="inp-c-cagr-end" value="0.08"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                    <input type="number" step="0.01" id="inp-c-vol-start" value="0.40"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                    <input type="number" step="0.01" id="inp-c-vol-end" value="0.20"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stock Params -->
+                        <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                            <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                    <input type="number" step="0.01" id="inp-s-cagr-start" value="0.08"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                    <input type="number" step="0.01" id="inp-s-cagr-end" value="0.06"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                    <input type="number" step="0.01" id="inp-s-vol-start" value="0.18"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                    <input type="number" step="0.01" id="inp-s-vol-end" value="0.16"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sim Settings -->
+                <div class="space-y-4 pt-4 border-t border-gold-100">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Sim Data
+                                Points</label>
+                            <input type="number" id="inp-num-sims" value="1000"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Target
+                                Success</label>
+                            <input type="number" step="0.01" id="inp-target-success" value="0.95"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-gold-400 transition shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Button -->
+                <div class="pt-2 pb-6">
+                    <button id="btn-run" disabled onclick="runSimulation()"
+                        class="w-full bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-gold-200/50 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Run Simulation</span>
+                    </button>
+                    <p class="text-center text-[10px] text-slate-400 mt-2">Running python client-side (Pyodide)</p>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- Main Content: Results -->
+        <main class="flex-1 bg-slate-50 p-10 relative">
+
+            <!-- Welcome / Empty State -->
+            <div id="results-placeholder" class="text-center mt-32 opacity-40">
+                <div
+                    class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm border border-gold-100 mb-6">
+                    <svg class="w-10 h-10 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-serif text-slate-700 mb-2">Ready to Simulate</h2>
+                <p class="text-slate-500">Configure your portfolio parameters on the left to begin.</p>
+            </div>
+
+            <!-- Results Container (Hidden initially) -->
+            <div id="results-container" class="hidden space-y-8 max-w-6xl mx-auto animate-fade-in">
+
+                <!-- KPI Cards Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- Result Card 1 -->
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
+                        <div
+                            class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-gold-100 to-transparent rounded-full opacity-50">
+                        </div>
+                        <h3 class="text-gold-600 font-bold uppercase text-xs tracking-widest mb-1">Safe Withdrawal Rate
+                        </h3>
+
+                        <div class="mt-4 flex items-baseline gap-2 relative z-10">
+                            <span id="res-swr-val" class="text-5xl font-serif font-medium text-slate-900">--%</span>
+                        </div>
+                        <p class="text-sm text-slate-400 mt-2 font-medium">Variable Rate optimized for <span
+                                id="res-target-disp">--</span> success</p>
+                    </div>
+
+                    <!-- Result Card 2 -->
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
+                        <div
+                            class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-blue-50 to-transparent rounded-full opacity-50">
+                        </div>
+                        <h3 class="text-blue-500 font-bold uppercase text-xs tracking-widest mb-1">Success Probability
+                        </h3>
+
+                        <div class="mt-4 flex items-baseline gap-2 relative z-10">
+                            <span id="res-success-val" class="text-5xl font-serif font-medium text-slate-900">--%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-4">
+                            <div id="res-success-bar"
+                                class="bg-blue-500 h-1.5 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Result Card 3 -->
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative overflow-hidden">
+                        <div
+                            class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-purple-50 to-transparent rounded-full opacity-50">
+                        </div>
+                        <h3 class="text-purple-500 font-bold uppercase text-xs tracking-widest mb-1">Median End Wealth
+                        </h3>
+
+                        <div class="mt-4 flex items-baseline gap-2 relative z-10">
+                            <span id="res-median-end" class="text-4xl font-serif font-medium text-slate-900">-- €</span>
+                            <span class="text-sm text-slate-400">M</span>
+                        </div>
+                        <p class="text-sm text-slate-400 mt-2 font-medium">Expected outcome (50th percentile)</p>
+                    </div>
+                </div>
+
+                <!-- Secondary Stats -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div
+                        class="bg-white/60 rounded-xl p-5 border border-slate-200/60 flex flex-col items-center justify-center">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Initial Monthly
+                            Withdrawal (Median)</span>
+                        <div id="res-initial-monthly" class="text-2xl font-serif text-slate-700 mt-2">--</div>
+                    </div>
+                    <div
+                        class="bg-white/60 rounded-xl p-5 border border-slate-200/60 flex flex-col items-center justify-center">
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-widest">1% Worst Case End
+                            Wealth</span>
+                        <div id="res-worst-case" class="text-2xl font-serif text-slate-700 mt-2">--</div>
+                    </div>
+                </div>
+
+                <!-- Plot -->
+                <div class="bg-white rounded-2xl p-8 shadow-[0_4px_30px_rgba(0,0,0,0.04)] border border-slate-100">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-serif font-bold text-slate-800">Wealth Distribution Analysis</h3>
+                    </div>
+
+                    <!-- Chart Area -->
+                    <div id="plot-area"
+                        class="w-full flex justify-center items-center bg-slate-50 rounded-xl p-4 border border-slate-100 min-h-[300px]">
+                        <span class="text-slate-400 text-sm">Chart will render here...</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Python Logic  -->
+    <script type="text/python" id="py-logic">
+import js
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import skewnorm, norm
+import io
+import base64
+
+# ====================
+# HELPER FUNCTIONS
+# ====================
+
+def get_linear_path(start, end, steps):
+    return np.linspace(start, end, steps)
+
+def get_market_saturation_path(start, saturation, end, saturation_year, total_years):
+    if saturation_year >= total_years:
+        return get_linear_path(start, end, total_years)
+    path_fast = np.linspace(start, saturation, saturation_year + 1, endpoint=False)
+    path_slow = np.linspace(saturation, end, total_years - saturation_year)
+    return np.concatenate((path_fast, path_slow))
+
+# ====================
+# MARKET DATA GEN
+# ====================
+def generate_market_data(num_sims, years, configs):
+    # Unpack config
+    c_cagr_start = configs['C_CAGR_START']
+    c_cagr_end = configs['C_CAGR_END']
+    c_vol_start = configs['C_VOL_START']
+    c_vol_end = configs['C_VOL_END']
+    
+    s_cagr_start = configs['S_CAGR_START']
+    s_cagr_end = configs['S_CAGR_END']
+    s_vol_start = configs['S_VOL_START']
+    s_vol_end = configs['S_VOL_END']
+    
+    corr_start = configs.get('CORR_START', 0.40)
+    corr_end = configs.get('CORR_END', 0.70)
+
+    # Fixed / Derived Params 
+    c_skew_start = -0.8
+    c_skew_end = -0.2
+    s_skew_start = -0.4
+    s_skew_end = -0.3
+    
+    # Paths
+    corr_path = get_linear_path(corr_start, corr_end, years)
+    
+    # Crypto Saturation
+    c_cagr = get_market_saturation_path(c_cagr_start, 0.11, c_cagr_end, 15, years)
+    
+    c_vol  = get_linear_path(c_vol_start, c_vol_end, years)
+    c_skew = get_linear_path(c_skew_start, c_skew_end, years)
+
+    # Stocks
+    s_cagr = get_linear_path(s_cagr_start, s_cagr_end, years)
+    s_vol  = get_linear_path(s_vol_start, s_vol_end, years)
+    s_skew = get_linear_path(s_skew_start, s_skew_end, years)
+
+    log_returns_crypto = np.zeros((num_sims, years))
+    log_returns_stocks = np.zeros((num_sims, years))
+
+    for y in range(years):
+        rho = corr_path[y]
+        Z = np.random.multivariate_normal([0, 0], [[1, rho], [rho, 1]], num_sims)
+        U_crypto = norm.cdf(Z[:, 0])
+        U_stocks = norm.cdf(Z[:, 1])
+
+        # --- CRYPTO ---
+        a_c = c_skew[y]
+        raw_c = skewnorm.ppf(U_crypto, a_c)
+        delta_c = a_c / np.sqrt(1 + a_c**2)
+        mean_sn_c = np.sqrt(2/np.pi) * delta_c
+        var_sn_c = 1 - (2 * delta_c**2 / np.pi)
+        z_skew_c = (raw_c - mean_sn_c) / np.sqrt(var_sn_c)
+        mu_log_c = np.log(1 + c_cagr[y]) - 0.5 * c_vol[y]**2
+        log_returns_crypto[:, y] = mu_log_c + c_vol[y] * z_skew_c
+
+        # --- STOCKS ---
+        a_s = s_skew[y]
+        raw_s = skewnorm.ppf(U_stocks, a_s)
+        delta_s = a_s / np.sqrt(1 + a_s**2)
+        mean_sn_s = np.sqrt(2/np.pi) * delta_s
+        var_sn_s = 1 - (2 * delta_s**2 / np.pi)
+        z_skew_s = (raw_s - mean_sn_s) / np.sqrt(var_sn_s)
+        mu_log_s = np.log(1 + s_cagr[y]) - 0.5 * s_vol[y]**2
+        log_returns_stocks[:, y] = mu_log_s + s_vol[y] * z_skew_s
+
+    return log_returns_crypto, log_returns_stocks
+
+# ====================
+# SIMULATION CORE
+# ====================
+def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
+    num_sims = len(log_r_crypto)
+    years = len(log_r_crypto[0])
+    
+    invested_amount = configs['INVESTED_AMOUNT']
+    cash_buffer = configs['CASH_BUFFER']
+    alloc_crypto = configs['ALLOC_CRYPTO']
+    alloc_stocks = configs['ALLOC_STOCKS']
+    
+    infl_mean = configs.get('INFL_MEAN', 0.025)
+    infl_vol = configs.get('INFL_VOL', 0.015)
+    
+    # Stress Config
+    max_bad_years = configs.get('MAX_BAD_YEARS', 5)
+    force_crash = configs.get('FORCE_CRASH', False)
+    crash_duration = int(configs.get('CRASH_DURATION', 0))
+    
+    MAX_CONSECUTIVE_BAD_YEARS = max_bad_years
+    MAX_CASH_BUFFER = cash_buffer
+    CASH_REFILL_RATIO = 0.30
+    CASH_YIELD = 0.015
+    
+    INITIAL_FLOOR_AMOUNT = 60_000.0
+    INITIAL_CEILING_Y1_Y10 = 60_000.0
+    INITIAL_CEILING_Y11_Y50 = 100_000.0
+
+    inflation = np.maximum(
+        np.random.normal(infl_mean, infl_vol, size=(num_sims, years)),
+        0.0
+    )
+
+    portfolio = np.full(num_sims, invested_amount)
+    cash = np.full(num_sims, cash_buffer)
+    consecutive_bad_years = np.zeros(num_sims, dtype=int)
+
+    r_arith_crypto = np.exp(log_r_crypto) - 1
+    r_arith_stocks = np.exp(log_r_stocks) - 1
+    r_port_arith = r_arith_crypto * alloc_crypto + r_arith_stocks * alloc_stocks
+    
+    # FORCE CRASH LOGIC
+    if force_crash and crash_duration > 0:
+        # Force returns to be negative for the first N years
+        # Simple strategy: If return is positive, flip it to negative. 
+        # Or reduce it by a fixed amount? Flipping is a good "Reverse Mirror" test.
+        # But we want to preserve magnitude distribution roughly.
+        # Let's just ensure they are <= -0.05 (min crash)
+        
+        limit = min(years, crash_duration)
+        for y_c in range(limit):
+             # Ensure negative returns (bear market)
+             # If value > -0.05, subtract a penalty or flip sign? 
+             # Let's flip signs of positive returns and subtract 5% from everything to be mean
+             
+             # Current year returns
+             rets = r_port_arith[:, y_c]
+             
+             # Flip positives
+             mask_pos = rets > 0
+             rets[mask_pos] = -rets[mask_pos]
+             
+             # Ensure at least some pain (min -5% max -35% cap?)
+             # Let's just subtract 0.10 to ensure it's a "Crash"
+             # rets -= 0.10 
+             
+             # Simpler: Make sure it's at most -0.05
+             rets = np.minimum(rets, -0.05)
+             
+             r_port_arith[:, y_c] = rets
+
+
+    current_floor = np.full(num_sims, INITIAL_FLOOR_AMOUNT)
+    current_ceiling = np.full(num_sims, INITIAL_CEILING_Y1_Y10)
+
+    for y in range(years):
+        if y == 10:
+            ratio = INITIAL_CEILING_Y11_Y50 / INITIAL_CEILING_Y1_Y10
+            current_ceiling *= ratio
+
+        withdrawal_target = portfolio * withdrawal_rate_W
+        withdrawal_amount = np.minimum(np.maximum(withdrawal_target, current_floor), current_ceiling)
+
+        growth_factor = 1 + r_port_arith[:, y]
+        is_negative = r_port_arith[:, y] < 0
+        must_recover = (consecutive_bad_years >= MAX_CONSECUTIVE_BAD_YEARS) & is_negative
+        growth_factor[must_recover] = 1.0
+
+        consecutive_bad_years[is_negative] += 1
+        consecutive_bad_years[~is_negative] = 0
+
+        portfolio_after_growth = portfolio * growth_factor
+
+        # Cash logic
+        cash_draw = np.minimum(withdrawal_amount, cash)
+        portfolio_draw = withdrawal_amount - cash_draw
+        cash -= cash_draw
+        portfolio_after_growth -= portfolio_draw
+
+        # Refill
+        positive_mask = (growth_factor > 1.0)
+        gain = np.maximum(portfolio_after_growth - portfolio, 0)
+        refill_amount = gain * CASH_REFILL_RATIO
+        refill_amount = np.minimum(refill_amount, MAX_CASH_BUFFER - cash)
+
+        cash[positive_mask] += refill_amount[positive_mask]
+        portfolio_after_growth[positive_mask] -= refill_amount[positive_mask]
+        cash *= (1 + CASH_YIELD)
+        portfolio = np.maximum(portfolio_after_growth, 0)
+        cash = np.maximum(cash, 0)
+        
+        if y < years - 1:
+            infl = 1 + inflation[:, y+1]
+            current_floor *= infl
+            current_ceiling *= infl
+
+    total_final = portfolio + cash
+    success_rate = np.mean(total_final > 0)
+    return success_rate, total_final
+
+# ====================
+# EXPORTED FUNCTION
+# ====================
+def run_full_simulation(args):
+    try:
+        years = int(js.document.getElementById("inp-years").value)
+        initial_amount = float(js.document.getElementById("inp-initial").value)
+        buffer = float(js.document.getElementById("inp-buffer").value)
+        
+        # Read PERCENTAGES (0-100) and convert to decimal (0.0-1.0)
+        alloc_crypto = float(js.document.getElementById("inp-alloc-crypto-pct").value) / 100.0
+        alloc_stocks = float(js.document.getElementById("inp-alloc-stocks-pct").value) / 100.0
+        
+        num_sims = int(js.document.getElementById("inp-num-sims").value)
+        target_success = float(js.document.getElementById("inp-target-success").value)
+        
+        configs = {
+            'YEARS': years,
+            'INITIAL_AMOUNT': initial_amount,
+            'CASH_BUFFER': buffer,
+            'INVESTED_AMOUNT': initial_amount - buffer,
+            'ALLOC_CRYPTO': alloc_crypto,
+            'ALLOC_STOCKS': alloc_stocks,
+            
+            # Detailed Params
+            'INFL_MEAN': float(js.document.getElementById("inp-infl-mean").value),
+            'INFL_VOL': float(js.document.getElementById("inp-infl-vol").value),
+            
+            'CORR_START': float(js.document.getElementById("inp-corr-start").value),
+            'CORR_END': float(js.document.getElementById("inp-corr-end").value),
+            
+            'C_CAGR_START': float(js.document.getElementById("inp-c-cagr-start").value),
+            'C_CAGR_END': float(js.document.getElementById("inp-c-cagr-end").value),
+            'C_VOL_START': float(js.document.getElementById("inp-c-vol-start").value),
+            'C_VOL_END': float(js.document.getElementById("inp-c-vol-end").value),
+            'S_CAGR_START': float(js.document.getElementById("inp-s-cagr-start").value),
+            'S_CAGR_END': float(js.document.getElementById("inp-s-cagr-end").value),
+            'S_VOL_START': float(js.document.getElementById("inp-s-vol-start").value),
+            'S_VOL_END': float(js.document.getElementById("inp-s-vol-end").value),
+            
+            # Stress Test
+            'MAX_BAD_YEARS': int(js.document.getElementById("inp-max-bad-years").value),
+            'FORCE_CRASH': js.document.getElementById("chk-force-start-crash").checked,
+            'CRASH_DURATION': int(js.document.getElementById("inp-crash-duration").value),
+        }
+
+        js.update_status(f"Simulating {num_sims} Scenarios...", "text-gold-600")
+        
+        log_r_c, log_r_s = generate_market_data(num_sims, years, configs)
+
+        js.update_status("Optimizing...", "text-purple-500")
+        
+        low, high = 0.01, 0.10
+        best_swr = 0.0
+        final_vals = None
+        
+        for i in range(12):
+            mid = (low + high) / 2
+            rate, totals = simulate_portfolio(mid, log_r_c, log_r_s, configs)
+            if rate >= target_success:
+                best_swr = mid
+                low = mid
+                final_vals = totals
+            else:
+                high = mid
+                if final_vals is None: final_vals = totals
+
+        if final_vals is None:
+             best_swr = 0.01
+             _, final_vals = simulate_portfolio(best_swr, log_r_c, log_r_s, configs)
+             
+        final_succ, final_total_vals = simulate_portfolio(best_swr, log_r_c, log_r_s, configs)
+        
+        # Update UI
+        js.document.getElementById("res-swr-val").innerText = f"{best_swr*100:.2f} %"
+        js.document.getElementById("res-success-val").innerText = f"{final_succ*100:.1f} %"
+        js.document.getElementById("res-target-disp").innerText = f"{target_success*100:.0f}%"
+        js.document.getElementById("res-success-bar").style.width = f"{final_succ*100}%"
+        
+        median_wealth = np.median(final_total_vals)
+        js.document.getElementById("res-median-end").innerText = f"{median_wealth/1e6:.2f}"
+        
+        worst_case = np.percentile(final_total_vals, 1)
+        js.document.getElementById("res-worst-case").innerText = f"{worst_case/1e6:.2f} M €"
+        
+        initial_wd = configs['INVESTED_AMOUNT'] * best_swr
+        js.document.getElementById("res-initial-monthly").innerText = f"{initial_wd/12:,.0f} €"
+
+        # Chart
+        js.update_status("Rendering Charts...", "text-blue-500")
+        
+        plt.clf()
+        plt.style.use('default') 
+        fig = plt.figure(figsize=(10, 5))
+        fig.patch.set_facecolor('#f8fafc') 
+        ax = plt.gca()
+        ax.set_facecolor('white')
+        
+        plot_data = final_total_vals[final_total_vals < 100_000_000] / 1e6
+        plt.hist(plot_data, bins=50, density=True, color='#b8873b', alpha=0.8, edgecolor='#7e5228')
+        plt.axvline(0, color='#ef4444', linewidth=2, linestyle='--', label='Bankruptcy')
+        
+        plt.title(f"Wealth Distribution (End of {years} Years)", fontsize=12, pad=15)
+        plt.xlabel("Total Wealth (Million €)", fontsize=10)
+        plt.ylabel("Probability Density", fontsize=10)
+        plt.grid(True, alpha=0.1, color='black', linestyle='-')
+        
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_color('#cbd5e1')
+        ax.spines['bottom'].set_color('#cbd5e1')
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight', facecolor=fig.get_facecolor())
+        buf.seek(0)
+        img_str = base64.b64encode(buf.read()).decode('utf-8')
+        
+        img_html = f'<img src="data:image/png;base64,{img_str}" class="max-w-full h-auto rounded-lg shadow-sm" />'
+        js.document.getElementById("plot-area").innerHTML = img_html
+        
+        js.document.getElementById("results-placeholder").classList.add("hidden")
+        js.document.getElementById("results-container").classList.remove("hidden")
+        
+        js.update_status("Simulation Complete", "text-green-600")
+
+    except Exception as e:
+        js.console.error(str(e))
+        js.update_status(f"Error: {str(e)}", "text-red-500")
+    </script>
+
+    <!-- JS Config -->
+    <script>
+        const statusEl = document.getElementById("status-indicator");
+        const btnRun = document.getElementById("btn-run");
+        let pyodide = null;
+
+        // --- ASSET ALLOCATION LOGIC ---
+        function updateAllocations(source) {
+            const cryptoEl = document.getElementById('inp-alloc-crypto-pct');
+            const stocksEl = document.getElementById('inp-alloc-stocks-pct');
+            const lblCrypto = document.getElementById('lbl-crypto-pct');
+            const lblStocks = document.getElementById('lbl-stocks-pct');
+
+            let cryptoVal = parseInt(cryptoEl.value);
+            let stocksVal = parseInt(stocksEl.value);
+
+            if (source === 'crypto') {
+                stocksVal = 100 - cryptoVal;
+                stocksEl.value = stocksVal;
+            } else {
+                cryptoVal = 100 - stocksVal;
+                cryptoEl.value = cryptoVal;
+            }
+
+            lblCrypto.innerText = cryptoVal + "%";
+            lblStocks.innerText = stocksVal + "%";
+        }
+
+        // --- TOGGLE ADVANCED ---
+        function toggleAdvanced() {
+            const panel = document.getElementById('pnl-advanced');
+            const icon = document.getElementById('icon-advanced');
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // --- CRASH CONFIG TOGGLE ---
+        document.getElementById('chk-force-start-crash').addEventListener('change', (e) => {
+            const div = document.getElementById('div-crash-config');
+            if (e.target.checked) {
+                div.classList.remove('hidden');
+            } else {
+                div.classList.add('hidden');
+            }
+        });
+
+        async function main() {
+            try {
+                pyodide = await loadPyodide();
+                await pyodide.loadPackage(["numpy", "scipy", "matplotlib"]);
+
+                const pyCode = document.getElementById("py-logic").innerText;
+                await pyodide.runPythonAsync(pyCode);
+
+                update_status("Engine Ready", "text-gold-700");
+                btnRun.disabled = false;
+
+            } catch (err) {
+                console.error(err);
+                update_status("Failed to load engine", "text-red-500");
+            }
+        }
+
+        window.update_status = function (msg, colorClass) {
+            statusEl.innerHTML = `<span class="${colorClass}">${msg}</span>`;
+        }
+
+        async function runSimulation() {
+            if (!pyodide) return;
+            btnRun.disabled = true;
+            btnRun.innerHTML = '<div class="loading-spinner w-4 h-4 border-white/30 border-t-white"></div><span>Simulating...</span>';
+
+            setTimeout(async () => {
+                try {
+                    await pyodide.runPythonAsync(`run_full_simulation(None)`);
+                } catch (err) {
+                    console.error(err);
+                    update_status("Runtime Error", "text-red-600");
+                } finally {
+                    btnRun.disabled = false;
+                    btnRun.innerHTML = `
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Run Simulation</span>
+                    `;
+                }
+            }, 100);
+        }
+
+        main();
+    </script>
 </body>
+
 </html>
