@@ -205,17 +205,56 @@
             margin-bottom: 2rem;
         }
 
-        #rocket-anim {
-            font-size: 4rem;
+        .rocket {
+            font-size: 2.5rem;
             position: absolute;
-            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+            bottom: -50px;
             opacity: 0;
-            transform: translateY(100px);
+            transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+            z-index: 10000;
         }
 
-        #rocket-anim.launch {
+        .rocket.launch {
             opacity: 1;
-            transform: translateY(-200vh);
+            transform: translateY(-120vh) rotate(-10deg);
+        }
+
+        .moon {
+            position: absolute;
+            top: 10%;
+            right: 15%;
+            width: 150px;
+            height: 150px;
+            background: url('img/moon.png') no-repeat center center;
+            background-size: 135%;
+            /* Zoom in to hide checkerboard edges */
+            /* box-shadow: 0 0 60px rgba(255, 255, 255, 0.3); Optional subtle glow */
+            opacity: 0.9;
+            z-index: 1;
+            border-radius: 50%;
+            /* Clips fake transparent corners if present */
+        }
+
+        .btc-logo {
+            width: 120px;
+            height: 120px;
+            z-index: 2;
+            filter: drop-shadow(0 0 20px rgba(247, 147, 26, 0.5));
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
         }
 
         .loading-text {
@@ -231,10 +270,8 @@
 
     <!-- Loading Overlay -->
     <div id="loading-overlay">
-        <div class="loader-spinner" id="main-spinner"></div>
-        <div id="rocket-anim">🚀</div>
-        <div class="loading-text" id="main-loading-text">Initializing WealthGuard Engine...</div>
-        <div class="mt-4 text-white/70 text-sm font-medium">Connecting Javascript Engine...</div>
+        <div class="moon"></div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" class="btc-logo" alt="Bitcoin Logo">
     </div>
 
     <!-- Header -->
@@ -445,18 +482,19 @@
                     </div>
 
                     <div class="bg-gold-50/50 rounded-xl p-4 border border-gold-100 space-y-6">
-                        <!-- Bonds (Calculated) -->
+                        <!-- Bonds Slider -->
                         <div class="pb-2 border-b border-white/50">
-                            <div class="flex justify-between text-xs mb-1">
+                            <div class="flex justify-between text-xs mb-2">
                                 <span class="flex items-center gap-1 font-bold text-slate-700">
-                                    <span class="text-green-600">●</span> Bonds / Cash
+                                    <span class="text-green-600">●</span> Bonds (FI)
                                 </span>
                                 <span id="lbl-bonds-pct" class="font-mono text-green-600 font-bold">50%</span>
                             </div>
-                            <div class="w-full h-1.5 bg-slate-200 rounded-lg overflow-hidden">
-                                <div class="h-full bg-green-200 w-full"></div>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mt-1">Remainder of portfolio (Safe Bucket)</p>
+                            <input type="range"
+                                class="w-full accent-green-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-bonds-pct" value="50"
+                                oninput="updateAllocations('bonds')">
+                            <p class="text-[10px] text-slate-400 mt-1">Fixed income & capital preservation</p>
                         </div>
 
                         <!-- Stocks Slider -->
@@ -1102,32 +1140,61 @@
         function updateAllocations(source) {
             const cryptoEl = document.getElementById('inp-alloc-crypto-pct');
             const stocksEl = document.getElementById('inp-alloc-stocks-pct');
-            const bondsEl = document.getElementById('lbl-bonds-pct'); // New Label
+            const bondsEl = document.getElementById('inp-alloc-bonds-pct');
 
             let cVal = parseInt(cryptoEl.value) || 0;
             let sVal = parseInt(stocksEl.value) || 0;
+            let bVal = parseInt(bondsEl.value) || 0;
 
-            // Limit logic: If sum > 100, reduce the *other* one
-            if (cVal + sVal > 100) {
-                if (source === 'crypto') {
-                    sVal = 100 - cVal;
-                    stocksEl.value = sVal;
-                } else {
-                    cVal = 100 - sVal;
-                    cryptoEl.value = cVal;
+            const total = cVal + sVal + bVal;
+
+            if (total !== 100) {
+                const diff = total - 100;
+                // Distribute the difference to the OTHER two sliders
+                if (source === 'stocks') {
+                    // Adjust Bonds first, then Crypto
+                    if (diff > 0) {
+                        let toTake = Math.min(bVal, diff);
+                        bVal -= toTake;
+                        cVal -= (diff - toTake);
+                    } else {
+                        bVal -= diff; // diff is negative
+                    }
+                } else if (source === 'crypto') {
+                    if (diff > 0) {
+                        let toTake = Math.min(sVal, diff);
+                        sVal -= toTake;
+                        bVal -= (diff - toTake);
+                    } else {
+                        sVal -= diff;
+                    }
+                } else if (source === 'bonds') {
+                    if (diff > 0) {
+                        let toTake = Math.min(sVal, diff);
+                        sVal -= toTake;
+                        cVal -= (diff - toTake);
+                    } else {
+                        sVal -= diff;
+                    }
                 }
             }
 
-            const bVal = 100 - cVal - sVal;
+            // Clamping
+            cVal = Math.max(0, Math.min(100, cVal));
+            sVal = Math.max(0, Math.min(100, sVal));
+            bVal = 100 - cVal - sVal; // Ensure exact 100
+
+            cryptoEl.value = cVal;
+            stocksEl.value = sVal;
+            bondsEl.value = bVal;
 
             document.getElementById('lbl-crypto-pct').innerText = cVal + "%";
             document.getElementById('lbl-stocks-pct').innerText = sVal + "%";
+            document.getElementById('lbl-bonds-pct').innerText = bVal + "%";
 
-            if (bondsEl) {
-                bondsEl.innerText = bVal + "%";
-                // Visual feedback if bonds are low
-                bondsEl.className = bVal < 20 ? "font-mono font-bold text-red-500" : "font-mono font-bold text-green-600";
-            }
+            // Visual feedback if bonds are low
+            const labelBonds = document.getElementById('lbl-bonds-pct');
+            labelBonds.className = bVal < 20 ? "font-mono font-bold text-red-500" : "font-mono font-bold text-green-600";
         }
 
         function toggleAdvanced() {
@@ -1200,9 +1267,9 @@
                     "Success Target": { Value: (configs.targetSuccess * 100) + "%" }
                 });
                 console.table({
-                    "Stocks Allocation": { Value: (configs.ALLOC_STOCKS || 0) + "%" },
-                    "Crypto Allocation": { Value: (configs.ALLOC_CRYPTO || 0) + "%" },
-                    "Bond/Cash Alloc": { Value: (100 - (configs.ALLOC_STOCKS || 0) - (configs.ALLOC_CRYPTO || 0)) + "%" }
+                    "Stocks Allocation": { Value: (configs.ALLOC_STOCKS || 0) * 100 + "%" },
+                    "Crypto Allocation": { Value: (configs.ALLOC_CRYPTO || 0) * 100 + "%" },
+                    "Bonds Allocation": { Value: (100 - (configs.ALLOC_STOCKS || 0) * 100 - (configs.ALLOC_CRYPTO || 0) * 100) + "%" }
                 });
                 console.table({
                     "Stock Return (Nom)": { Value: (configs.S_CAGR_START * 100).toFixed(1) + "%" },
@@ -1332,12 +1399,10 @@
                 document.getElementById("results-placeholder").classList.add("hidden");
                 document.getElementById("results-container").classList.remove("hidden");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                update_status("Simulation Complete", "text-green-600");
 
             } catch (e) {
                 console.error(e);
                 alert("Error: " + e.message);
-                update_status("Error", "text-red-600");
             } finally {
                 btnRun.disabled = false;
                 btnRun.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Run Simulation</span>`;
@@ -1424,19 +1489,28 @@
             const btn = document.getElementById("btn-run");
             if (btn) btn.disabled = false;
 
-            // Fake loading animation
-            const spinner = document.getElementById('main-spinner');
-            const rocket = document.getElementById('rocket-anim');
             const overlay = document.getElementById('loading-overlay');
+            const spinner = document.getElementById('main-spinner');
 
-            if (spinner) spinner.style.display = 'none';
+            // Create 21 rockets
+            for (let i = 0; i < 21; i++) {
+                const rocket = document.createElement('div');
+                rocket.className = 'rocket';
+                rocket.innerText = '🚀';
+                rocket.style.left = Math.random() * 90 + 5 + '%';
+                // Randomize speed slightly for variety but keep it "slower" (around 4s from CSS)
+                const delay = i * 150 + Math.random() * 200;
+                overlay.appendChild(rocket);
 
-            setTimeout(() => {
-                if (rocket) rocket.classList.add('launch');
                 setTimeout(() => {
-                    if (overlay) overlay.classList.add('fade-out');
-                }, 400);
-            }, 600);
+                    rocket.classList.add('launch');
+                }, delay);
+            }
+
+            // Make the load up snappier (2 seconds total)
+            setTimeout(() => {
+                if (overlay) overlay.classList.add('fade-out');
+            }, 2000);
         })();
 
     </script>
