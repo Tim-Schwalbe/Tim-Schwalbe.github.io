@@ -104,6 +104,7 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
 
     for (let s = 0; s < numSims; s++) {
         let portfolio = INVESTED_AMOUNT;
+        let cashBalance = configs.CASH_BUFFER || 0;
         let survived = true;
 
         let currentAnnualWithdrawal = initialAnnualWithdrawal;
@@ -134,7 +135,43 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
 
             // 2. Apply Growth
             portfolio *= growthFactor;
-            portfolio -= currentMonthlyWithdrawal;
+
+            // CASH BUFFER LOGIC: "Prime Harvesting" + "Smart Refill"
+            let paidFromCash = false;
+
+            // 1. Defend: Use Cash if Market is Down
+            if (growthFactor < 1.0 && cashBalance >= currentMonthlyWithdrawal) {
+                cashBalance -= currentMonthlyWithdrawal;
+                paidFromCash = true;
+            } else {
+                // 2. Spend: Use Portfolio
+                portfolio -= currentMonthlyWithdrawal;
+
+                // 3. Refill: If Portfolio is "Booming" (> 20% gain), refill the buffer
+                // Only check refill if we are paying from portfolio (Market is UP or Flat)
+                // And only if buffer is depleted.
+                const bufferTarget = configs.CASH_BUFFER || 0;
+                if (bufferTarget > 0 && cashBalance < bufferTarget) {
+                    // Refill Threshold: Only if portfolio is substantial (e.g., > 110% of start)
+                    // This prevents refilling while barely surviving.
+                    const refillThreshold = INVESTED_AMOUNT * 1.10;
+                    if (portfolio > refillThreshold) {
+                        const needed = bufferTarget - cashBalance;
+                        const take = Math.min(needed, portfolio - refillThreshold);
+                        // Don't take too much at once? Let's take what we can to restore shield.
+                        if (take > 0) {
+                            portfolio -= take;
+                            cashBalance += take;
+                        }
+                    }
+                }
+            }
+
+            // NaN Check
+            if (isNaN(portfolio)) {
+                console.error(`Engine: Portfolio became NaN at sim ${s} month ${m}.`, { rLogS, rLinPort, currentMonthlyWithdrawal });
+                survived = false; portfolio = 0; break;
+            }
 
             if (portfolio <= 0) {
                 survived = false;
