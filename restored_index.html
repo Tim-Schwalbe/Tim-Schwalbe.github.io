@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWR Wealth Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bitcoin: {
+                            50: '#fff9f0',
+                            100: '#ffefd6',
+                            200: '#ffd9a3',
+                            300: '#ffbf70',
+                            400: '#fba13d',
+                            500: '#f7931a', /* Main Bitcoin Orange */
+                            600: '#db7a0d',
+                            700: '#b65f0a',
+                            800: '#914c0a',
+                            900: '#763f0b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #fff9f0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ffbf70;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f7931a;
+        }
+
+        .loading-spinner {
+            border: 3px solid #ffefd6;
+            border-top: 3px solid #f7931a;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* HIDE SCROLLBAR FOR SIDEBAR */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Expansion Panel Animation */
+        .advanced-panel {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .advanced-panel.open {
+            max-height: 2000px;
+            /* Arbitrary large height */
+            opacity: 1;
+        }
+
+        /* Tutorial Overlay */
+        #tutorial-overlay {
+            background: transparent;
+            /* No dark overlay since we removed the highlight box */
+            transition: opacity 0.3s;
+            position: absolute;
+        }
+
+        .tutorial-highlight {
+            position: relative;
+            z-index: 60 !important;
+            box-shadow: 0 0 0 4px #f7931a, 0 0 0 10000px rgba(0, 0, 0, 0.5);
+            background-color: transparent;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /* Tooltip */
+        .tutorial-tooltip {
+            position: absolute;
+            z-index: 70;
+            background: #f7931a;
+            /* Bitcoin-500 */
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            max-width: 440px;
+            width: max-content;
+            animation: fadeIn 0.3s ease-out;
+            pointer-events: auto;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tooltip Arrow Base */
+        .tutorial-tooltip::after,
+        .tutorial-tooltip::before {
+            content: '';
+            position: absolute;
+            border-style: solid;
+            display: block;
+        }
+
+        /* Right Arrow (Tooltip on Right, Arrow points Left) */
+        .tutorial-tooltip.tooltip-right::after {
+            top: 30px;
+            margin-top: -8px;
+            /* Correctly centers the 16px arrow triangle at the 30px mark */
+            left: -8px;
+            border-width: 8px 8px 8px 0;
+            border-color: transparent #f7931a transparent transparent;
+        }
+
+        /* Remove double border pseudo-elements since we are solid color now */
+        .tutorial-tooltip.tooltip-right::before {
+            display: none;
+        }
+
+        /* Bottom Arrow (Tooltip on Bottom, Arrow points Up) */
+        .tutorial-tooltip.tooltip-bottom::after {
+            top: -8px;
+            left: 20px;
+            border-width: 0 8px 8px 8px;
+            border-color: transparent transparent #f7931a transparent;
+        }
+
+        .tutorial-tooltip.tooltip-bottom::before {
+            display: none;
+        }
+
+
+
+        /* Nav Link Active State */
+        .nav-link.active {
+            color: #f7931a;
+            font-weight: 600;
+            border-bottom: 2px solid #f7931a;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #f7931a;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+            color: white;
+        }
+
+        #loading-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        #rocket-anim {
+            font-size: 4rem;
+            position: absolute;
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+            opacity: 0;
+            transform: translateY(100px);
+        }
+
+        #rocket-anim.launch {
+            opacity: 1;
+            transform: translateY(-200vh);
+        }
+
+        .loading-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+
+<body class="bg-bitcoin-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loader-spinner" id="main-spinner"></div>
+        <div id="rocket-anim">🚀</div>
+        <div class="loading-text" id="main-loading-text">Initializing WealthGuard Engine...</div>
+        <div class="mt-4 text-white/70 text-sm font-medium">Please wait while we load Python & Data</div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-bitcoin-200 px-6 py-4 shadow-sm flex-none z-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Bitcoin Logo Icon -->
+                <div class="w-10 h-10 flex items-center justify-center text-white">
+                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-sm">
+                        <circle cx="256" cy="256" r="256" fill="#F7931A" />
+                        <path
+                            d="M351.4 191c4.1-27.2-16.7-41.8-45-51.6l9.2-36.7-22.3-5.6-9 35.9c-5.9-1.5-11.8-2.8-17.7-4.1l9-36-22.3-5.6-9.2 36.7c-4.8-1.1-9.7-2.3-14.4-3.4l.1-.4-30.8-7.7-6 23.9s16.6 3.8 16.3 4c9.1 2.3 10.7 8.3 10.4 13.1l-10.4 41.7c.6.2 1.5.5 2.4.9l-2.4-.6-14.6 58.5c-1.1 2.8-3.9 6.9-10.2 5.3.2.3-16.3-4.1-16.3-4.1l-11.1 25.6 29 7.2c5.4 1.3 10.7 2.7 15.9 4l-9.3 37.3 22.3 5.6 9.2-36.8c6.1 1.7 12 3.2 17.8 4.7l-9.1 36.5 22.3 5.6 9.3-37.1c38 7.2 66.6 4.3 78.6-30.1 9.6-27.7-1.1-43.7-21.1-54.1 14.5-3.3 25.5-12.8 28.5-32.3zm-51.1 71.5c-6.9 27.7-53.7 12.7-68.8 9l12.3-49.2c15.1 3.7 63.4 11 56.5 40.2zm5.7-71.7c-6.3 25.2-45.3 12.4-57.9 9.3l11.2-44.8c12.6 3.1 53 9 46.7 35.5z"
+                            fill="white" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
+                    Wealth<span class="text-bitcoin-500">Guard</span> Simulator
+                </h1>
+            </div>
+
+
+            <div id="status-indicator"
+                class="flex items-center gap-2 text-sm text-bitcoin-600 bg-bitcoin-100 px-3 py-1.5 rounded-full border border-bitcoin-200">
+                <div class="loading-spinner"></div>
+                <span class="font-medium">Initializing Engine...</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="container mx-auto px-6 pt-4 flex gap-8 text-sm text-slate-500 border-t border-bitcoin-50 mt-4">
+            <button onclick="switchView('calculator')" id="nav-calculator"
+                class="nav-link active pb-3 hover:text-bitcoin-600 transition">Calculator</button>
+            <button onclick="switchView('info')" id="nav-info"
+                class="nav-link pb-3 hover:text-bitcoin-600 transition">Methodology</button>
+            <button onclick="switchView('satoshi')" id="nav-satoshi"
+                class="nav-link pb-3 hover:text-bitcoin-600 transition">Satoshi Nakamoto</button>
+            <div class="flex-1"></div>
+            <button onclick="startTutorial()"
+                class="flex items-center gap-1.5 text-bitcoin-600 font-medium pb-3 hover:text-bitcoin-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
+                </svg>
+                <span>Take a Tour</span>
+            </button>
+        </nav>
+    </header>
+
+    <div id="view-calculator" class="flex-1 flex">
+
+        <!-- Sidebar: Configuration -->
+        <aside
+            class="w-[420px] flex-none bg-white border-r border-bitcoin-200 z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+            <div class="p-6 space-y-8">
+
+                <!-- Section 1: Portfolio -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 pb-2 border-b border-bitcoin-100">
+                        <svg class="w-5 h-5 text-bitcoin-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Portfolio Setup</h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Horizon
+                                (Years)</label>
+                            <input type="number" id="inp-years" value="50"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 focus:ring-1 focus:ring-bitcoin-400 transition shadow-sm">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Cash Buffer</label>
+                            <input type="number" id="inp-buffer" value="0"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 focus:ring-1 focus:ring-bitcoin-400 transition shadow-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Invested Amount
+                                (€)</label>
+                            <input type="number" id="inp-initial" value="0"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 font-medium">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Desired Exp.
+                                (€/yr)</label>
+                            <input type="number" id="inp-target-annual" value="60000"
+                                class="w-full bg-white border border-bitcoin-200 rounded-lg px-3 py-2 text-bitcoin-700 text-sm focus:outline-none focus:border-bitcoin-400 font-bold shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Guardrails (Moved to Portfolio Setup) -->
+                <div class="bg-indigo-50/50 rounded-lg p-3 border border-indigo-100 mt-2">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-[10px] uppercase font-bold text-indigo-500">Withdrawal Guardrails</p>
+                        <div class="group relative cursor-help">
+                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div
+                                class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                                Defines your lifestyle safety net (Floor) and limits excess spending in boom markets
+                                (Ceiling).
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-1">Floor Multiplier</label>
+                            <input type="number" step="0.05" id="inp-floor-mult" value="1.0"
+                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-400 focus:outline-none transition">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Ceiling (Y1-10)</label>
+                                <input type="number" step="0.1" id="inp-ceiling-early" value="1.5"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-400 focus:outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Ceiling (Y11-50)</label>
+                                <input type="number" step="0.1" id="inp-ceiling-late" value="2.0"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-400 focus:outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Settings -->
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="col-span-1">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Simulations</label>
+                        <input type="number" id="inp-num-sims" value="1000"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 transition shadow-sm">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Target %</label>
+                        <input type="number" id="inp-target-success" value="95"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-bitcoin-400 transition shadow-sm">
+                    </div>
+                </div>
+                <!-- Simulation Button -->
+                <div class="pt-2 pb-2">
+                    <button id="btn-run" disabled onclick="runSimulation()"
+                        class="w-full bg-gradient-to-r from-bitcoin-500 to-amber-500 hover:from-bitcoin-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-bitcoin-200/50 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Run Simulation</span>
+                    </button>
+                    <p class="text-center text-[10px] text-slate-400 mt-2">Running python client-side (Pyodide)</p>
+                </div>
+                <!-- Asset Allocation -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 pb-2 border-b border-bitcoin-100">
+                        <svg class="w-5 h-5 text-bitcoin-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                        </svg>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Asset Allocation</h3>
+                    </div>
+
+                    <div class="bg-bitcoin-50/50 rounded-xl p-4 border border-bitcoin-100 space-y-6">
+                        <!-- Crypto Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="flex items-center gap-1 font-bold text-slate-700">
+                                    <span class="text-orange-500">●</span> Crypto (BTC)
+                                </span>
+                                <span id="lbl-crypto-pct" class="font-mono text-slate-600 font-bold">5%</span>
+                            </div>
+                            <input type="range"
+                                class="w-full accent-orange-500 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="5"
+                                oninput="updateAllocations('crypto')">
+                        </div>
+
+                        <!-- Stocks Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="flex items-center gap-1 font-bold text-slate-700">
+                                    <span class="text-blue-600">●</span> Stocks (ETF)
+                                </span>
+                                <span id="lbl-stocks-pct" class="font-mono text-slate-600 font-bold">95%</span>
+                            </div>
+                            <input type="range"
+                                class="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="95"
+                                oninput="updateAllocations('stocks')">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deep Tweak Section -->
+                <div class="space-y-4">
+                    <button id="btn-advanced-toggle" onclick="toggleAdvanced()"
+                        class="w-full flex items-center justify-between text-xs font-bold text-bitcoin-600 uppercase tracking-widest hover:text-bitcoin-700 transition outline-none">
+                        <span>Advanced Market Assumptions</span>
+                        <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <div id="pnl-advanced" class="advanced-panel space-y-6">
+
+                        <!-- Stress Test Parameters (New) -->
+                        <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
+                            <p class="text-[10px] uppercase font-bold text-red-500 mb-2">Stress Test / Bad Years</p>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Max Consecutive Bad Years
+                                        (Limit)</label>
+                                    <input type="number" id="inp-max-bad-years" value="5"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                    <p class="text-[9px] text-slate-400 mt-0.5">Limits recovery logic after this many
+                                        down years.</p>
+                                </div>
+
+                                <div class="flex items-center gap-2 pt-1 border-t border-red-100/50">
+                                    <input type="checkbox" id="chk-force-start-crash"
+                                        class="w-3 h-3 accent-red-500 rounded border-gray-300 focus:ring-red-500">
+                                    <label for="chk-force-start-crash"
+                                        class="text-[10px] font-bold text-red-600 select-none cursor-pointer">Force
+                                        Crash at Start</label>
+                                </div>
+
+                                <div id="div-crash-config" class="hidden pl-5 space-y-2 border-l-2 border-red-100">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-1">Crash Duration
+                                            (Years)</label>
+                                        <input type="number" id="inp-crash-duration" value="3"
+                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                    </div>
+                                    <p class="text-[9px] text-red-400 italic">Forces returns to be negative for the
+                                        first N years.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Inflation -->
+                    <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                        <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
+                                <input type="number" step="0.001" id="inp-infl-mean" value="0.025"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
+                                <input type="number" step="0.001" id="inp-infl-vol" value="0.005"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Correlation -->
+                    <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                        <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Asset Correlation</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
+                                <input type="number" step="0.05" id="inp-corr-start" value="0.25"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
+                                <input type="number" step="0.05" id="inp-corr-end" value="0.70"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Crypto Params -->
+                    <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
+                        <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                <input type="number" step="0.01" id="inp-c-cagr-start" value="0.32"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                <input type="number" step="0.01" id="inp-c-cagr-end" value="0.08"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                <input type="number" step="0.01" id="inp-c-vol-start" value="0.40"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                <input type="number" step="0.01" id="inp-c-vol-end" value="0.20"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Params -->
+                    <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                        <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                <input type="number" step="0.01" id="inp-s-cagr-start" value="0.08"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                <input type="number" step="0.01" id="inp-s-cagr-end" value="0.06"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                <input type="number" step="0.01" id="inp-s-vol-start" value="0.18"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                <input type="number" step="0.01" id="inp-s-vol-end" value="0.16"
+                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Content: Results -->
+        <main class="flex-1 bg-slate-50 p-10 relative">
+
+            <!-- Welcome / Empty State -->
+            <div id="results-placeholder" class="text-center mt-32 opacity-40">
+                <div
+                    class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm border border-bitcoin-100 mb-6">
+                    <svg class="w-10 h-10 text-bitcoin-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-serif text-slate-700 mb-2">Ready to Simulate</h2>
+                <p class="text-slate-500">Configure your portfolio parameters on the left to begin.</p>
+            </div>
+
+            <!-- Results Container (Hidden initially) -->
+            <div id="results-container" class="hidden space-y-16 max-w-6xl ml-0 mr-auto animate-fade-in pb-20">
+
+                <!-- SECTION 1: THE VISION (Required For Goal) -->
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-xs font-black text-bitcoin-500 uppercase tracking-[0.2em] whitespace-nowrap">The
+                            Vision
+                            (Required For Target Goal)</h2>
+                        <div class="h-px bg-bitcoin-200 flex-1"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Success Probability -->
+                        <div
+                            class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+                            <div
+                                class="absolute -right-6 -top-6 w-32 h-32 bg-blue-50/50 rounded-full group-hover:scale-110 transition-transform">
+                            </div>
+                            <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest relative z-10 mb-2">
+                                Success Probability</p>
+                            <p id="res-success-val"
+                                class="text-7xl font-serif font-bold text-slate-800 text-right relative z-10">--%
+                            </p>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 mt-6 relative z-10 overflow-hidden">
+                                <div id="res-success-bar"
+                                    class="bg-blue-500 h-full rounded-full shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-1000"
+                                    style="width: 0%"></div>
+                            </div>
+                            <p class="text-[10px] text-slate-400 font-medium mt-5 leading-relaxed">Percentage of
+                                scenarios
+                                where your capital survived the full term.</p>
+                        </div>
+
+                        <!-- Required Capital -->
+                        <div
+                            class="md:col-span-2 bg-slate-800 rounded-3xl p-8 shadow-xl relative overflow-hidden group">
+                            <div
+                                class="absolute -right-16 -top-16 w-64 h-64 bg-bitcoin-500/10 rounded-full group-hover:scale-110 transition-transform duration-1000">
+                            </div>
+                            <div
+                                class="flex flex-col md:flex-row md:items-center justify-between h-full relative z-10 gap-8">
+                                <div class="space-y-2">
+                                    <p class="text-[10px] font-bold text-gold-400 uppercase tracking-[0.2em]">Required
+                                        Capital (Goal)</p>
+                                    <p id="res-required-capital" class="text-6xl font-serif font-bold text-white">--</p>
+                                    <p class="text-[10px] text-slate-400 font-medium italic">Amount needed to achieve
+                                        your
+                                        target success probability.</p>
+                                </div>
+                                <div
+                                    class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600 min-w-[200px] flex flex-col justify-center items-center">
+                                    <p id="lbl-shortfall"
+                                        class="text-[13px] text-bitcoin-400 font-black uppercase tracking-widest text-center">
+                                        --</p>
+                                    <p
+                                        class="text-[9px] text-slate-400 mt-2 uppercase font-bold text-center tracking-tighter">
+                                        Current Funding Gap</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: THE REALITY (Possible Today) -->
+                <div class="space-y-6 pt-4">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">The
+                            Reality (Supported by Current Wealth)</h2>
+                        <div class="h-px bg-slate-200 flex-1"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Safe Monthly Range (Colspan 2) -->
+                        <div
+                            class="md:col-span-2 bg-indigo-50/50 p-8 rounded-3xl border border-indigo-100/60 shadow-sm relative overflow-hidden group">
+                            <div
+                                class="absolute top-0 right-0 w-48 h-48 bg-indigo-100/40 rounded-full -mr-24 -mt-24 group-hover:scale-110 transition-transform duration-700">
+                            </div>
+
+                            <div class="flex items-center justify-between mb-8 relative z-10">
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold tracking-[0.2em] text-indigo-500 mb-1">
+                                        Safe
+                                        Monthly Budget</p>
+                                    <h3 class="text-xl font-serif font-bold text-slate-800">Risk Profile Categories</h3>
+                                </div>
+                                <span
+                                    class="text-[10px] bg-indigo-600 text-white px-4 py-1.5 rounded-full font-bold shadow-sm whitespace-nowrap">Boom
+                                    Peak: <span id="res-max-monthly">--</span> €</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
+                                <div class="space-y-2 border-r border-indigo-200/50 pr-4">
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                        Conservative
+                                        (99%)</p>
+                                    <p id="res-safe-99" class="text-3xl font-serif font-bold text-slate-700">-- €</p>
+                                    <p class="text-[10px] text-slate-400 font-medium italic">Ultra-safe baseline</p>
+                                </div>
+                                <div class="space-y-2 border-r border-indigo-200/50 pr-4">
+                                    <p class="text-[10px] text-indigo-600 font-bold uppercase tracking-tight">Your
+                                        Target
+                                        (<span id="res-target-ptr">--</span>%)</p>
+                                    <p id="res-safe-monthly"
+                                        class="text-4xl font-serif font-bold text-slate-900 leading-tight">-- €</p>
+                                    <p class="text-[10px] text-indigo-500 font-bold italic">Recommended Safe Rate</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Aggressive
+                                        (90%)</p>
+                                    <p id="res-safe-90" class="text-3xl font-serif font-bold text-slate-700">-- €</p>
+                                    <p class="text-[10px] text-slate-400 font-medium italic">Higher lifestyle risk</p>
+                                </div>
+                            </div>
+
+                            <div
+                                class="mt-8 pt-5 border-t border-indigo-200/40 flex justify-between items-center relative z-10">
+                                <span class="text-[11px] text-slate-400 font-medium">Desired Lifestyle: <span
+                                        id="lbl-target-monthly" class="font-bold text-slate-600">--</span> /mo</span>
+                                <span class="text-[9px] text-indigo-400 uppercase font-black opacity-40">Capital
+                                    Dependent
+                                    Realization</span>
+                            </div>
+                        </div>
+
+                        <!-- SWR Efficiency -->
+                        <div
+                            class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col justify-between group overflow-hidden relative">
+                            <div
+                                class="absolute -right-6 -top-6 w-24 h-24 bg-bitcoin-50 rounded-full opacity-60 group-hover:scale-125 transition-transform duration-500">
+                            </div>
+                            <div>
+                                <p
+                                    class="text-[10px] font-bold text-bitcoin-600 uppercase tracking-widest relative z-10 mb-2">
+                                    Safe Withdrawal Rate</p>
+                                <p id="res-swr-val"
+                                    class="text-6xl font-serif font-bold text-slate-800 text-right relative z-10">--%
+                                </p>
+                            </div>
+                            <p
+                                class="text-[10px] text-slate-400 font-medium mt-4 relative z-10 border-t border-slate-50 pt-4 leading-relaxed">
+                                <span class="block font-bold text-slate-600 mb-1">Portfolio Efficiency</span>
+                                <span id="res-target-disp-desc" class="italic text-bitcoin-600/70">Optimized for your
+                                    survival
+                                    odds</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Median Outcome -->
+                        <div
+                            class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group flex items-center justify-between">
+                            <div
+                                class="absolute -right-6 -top-6 w-24 h-24 bg-purple-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+                            </div>
+                            <div class="relative z-10">
+                                <p class="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-1">Median
+                                    Projected Wealth</p>
+                                <div class="flex items-baseline gap-1">
+                                    <p id="res-median-end"
+                                        class="text-5xl font-serif font-bold text-slate-800 text-right">--</p>
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Million
+                                        €</span>
+                                </div>
+                            </div>
+                            <p
+                                class="text-[10px] text-slate-400 font-medium max-w-[140px] text-right italic relative z-10">
+                                Outcome in 50% of simulated futures.</p>
+                        </div>
+
+                        <!-- Safety Margin -->
+                        <div
+                            class="bg-red-50/10 rounded-3xl p-8 border border-red-100/60 shadow-sm relative overflow-hidden group flex items-center justify-between">
+                            <div
+                                class="absolute -right-6 -top-6 w-24 h-24 bg-red-100/20 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+                            </div>
+                            <div class="relative z-10">
+                                <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">1% Worst
+                                    Case
+                                    Margin</p>
+                                <p id="res-worst-case" class="text-4xl font-serif font-bold text-slate-800 text-right">
+                                    --</p>
+                            </div>
+                            <p
+                                class="text-[10px] text-slate-400 font-medium max-w-[140px] text-right italic relative z-10">
+                                Statistical "Zero Bound" for capital safety.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plot -->
+                <div class="bg-white rounded-2xl p-8 shadow-[0_4px_30px_rgba(0,0,0,0.04)] border border-slate-100">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-serif font-bold text-slate-800">Wealth Distribution Analysis</h3>
+                    </div>
+
+                    <!-- Chart Area -->
+                    <div id="plot-area"
+                        class="w-full flex justify-center items-center bg-slate-50 rounded-xl p-4 border border-slate-100 min-h-[300px]">
+                        <span class="text-slate-400 text-sm">Chart will render here...</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- VIEW: INFO / METHODOLOGY -->
+    <div id="view-info" class="hidden flex-1 overflow-y-auto bg-white p-10 animate-fade-in">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <h2 class="text-4xl font-serif font-bold text-slate-800 text-right border-b border-bitcoin-200 pb-4">
+                Methodology &
+                Glossary</h2>
+
+            <section class="space-y-4">
+                <h3 class="text-2xl font-serif text-bitcoin-600">Core Logic: Monte Carlo Simulation</h3>
+                <p class="text-slate-600 leading-relaxed">
+                    This calculator does not use historical backtesting (which is limited to one specific history).
+                    Instead, it uses
+                    <strong>Monte Carlo Simulation</strong> to generate thousands of possible future market scenarios
+                    based on statistical parameters.
+                    This allows us to stress-test your portfolio against millions of potential realities, including
+                    those worse than history.
+                </p>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">CAGR (Compound Annual Growth Rate)</h4>
+                    <p class="text-sm text-slate-500">The mean annual return. "Start" vs "End" allows decreasing returns
+                        over time (e.g., crypto maturing).</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">Volatility (Risk)</h4>
+                    <p class="text-sm text-slate-500">Standard deviation of returns. Higher volatility means wilder
+                        swings. We use a "Skewed Normal" distribution to model real-world fat tails.</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">Gaussian Copula (Correlation)</h4>
+                    <p class="text-sm text-slate-500">Mathematical method to link the random movements of Stocks and
+                        Crypto. "Correlation" (0 to 1) defines how often they move together.</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-slate-700 mb-2">Safe Withdrawal Rate (SWR)</h4>
+                    <p class="text-sm text-slate-500">The calculated percentage of your initial portfolio you can
+                        withdraw annually (adjusted for inflation) without running out of money.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- VIEW: SATOSHI NAKAMOTO -->
+    <div id="view-satoshi" class="hidden flex-1 overflow-y-auto bg-bitcoin-50 p-10 animate-fade-in">
+        <article
+            class="max-w-3xl mx-auto bg-white shadow-xl shadow-bitcoin-100/50 p-12 rounded-lg border border-bitcoin-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-bitcoin-400 to-bitcoin-600"></div>
+
+            <header class="mb-10 text-center">
+                <span class="text-xs font-bold tracking-[0.2em] text-bitcoin-600 uppercase">The Origin</span>
+                <h1 class="text-5xl font-serif font-bold text-slate-900 mt-4 mb-6">Who is Satoshi Nakamoto?</h1>
+                <div class="w-16 h-1 bg-slate-200 mx-auto"></div>
+            </header>
+
+            <div class="prose prose-slate prose-lg mx-auto text-slate-600 font-serif leading-loose">
+                <p>
+                    <span class="text-6xl float-left mr-4 mt-[-10px] font-bold text-bitcoin-500">O</span>n October 31,
+                    2008, a link to a paper titled
+                    <em>"Bitcoin: A Peer-to-Peer Electronic Cash System"</em> was posted to a cryptography mailing list.
+                    The author was
+                    <strong>Satoshi Nakamoto</strong>. To this day, the true identity of this person—or group of
+                    people—remains unknown.
+                </p>
+                <p>
+                    Satoshi didn't just write code; he architected a solution to the "Double-Spend Problem" without
+                    requiring a central authority.
+                    By combining cryptography, game theory, and computer science, he created the
+                    <strong>Blockchain</strong>.
+                </p>
+                <blockquote
+                    class="border-l-4 border-bitcoin-400 pl-6 italic my-8 text-slate-500 bg-bitcoin-50 py-4 pr-4 rounded-r-lg">
+                    "The root problem with conventional currency is all the trust that's required to make it work. The
+                    central bank must be trusted not to debase the currency, but the history of fiat currencies is full
+                    of breaches of that trust."
+                </blockquote>
+                <p>
+                    Satoshi mined the first block of the chain, known as the "Genesis Block," on January 3, 2009.
+                    Embedded in the code of this block was the text:
+                    <code
+                        class="text-sm bg-slate-100 px-1 py-0.5 rounded text-slate-700">The Times 03/Jan/2009 Chancellor on brink of second bailout for banks</code>.
+                    This was both a timestamp and a political statement on the instability of the fractional-reserve
+                    banking system.
+                </p>
+                <p>
+                    In 2011, Satoshi sent a final email stating he had "moved on to other things," and vanished. He left
+                    behind a network that is now secured by more computing power than any other network on Earth, and a
+                    wallet containing ~1.1 million Bitcoin that has never moved.
+                </p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-sans">WealthGuard Simulations • Est.
+                    2026</p>
+            </div>
+        </article>
+    </div>
+
+    <!-- TUTORIAL OVERLAY -->
+    <div id="tutorial-overlay" class="fixed inset-0 hidden z-50 pointer-events-none">
+        <!-- Highlight box and tooltip will be injected via JS -->
+    </div>
+
+    <!-- Python Logic  -->
+    <script type="text/python" id="py-logic">
+import js
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import skewnorm, norm
+import io
+import base64
+
+# ====================
+# MARKET ENGINE
+# ====================
+
+def get_linear_path(start, end, steps):
+    return np.linspace(start, end, steps)
+
+def get_market_saturation_path(start, saturation, end, saturation_year, total_years):
+    if saturation_year >= total_years:
+        return get_linear_path(start, end, total_years)
+    path_fast = np.linspace(start, saturation, saturation_year + 1, endpoint=False)
+    path_slow = np.linspace(saturation, end, total_years - saturation_year)
+    return np.concatenate((path_fast, path_slow))
+
+def generate_market_data(num_sims, years, configs):
+    # Unpack config
+    c_cagr_start = configs['C_CAGR_START']
+    c_cagr_end = configs['C_CAGR_END']
+    c_vol_start = configs['C_VOL_START']
+    c_vol_end = configs['C_VOL_END']
+    
+    s_cagr_start = configs['S_CAGR_START']
+    s_cagr_end = configs['S_CAGR_END']
+    s_vol_start = configs['S_VOL_START']
+    s_vol_end = configs['S_VOL_END']
+    
+    corr_start = configs.get('CORR_START', 0.40)
+    corr_end = configs.get('CORR_END', 0.70)
+
+    # Asset-specific skewness (Negative skew = fat left tails / crashes)
+    c_skew_start, c_skew_end = -0.8, -0.2
+    s_skew_start, s_skew_end = -0.4, -0.3
+    
+    corr_path = get_linear_path(corr_start, corr_end, years)
+    c_cagr = get_market_saturation_path(c_cagr_start, 0.11, c_cagr_end, 15, years)
+    c_vol  = get_linear_path(c_vol_start, c_vol_end, years)
+    c_skew = get_linear_path(c_skew_start, c_skew_end, years)
+
+    s_cagr = get_linear_path(s_cagr_start, s_cagr_end, years)
+    s_vol  = get_linear_path(s_vol_start, s_vol_end, years)
+    s_skew = get_linear_path(s_skew_start, s_skew_end, years)
+
+    returns_crypto = np.zeros((num_sims, years))
+    returns_stocks = np.zeros((num_sims, years))
+
+    for y in range(years):
+        rho = corr_path[y]
+        Z = np.random.multivariate_normal([0, 0], [[1, rho], [rho, 1]], num_sims)
+        U_crypto = norm.cdf(Z[:, 0])
+        U_stocks = norm.cdf(Z[:, 1])
+
+        # Crypto Calculation
+        a_c = c_skew[y]
+        raw_c = skewnorm.ppf(U_crypto, a_c)
+        delta_c = a_c / np.sqrt(1 + a_c**2)
+        mean_sn_c = np.sqrt(2/np.pi) * delta_c
+        var_sn_c = 1 - (2 * delta_c**2 / np.pi)
+        z_standard_c = (raw_c - mean_sn_c) / np.sqrt(var_sn_c)
+
+        # Standard Geometric Drift: ensures median path follows CAGR
+        mu_log_c = np.log(1 + c_cagr[y])
+        returns_crypto[:, y] = mu_log_c + c_vol[y] * z_standard_c
+
+        # Stocks Calculation
+        a_s = s_skew[y]
+        raw_s = skewnorm.ppf(U_stocks, a_s)
+        delta_s = a_s / np.sqrt(1 + a_s**2)
+        mean_sn_s = np.sqrt(2/np.pi) * delta_s
+        var_sn_s = 1 - (2 * delta_s**2 / np.pi)
+        z_standard_s = (raw_s - mean_sn_s) / np.sqrt(var_sn_s)
+        
+        mu_log_s = np.log(1 + s_cagr[y])
+        returns_stocks[:, y] = mu_log_s + s_vol[y] * z_standard_s
+
+    return returns_crypto, returns_stocks
+
+# ====================
+# SIMULATION ENGINE
+# ====================
+
+def simulate_portfolio(withdrawal_rate_W, log_r_crypto, log_r_stocks, configs):
+    num_sims = len(log_r_crypto)
+    years = len(log_r_crypto[0])
+    
+    invested_amount = configs['INVESTED_AMOUNT']
+    cash_buffer = configs['CASH_BUFFER']
+    alloc_crypto = configs['ALLOC_CRYPTO']
+    alloc_stocks = configs['ALLOC_STOCKS']
+    
+    infl_mean = configs.get('INFL_MEAN', 0.025)
+    infl_vol = configs.get('INFL_VOL', 0.015)
+    
+    force_crash = configs.get('FORCE_CRASH', False)
+    crash_duration = int(configs.get('CRASH_DURATION', 0))
+    
+    CASH_REFILL_RATIO = 0.30
+    CASH_YIELD = 0.015
+    MAX_CASH_BUFFER = cash_buffer
+    
+    target_annual = configs.get('TARGET_ANNUAL_EXP', 60_000.0)
+    
+    floor_mult = configs.get('FLOOR_MULT', 1.0)
+    ceiling_early_mult = configs.get('CEILING_EARLY', 1.5)
+    ceiling_late_mult = configs.get('CEILING_LATE', 2.0)
+
+    INITIAL_FLOOR_AMOUNT = target_annual * floor_mult
+    INITIAL_CEILING_Y1_Y10 = target_annual * ceiling_early_mult if target_annual > 0 else 1e15
+    INITIAL_CEILING_Y11_Y50 = target_annual * ceiling_late_mult if target_annual > 0 else 1e15
+
+    # Refined Inflation: Allow deflation (standard economic model) 
+    # to maintain the exact Mean requested by user.
+    inflation = np.random.normal(infl_mean, infl_vol, size=(num_sims, years))
+
+    portfolio = np.full(num_sims, invested_amount)
+    cash = np.full(num_sims, cash_buffer)
+    
+    if withdrawal_rate_W > 0:
+        current_target_real = np.full(num_sims, invested_amount * withdrawal_rate_W)
+    else:
+        current_target_real = np.full(num_sims, target_annual)
+
+    r_arith_crypto = np.exp(log_r_crypto) - 1
+    r_arith_stocks = np.exp(log_r_stocks) - 1
+    r_port_arith = r_arith_crypto * alloc_crypto + r_arith_stocks * alloc_stocks
+    
+    if force_crash and crash_duration > 0:
+        limit = min(years, crash_duration)
+        for y_c in range(limit):
+             rets = r_port_arith[:, y_c]
+             mask_pos = rets > 0
+             rets[mask_pos] = -rets[mask_pos]
+             rets = np.minimum(rets, -0.05)
+             r_port_arith[:, y_c] = rets
+
+    current_floor = np.full(num_sims, INITIAL_FLOOR_AMOUNT)
+    current_ceiling = np.full(num_sims, INITIAL_CEILING_Y1_Y10)
+
+    for y in range(years):
+        if y == 10:
+            # Shift from Early Ceiling to Late Ceiling
+            # Calculate the ratio increase relative to target
+            target_ceiling_late = INITIAL_CEILING_Y11_Y50 
+            current_ceiling = np.full(num_sims, target_ceiling_late) * (current_ceiling / INITIAL_CEILING_Y1_Y10)
+        withdrawal_amount = np.minimum(np.maximum(current_target_real, current_floor), current_ceiling)
+        growth_factor = 1 + r_port_arith[:, y]
+        portfolio_after_growth = portfolio * growth_factor
+
+        cash_draw = np.minimum(withdrawal_amount, cash)
+        portfolio_draw = withdrawal_amount - cash_draw
+        
+        cash -= cash_draw
+        portfolio_after_growth -= portfolio_draw
+
+        positive_mask = (growth_factor > 1.0)
+        gain = np.maximum(portfolio_after_growth - portfolio, 0)
+        refill_amount = gain * CASH_REFILL_RATIO
+        refill_amount = np.minimum(refill_amount, MAX_CASH_BUFFER - cash)
+
+        cash[positive_mask] += refill_amount[positive_mask]
+        portfolio_after_growth[positive_mask] -= refill_amount[positive_mask]
+        
+        cash *= (1 + CASH_YIELD)
+        portfolio = np.maximum(portfolio_after_growth, 0)
+        cash = np.maximum(cash, 0)
+        
+        if y < years - 1:
+            infl = 1 + inflation[:, y+1]
+            current_target_real *= infl
+            current_floor *= infl
+            current_ceiling *= infl
+
+    total_final = portfolio + cash
+    success_rate = np.mean(total_final > 0)
+    return success_rate, total_final
+
+# ====================
+# UI BRIDGE (MAIN)
+# ====================
+
+def run_full_simulation(args):
+    try:
+        years = int(js.document.getElementById("inp-years").value)
+        initial_total = float(js.document.getElementById("inp-initial").value)
+        buffer = float(js.document.getElementById("inp-buffer").value)
+        
+        alloc_crypto = float(js.document.getElementById("inp-alloc-crypto-pct").value) / 100.0
+        alloc_stocks = float(js.document.getElementById("inp-alloc-stocks-pct").value) / 100.0
+        
+        num_sims = int(js.document.getElementById("inp-num-sims").value)
+        target_success = float(js.document.getElementById("inp-target-success").value) / 100.0
+        
+        configs = {
+            'YEARS': years,
+            'INVESTED_AMOUNT': initial_total - buffer,
+            'CASH_BUFFER': buffer,
+            'ALLOC_CRYPTO': alloc_crypto,
+            'ALLOC_STOCKS': alloc_stocks,
+            
+            'INFL_MEAN': float(js.document.getElementById("inp-infl-mean").value),
+            'INFL_VOL': float(js.document.getElementById("inp-infl-vol").value),
+            
+            'CORR_START': float(js.document.getElementById("inp-corr-start").value),
+            'CORR_END': float(js.document.getElementById("inp-corr-end").value),
+            
+            'C_CAGR_START': float(js.document.getElementById("inp-c-cagr-start").value),
+            'C_CAGR_END': float(js.document.getElementById("inp-c-cagr-end").value),
+            'C_VOL_START': float(js.document.getElementById("inp-c-vol-start").value),
+            'C_VOL_END': float(js.document.getElementById("inp-c-vol-end").value),
+            'S_CAGR_START': float(js.document.getElementById("inp-s-cagr-start").value),
+            'S_CAGR_END': float(js.document.getElementById("inp-s-cagr-end").value),
+            'S_VOL_START': float(js.document.getElementById("inp-s-vol-start").value),
+            'S_VOL_END': float(js.document.getElementById("inp-s-vol-end").value),
+            
+            'MAX_BAD_YEARS': int(js.document.getElementById("inp-max-bad-years").value),
+            'FORCE_CRASH': js.document.getElementById("chk-force-start-crash").checked,
+            'CRASH_DURATION': int(js.document.getElementById("inp-crash-duration").value),
+            'TARGET_ANNUAL_EXP': float(js.document.getElementById("inp-target-annual").value),
+            
+            'FLOOR_MULT': float(js.document.getElementById("inp-floor-mult").value),
+            'CEILING_EARLY': float(js.document.getElementById("inp-ceiling-early").value),
+            'CEILING_LATE': float(js.document.getElementById("inp-ceiling-late").value),
+        }
+
+        js.update_status(f"Simulating {num_sims} Scenarios...", "text-bitcoin-600")
+        log_r_c, log_r_s = generate_market_data(num_sims, years, configs)
+
+        js.update_status("Calculating Risk Profiles...", "text-purple-500")
+        sh_configs = configs.copy()
+        sh_configs['INVESTED_AMOUNT'] = 1_000_000.0
+        sh_configs['CASH_BUFFER'] = 0.0
+        sh_configs['TARGET_ANNUAL_EXP'] = 0.0 
+        
+        def find_swr(target_odds):
+            low, high = 0.001, 0.20
+            best_r = 0.001
+            for i in range(15):
+                mid = (low + high) / 2
+                rate, _ = simulate_portfolio(mid, log_r_c, log_r_s, sh_configs)
+                if rate >= target_odds:
+                    best_r = mid
+                    low = mid
+                else:
+                    high = mid
+            return best_r
+
+        best_market_swr = find_swr(target_success)
+        swr_99 = find_swr(0.99)
+        swr_90 = find_swr(0.90)
+
+        js.update_status("Final Verification...", "text-indigo-500")
+        final_succ, final_total_vals = simulate_portfolio(-1, log_r_c, log_r_s, configs)
+        
+        # 5. Diagnostics
+        # Calculate Realized CAGR of the simulation for debugging
+        realized_returns = np.exp(np.mean(log_r_s, axis=0)) - 1
+        avg_realized_cagr = np.mean(realized_returns)
+        js.console.log(f"Diagnostics: Target CAGR Avg={np.mean(get_linear_path(configs['S_CAGR_START'], configs['S_CAGR_END'], years)):.4f}")
+        js.console.log(f"Diagnostics: Realized CAGR Avg={avg_realized_cagr:.4f}")
+        
+        # 6. Update UI Results
+        js.document.getElementById("res-swr-val").innerText = f"{best_market_swr*100:.2f}%"
+        js.document.getElementById("res-success-val").innerText = f"{final_succ*100:.1f}%"
+        js.document.getElementById("res-target-disp-desc").innerText = f"Optimal for {target_success*100:.0f}% survival odds"
+        js.document.getElementById("res-target-ptr").innerText = f"{target_success*100:.0f}"
+        js.document.getElementById("res-success-bar").style.width = f"{final_succ*100}%"
+        
+        median_wealth = np.median(final_total_vals)
+        js.document.getElementById("res-median-end").innerText = f"{median_wealth/1e6:,.2f}"
+        
+        worst_case = np.percentile(final_total_vals, 1)
+        js.document.getElementById("res-worst-case").innerText = f"{worst_case/1e6:,.2f} M €"
+        
+        req_capital = configs['TARGET_ANNUAL_EXP'] / best_market_swr
+        shortfall = max(0, req_capital - initial_total)
+        
+        js.document.getElementById("res-required-capital").innerText = f"{req_capital/1e6:.2f} M €"
+        
+        # Safe monthly based on Current Capital vs Target profiles
+        target_monthly = configs['TARGET_ANNUAL_EXP'] / 12
+        safe_monthly = (initial_total * best_market_swr) / 12
+        m_99 = (initial_total * swr_99) / 12
+        m_90 = (initial_total * swr_90) / 12
+        
+        peak_monthly = target_monthly * configs.get('CEILING_LATE', 2.0)
+        # If target lifestyle is higher than possible, peak is based on target
+        # If target lifestyle is 0, peak is based on safe
+        if target_monthly == 0: peak_monthly = safe_monthly
+
+        js.document.getElementById("res-safe-monthly").innerText = f"{safe_monthly:,.0f} €"
+        js.document.getElementById("res-safe-99").innerText = f"{m_99:,.0f} €"
+        js.document.getElementById("res-safe-90").innerText = f"{m_90:,.0f} €"
+        js.document.getElementById("res-max-monthly").innerText = f"{peak_monthly:,.0f}"
+        
+        # Update labels
+        goal_text = "Goal Reached" if shortfall <= 0 else f"Goal distance: {shortfall/1e6:.2f} M €"
+        js.document.getElementById("lbl-shortfall").innerText = goal_text
+        js.document.getElementById("lbl-target-monthly").innerText = f"{target_monthly:,.0f} €"
+
+        # 7. Render Charts
+        js.update_status("Rendering Analysis...", "text-blue-500")
+        render_plot(final_total_vals, years)
+        
+        js.document.getElementById("results-placeholder").classList.add("hidden")
+        js.document.getElementById("results-container").classList.remove("hidden")
+        js.update_status("Ready", "text-bitcoin-700")
+
+    except Exception as e:
+        js.console.error(str(e))
+        js.update_status(f"Error: {str(e)}", "text-red-500")
+
+def render_plot(total_final_values, years):
+    plt.clf()
+    plt.style.use('default') 
+    fig = plt.figure(figsize=(10, 5))
+    fig.patch.set_facecolor('#f8fafc') 
+    
+    plot_data = total_final_values[total_final_values < 100_000_000] / 1e6
+    plt.hist(plot_data, bins=50, density=True, color='#f7931a', alpha=0.8, edgecolor='#db7a0d')
+    plt.axvline(0, color='#ef4444', linewidth=2, linestyle='--', label='Bankruptcy')
+    
+    plt.title(f"Wealth Distribution (End of {years} Years)", fontsize=12, pad=15)
+    plt.xlabel("Total Wealth (Million €)", fontsize=10)
+    plt.ylabel("Probability Density", fontsize=10)
+    plt.grid(True, alpha=0.1, color='black', linestyle='-')
+    
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight', facecolor=fig.get_facecolor())
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode('utf-8')
+    
+    img_html = f'<img src="data:image/png;base64,{img_str}" class="max-w-full h-auto rounded-lg shadow-sm" />'
+    js.document.getElementById("plot-area").innerHTML = img_html
+    </script>
+
+    <!-- JS Config -->
+    <script>
+        const statusEl = document.getElementById("status-indicator");
+        const btnRun = document.getElementById("btn-run");
+        let pyodide = null;
+
+        // --- NAVIGATION LOGIC ---
+        function switchView(viewName) {
+            // Hide all views
+            ['calculator', 'info', 'satoshi'].forEach(v => {
+                document.getElementById('view-' + v).classList.add('hidden');
+                document.getElementById('nav-' + v).classList.remove('active', 'text-bitcoin-600');
+            });
+
+            // Show target
+            document.getElementById('view-' + viewName).classList.remove('hidden');
+            document.getElementById('nav-' + viewName).classList.add('active', 'text-bitcoin-600');
+        }
+
+        // --- TUTORIAL LOGIC ---
+        const tutorialSteps = [
+            {
+                id: 'inp-years',
+                title: 'Time Horizon',
+                text: 'How long do you want to plan for? 50-60 years covers a long retirement.'
+            },
+            {
+                id: 'inp-initial',
+                title: 'Invested Capital',
+                text: 'Your current starting portfolio value. If this is 0, we can still calculate how much you NEED to have.'
+            },
+            {
+                id: 'inp-buffer',
+                title: 'Cash Buffer',
+                text: 'Cash set aside for emergencies. This is kept separate from your invested wealth.'
+            },
+            {
+                id: 'inp-target-annual',
+                title: 'Desired Lifestyle',
+                text: 'How much do you want to spend annually? We use this to calculate your Required Capital goal.'
+            },
+            {
+                id: 'inp-floor-mult',
+                title: 'Guardrails: Floor',
+                text: 'Your lifestyle safety net. 1.0 means you always withdraw at least 100% of your target budget.'
+            },
+            {
+                id: 'inp-ceiling-early',
+                title: 'Guardrails: Ceiling',
+                text: 'Limits "lifestyle creep". During boom markets, we cap withdrawals (e.g., 1.5x) to preserve wealth.'
+            },
+            {
+                id: 'inp-alloc-crypto-pct',
+                title: 'Asset Allocation',
+                text: 'Balance between High Risk (Crypto) and Stable Growth (Stocks). This calculator models their correlation.'
+            },
+            {
+                id: 'btn-advanced-toggle',
+                trigger: 'advanced', // Special flag to open panel
+                title: 'Advanced Assumptions',
+                text: 'Click here to tweak Market Returns, Inflation, and Stress Test items.'
+            },
+            {
+                id: 'inp-max-bad-years',
+                parent: 'pnl-advanced',
+                title: 'Stress Test: Recovery',
+                text: 'If returns are negative for this many years in a row, we stop inflation adjustments to save capital.'
+            },
+            {
+                id: 'div-crash-config',
+                targetOverride: 'chk-force-start-crash',
+                parent: 'pnl-advanced',
+                title: 'Stress Test: Sequence Risk',
+                text: 'Force a "Bear Market" immediately at the start of retirement to see if you survive the worst case.',
+                offsetX: 280 // Move right to clear the checkbox label
+            },
+            {
+                id: 'btn-run',
+                title: 'Run Simulation',
+                text: 'Starts the Python Monte Carlo engine in your browser (Pyodide). Generates thousands of scenarios.'
+            }
+        ];
+
+        let currentStepIndex = -1;
+
+        function startTutorial() {
+            switchView('calculator'); // Ensure we are on calc view
+            currentStepIndex = 0;
+            document.getElementById('tutorial-overlay').classList.remove('hidden');
+            document.getElementById('tutorial-overlay').classList.remove('pointer-events-none');
+            showTutorialStep();
+        }
+
+        function endTutorial() {
+            currentStepIndex = -1;
+            document.getElementById('tutorial-overlay').classList.add('hidden');
+            document.getElementById('tutorial-overlay').classList.add('pointer-events-none');
+            document.getElementById('tutorial-overlay').innerHTML = ''; // Clear
+        }
+
+        function showTutorialStep() {
+            const step = tutorialSteps[currentStepIndex];
+            const el = document.getElementById(step.targetOverride || step.id);
+
+            // Handle Panels opening
+            if (step.parent === 'pnl-advanced') {
+                const panel = document.getElementById('pnl-advanced');
+                if (!panel.classList.contains('open')) toggleAdvanced();
+            }
+            if (step.trigger === 'advanced') {
+                const panel = document.getElementById('pnl-advanced');
+                if (!panel.classList.contains('open')) toggleAdvanced();
+            }
+
+            if (!el) {
+                console.warn("Tutorial element not found:", step.id);
+                nextStep();
+                return;
+            }
+
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Create/Update Overlay Elements
+            const rect = el.getBoundingClientRect();
+
+            // Tooltip Positioning Logic
+            const sidebarWidth = 420;
+            const scrollY = window.scrollY;
+            const scrollX = window.scrollX;
+
+            // Default to bottom behavior
+            let top = rect.bottom + scrollY + 12;
+            let left = rect.left + scrollX;
+            let arrowClass = 'tooltip-bottom';
+
+            // If in sidebar (approx width check), try to put it on the right
+            if (rect.left < sidebarWidth && (rect.right + 440 < window.innerWidth)) {
+                // Arrow center is at 30px from tooltip top. 
+                // Align those 30px with the field's vertical center.
+                const fieldCenter = rect.top + scrollY + (rect.height / 2);
+                top = fieldCenter - 30;
+                left = rect.right + scrollX + 16 + (step.offsetX || 0);
+                arrowClass = 'tooltip-right';
+            }
+
+            // Ensure tooltip stays within viewport width
+            if (left + 300 > window.innerWidth) {
+                left = window.innerWidth - 320;
+            }
+            if (left < 10) left = 10;
+
+            const tooltipHtml = `
+                <div class="tutorial-tooltip ${arrowClass}" style="top: ${top}px; left: ${left}px;">
+                     <div class="flex justify-between items-start mb-2 border-b border-white/20 pb-2">
+                        <h4 class="font-bold text-white text-sm">${step.title}</h4>
+                        <span class="text-xs text-white/80 font-mono bg-white/10 px-1.5 py-0.5 rounded ml-2">${currentStepIndex + 1}/${tutorialSteps.length}</span>
+                    </div>
+                    <p class="text-sm text-white/90 mb-4 leading-relaxed">${step.text}</p>
+                    <div class="flex justify-between gap-2 pt-2">
+                        <button onclick="prevStep()" class="text-xs text-white/60 hover:text-white px-2 py-1 font-medium ${currentStepIndex === 0 ? 'invisible' : ''}">Back</button>
+                        <div class="flex gap-2">
+                            <button onclick="endTutorial()" class="text-xs text-white/60 hover:text-white px-2 py-1 font-medium">Skip</button>
+                            <button onclick="nextStep()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-4 py-1.5 rounded-md transition shadow-sm border border-white/30">
+                                ${currentStepIndex === tutorialSteps.length - 1 ? 'Finish' : 'Next'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('tutorial-overlay').innerHTML = tooltipHtml;
+        }
+
+        function nextStep() {
+            currentStepIndex++;
+            if (currentStepIndex >= tutorialSteps.length) {
+                endTutorial();
+            } else {
+                showTutorialStep();
+            }
+        }
+
+        function prevStep() {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                showTutorialStep();
+            }
+        }
+
+        // Window Resize Handler to update positions
+        window.addEventListener('resize', () => {
+            if (currentStepIndex > -1) showTutorialStep();
+        });
+
+
+        // --- ASSET ALLOCATION LOGIC ---
+        function updateAllocations(source) {
+            const cryptoEl = document.getElementById('inp-alloc-crypto-pct');
+            const stocksEl = document.getElementById('inp-alloc-stocks-pct');
+            const lblCrypto = document.getElementById('lbl-crypto-pct');
+            const lblStocks = document.getElementById('lbl-stocks-pct');
+
+            let cryptoVal = parseInt(cryptoEl.value);
+            let stocksVal = parseInt(stocksEl.value);
+
+            if (source === 'crypto') {
+                stocksVal = 100 - cryptoVal;
+                stocksEl.value = stocksVal;
+            } else {
+                cryptoVal = 100 - stocksVal;
+                cryptoEl.value = cryptoVal;
+            }
+
+            lblCrypto.innerText = cryptoVal + "%";
+            lblStocks.innerText = stocksVal + "%";
+        }
+
+        // --- TOGGLE ADVANCED ---
+        function toggleAdvanced() {
+            const panel = document.getElementById('pnl-advanced');
+            const icon = document.getElementById('icon-advanced');
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // --- CRASH CONFIG TOGGLE ---
+        document.getElementById('chk-force-start-crash').addEventListener('change', (e) => {
+            const div = document.getElementById('div-crash-config');
+            if (e.target.checked) {
+                div.classList.remove('hidden');
+            } else {
+                div.classList.add('hidden');
+            }
+        });
+
+        async function main() {
+            try {
+                // Overlay is visible by default
+                update_status("Loading Pyodide...", "text-bitcoin-700");
+                pyodide = await loadPyodide();
+
+                update_status("Loading Packages...", "text-bitcoin-700");
+                await pyodide.loadPackage(["numpy", "scipy", "matplotlib"]);
+
+                update_status("Initializing Engine...", "text-bitcoin-700");
+                const pyCode = document.getElementById("py-logic").innerText;
+                await pyodide.runPythonAsync(pyCode);
+
+                update_status("Engine Ready", "text-bitcoin-700");
+                btnRun.disabled = false;
+
+                // Launch Rocket and Fade Out
+                const spinner = document.getElementById('main-spinner');
+                const rocket = document.getElementById('rocket-anim');
+                const text = document.getElementById('main-loading-text');
+                const overlay = document.getElementById('loading-overlay');
+
+                spinner.style.display = 'none';
+                text.innerText = "System Ready. Let's Go!";
+
+                setTimeout(() => {
+                    rocket.classList.add('launch');
+                    setTimeout(() => {
+                        overlay.classList.add('fade-out');
+                    }, 400);
+                }, 600);
+
+            } catch (err) {
+                console.error(err);
+                update_status("Init Failed: " + err.message, "text-red-500");
+            }
+        }
+
+        window.update_status = function (msg, colorClass) {
+            statusEl.innerHTML = `<span class="${colorClass}">${msg}</span>`;
+        }
+
+        async function runSimulation() {
+            if (!pyodide) return;
+            btnRun.disabled = true;
+            btnRun.innerHTML = '<div class="loading-spinner w-4 h-4 border-white/30 border-t-white"></div><span>Simulating...</span>';
+
+            setTimeout(async () => {
+                try {
+                    await pyodide.runPythonAsync(`run_full_simulation(None)`);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } catch (err) {
+                    console.error(err);
+                    update_status("Runtime Error", "text-red-600");
+                } finally {
+                    btnRun.disabled = false;
+                    btnRun.innerHTML = `
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Run Simulation</span>
+                    `;
+                }
+            }, 100);
+        }
+
+        main();
+    </script>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="fixed inset-0 hidden z-50 pointer-events-none"></div>
+
+</body>
+
+</html>
