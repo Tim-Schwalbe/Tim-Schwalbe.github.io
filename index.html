@@ -285,9 +285,7 @@
                         class="text-gold-500">Guard</span> Simulator</h1>
             </div>
             <div id="status-indicator"
-                class="flex items-center gap-2 text-sm text-gold-600 bg-gold-100 px-3 py-1.5 rounded-full border border-gold-200">
-                <div class="loading-spinner"></div>
-                <span class="font-medium">Initializing Engine...</span>
+                class="bg-gold-50/50 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-mono font-bold border border-gold-100 flex items-center gap-2">
             </div>
         </div>
 
@@ -1097,7 +1095,8 @@
         const statusEl = document.getElementById("status-indicator");
         const btnRun = document.getElementById("btn-run");
         window.update_status = function (msg, colorClass) {
-            statusEl.innerHTML = `<span class="${colorClass}">${msg}</span>`;
+            // Status messages removed per user request
+            // statusEl.innerHTML = `<span class="${colorClass}">${msg}</span>`;
         }
 
         function parseFormattedValue(val) {
@@ -1485,7 +1484,7 @@
 
         // Initialize logic
         (function main() {
-            update_status("Engine Ready", "text-gold-700");
+            // update_status("Engine Ready", "text-gold-700");
             const btn = document.getElementById("btn-run");
             if (btn) btn.disabled = false;
 
