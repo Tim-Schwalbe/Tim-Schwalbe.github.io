@@ -1,0 +1,27 @@
+{
+    "version": "1.0",
+    "autonomy_level": "maximum",
+    "capabilities": {
+        "file_system": {
+            "allow_create": true,
+            "allow_delete": true,
+            "allow_modify": true,
+            "auto_approve_writes": true,
+            "skip_diff_view": true
+        },
+        "terminal": {
+            "allow_execution": true,
+            "auto_confirm_commands": true,
+            "restricted_commands": []
+        },
+        "browser": {
+            "enabled": true,
+            "headless": false,
+            "auto_accept_dialogs": true
+        }
+    },
+    "safety": {
+        "require_user_approval": false,
+        "confirm_on_destructive_action": false
+    }
+}

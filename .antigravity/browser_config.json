@@ -1,0 +1,10 @@
+{
+    "browser": "chrome",
+    "headless": false,
+    "args": [
+        "--remote-debugging-port=9222",
+        "--no-sandbox",
+        "--disable-setuid-sandbox"
+    ],
+    "permissions": []
+}
