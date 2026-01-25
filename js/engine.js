@@ -151,9 +151,12 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
                 // Only check refill if we are paying from portfolio (Market is UP or Flat)
                 // And only if buffer is depleted.
                 const bufferTarget = configs.CASH_BUFFER || 0;
-                if (bufferTarget > 0 && cashBalance < bufferTarget) {
+                if (configs.REFILL_CASH_BUFFER && bufferTarget > 0 && cashBalance < bufferTarget) {
                     // Refill Threshold: Only if portfolio is substantial (e.g., > 110% of start)
-                    // This prevents refilling while barely surviving.
+                    // WHY 110%? 
+                    // To prevent "Sequence of Returns" traps. If the market drops to 80% and recovers to 100%, 
+                    // the portfolio is still fragile. We should NOT drain it to fill cash yet.
+                    // We only "harvest" profits when we are safely above the high-water mark (110% is a conservative safe zone).
                     const refillThreshold = INVESTED_AMOUNT * 1.10;
                     if (portfolio > refillThreshold) {
                         const needed = bufferTarget - cashBalance;
