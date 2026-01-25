@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Calc - Automated Tests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/statistics.js"></script>
+    <script src="../js/engine.js"></script>
+</head>
+
+<body class="bg-slate-50 p-10 font-sans">
+
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-lg">
+        <h1 class="text-3xl font-black text-slate-900 mb-6 border-b pb-4">Automated Verification Suite</h1>
+
+        <div id="test-results" class="space-y-4">
+            <!-- Results will be injected here -->
+        </div>
+
+        <div class="mt-8 pt-6 border-t font-mono text-xs text-slate-400">
+            Engine Version: 1.0.0 | Tests run on: <span id="timestamp"></span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('timestamp').innerText = new Date().toLocaleString();
+
+        const resultsDiv = document.getElementById("test-results");
+
+        function addResult(name, passed, detail) {
+            const div = document.createElement("div");
+            div.className = `p-4 rounded-xl border flex items-center justify-between ${passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`;
+
+            div.innerHTML = `
+                <div>
+                    <h3 class="font-bold ${passed ? 'text-green-800' : 'text-red-800'}">${passed ? '✅ PASS' : '❌ FAIL'}: ${name}</h3>
+                    <p class="text-sm mt-1 text-slate-600">${detail}</p>
+                </div>
+                <div class="text-2xl font-bold ${passed ? 'text-green-600' : 'text-red-600'}">
+                    ${passed ? 'GOOD' : 'ERROR'}
+                </div>
+            `;
+            resultsDiv.appendChild(div);
+        }
+
+        async function runTests() {
+            console.log("Starting Tests...");
+
+            const defaultConfig = {
+                years: 30, numSims: 500,
+                INVESTED_AMOUNT: 1000000, CASH_BUFFER: 0,
+                ALLOC_CRYPTO: 0, ALLOC_STOCKS: 1.0,
+                INFL_MEAN: 0.025, INFL_VOL: 0.015,
+                S_CAGR_START: 0.07, S_VOL_START: 0.16,
+                B_CAGR_START: 0.045, B_VOL_START: 0.05,
+                C_CAGR_START: 0.15, C_VOL_START: 0.60,
+                TARGET_ANNUAL_EXP: 40000, REFILL_CASH_BUFFER: true, FORCE_CRASH: false
+            };
+
+            // Test 1: Cash Only Golden Flow
+            // $600k Cash, $60k Spend, 0% Inf, 10 Years -> 100% Success
+            {
+                const cfg = { ...defaultConfig, years: 10, INVESTED_AMOUNT: 0, CASH_BUFFER: 600000, TARGET_ANNUAL_EXP: 60000, INFL_MEAN: 0, INFL_VOL: 0 };
+                const res = simulatePortfolio(-1, generateMarketData(500, 10, cfg), cfg);
+                addResult("Cash Only (0% Inf)", res.successRate >= 0.99, `Success Rate: ${(res.successRate * 100).toFixed(1)}% (Target: 100%)`);
+            }
+
+            // Test 2: Cash Only Inflation Fail
+            // $600k Cash, $60k Spend, 2.5% Inf, 10 Years -> 0% Success (Run out year 9)
+            {
+                const cfg = { ...defaultConfig, years: 10, INVESTED_AMOUNT: 0, CASH_BUFFER: 600000, TARGET_ANNUAL_EXP: 60000, INFL_MEAN: 0.025, INFL_VOL: 0 };
+                const res = simulatePortfolio(-1, generateMarketData(500, 10, cfg), cfg);
+                addResult("Cash Only with Inflation (Should Fail)", res.successRate <= 0.05, `Success Rate: ${(res.successRate * 100).toFixed(1)}% (Target: ~0%)`);
+            }
+
+            // Test 3: 100% Crypto Stress Test + Buffer
+            // 100% BTC ($1M), High Buffer ($600k covers 10y), 30 Years
+            // Even if BTC crashes, buffer saves leads to recovery.
+            {
+                const cfg = {
+                    ...defaultConfig, years: 30, INVESTED_AMOUNT: 1000000, CASH_BUFFER: 600000,
+                    ALLOC_CRYPTO: 1.0, ALLOC_STOCKS: 0,
+                    TARGET_ANNUAL_EXP: 60000,
+                    C_CAGR_START: 0.15, C_VOL_START: 0.80
+                }; // Very high vol
+                const res = simulatePortfolio(-1, generateMarketData(500, 30, cfg), cfg);
+                // Success should be high because Buffer protects the first decade
+                addResult("Crypto Crash Guard (100% BTC + Buffer)", res.successRate > 0.80, `Success Rate: ${(res.successRate * 100).toFixed(1)}% (Buffer worked)`);
+            }
+
+            // Test 4: Trinity Study (No Buffer)
+            // 100% Stocks, 3% WR -> Safe
+            {
+                const cfg = {
+                    ...defaultConfig, years: 30, INVESTED_AMOUNT: 1000000, CASH_BUFFER: 0,
+                    ALLOC_STOCKS: 1.0, ALLOC_CRYPTO: 0,
+                    TARGET_ANNUAL_EXP: 30000
+                };
+                const res = simulatePortfolio(-1, generateMarketData(500, 30, cfg), cfg);
+                addResult("Trinity Baseline (3.0% WR, Stocks Only)", res.successRate > 0.90, `Success Rate: ${(res.successRate * 100).toFixed(1)}%`);
+            }
+        }
+
+        requestAnimationFrame(runTests);
+    </script>
+</body>
+
+</html>

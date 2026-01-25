@@ -8,53 +8,49 @@ function generateMarketData(numSims, years, configs) {
     // We store log returns for each month
     const stockReturns = new Float64Array(numSims * months);
     const bondReturns = new Float64Array(numSims * months);
+    const cryptoReturns = new Float64Array(numSims * months);
     const inflationPath = new Float64Array(numSims * months);
 
     const useLegacyConfig = (key, defaultVal) => configs.hasOwnProperty(key) ? configs[key] : defaultVal;
-
-    // 1. Convert Annual Inputs to Monthly Parameters
-    // Stocks
-    const sCagr = useLegacyConfig('S_CAGR_START', 0.07); // ~7% Real/Nominal? Default 7%
-    const sVol = useLegacyConfig('S_VOL_START', 0.16);
-    const sDriftM = Math.log(1 + sCagr) / 12;
-    const sVolM = sVol / Math.sqrt(12);
-
-    // Bonds (Monthly)
-    const bCagr = useLegacyConfig('B_CAGR_START', 0.045); // ~4.5% Nominal
-    const bVol = useLegacyConfig('B_VOL_START', 0.05);    // ~5% Vol
-    const bDriftM = Math.log(1 + bCagr) / 12;
-    const bVolM = bVol / Math.sqrt(12);
-
-    // Inflation
-    const inflMean = useLegacyConfig('INFL_MEAN', 0.025);
-    const inflVol = useLegacyConfig('INFL_VOL', 0.015);
-    const inflMeanM = inflMean / 12;
-    const inflVolM = inflVol / Math.sqrt(12);
 
     // Generation Loop
     for (let s = 0; s < numSims; s++) {
         for (let m = 0; m < months; m++) {
             const idx = s * months + m;
+            const t = m / Math.max(1, months - 1); // Progression [0, 1]
 
-            // 1. Inflation
+            // 1. Inflation (Fixed mean)
             const zI = Stats.randomNormal(0, 1);
-            const inflM = inflMeanM + inflVolM * zI;
+            const inflM = (useLegacyConfig('INFL_MEAN', 0.025) / 12) + (useLegacyConfig('INFL_VOL', 0.015) / Math.sqrt(12)) * zI;
             inflationPath[idx] = inflM;
 
-            // 2. Stocks (GBM)
-            // Log Return = Drift_m + Vol_m * Z
+            // 2. Stocks (Interpolated)
+            const sCagr = useLegacyConfig('S_CAGR_START', 0.07) * (1 - t) + useLegacyConfig('S_CAGR_END', 0.07) * t;
+            const sVol = useLegacyConfig('S_VOL_START', 0.16) * (1 - t) + useLegacyConfig('S_VOL_END', 0.16) * t;
+            const sDriftM = Math.log(1 + sCagr) / 12;
+            const sVolM = sVol / Math.sqrt(12);
             const zS = Stats.randomNormal(0, 1);
-            const logRetS = sDriftM + sVolM * zS;
-            stockReturns[idx] = logRetS;
+            stockReturns[idx] = sDriftM + sVolM * zS;
 
-            // 3. Bonds (GBM)
+            // 3. Bonds (Usually constant)
+            const bCagr = useLegacyConfig('B_CAGR_START', 0.045);
+            const bVol = useLegacyConfig('B_VOL_START', 0.05);
+            const bDriftM = Math.log(1 + bCagr) / 12;
+            const bVolM = bVol / Math.sqrt(12);
             const zB = Stats.randomNormal(0, 1);
-            const logRetB = bDriftM + bVolM * zB;
-            bondReturns[idx] = logRetB;
+            bondReturns[idx] = bDriftM + bVolM * zB;
+
+            // 4. Crypto (Interpolated)
+            const cCagr = useLegacyConfig('C_CAGR_START', 0.15) * (1 - t) + useLegacyConfig('C_CAGR_END', 0.15) * t;
+            const cVol = useLegacyConfig('C_VOL_START', 0.60) * (1 - t) + useLegacyConfig('C_VOL_END', 0.60) * t;
+            const cDriftM = Math.log(1 + cCagr) / 12;
+            const cVolM = cVol / Math.sqrt(12);
+            const zC = Stats.randomNormal(0, 1);
+            cryptoReturns[idx] = cDriftM + cVolM * zC;
         }
     }
 
-    return { stocks: stockReturns, bonds: bondReturns, inflation: inflationPath };
+    return { stocks: stockReturns, bonds: bondReturns, crypto: cryptoReturns, inflation: inflationPath };
 }
 
 function simulatePortfolio(withdrawalRate, marketData, configs) {
@@ -67,7 +63,7 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
     }
 
     const months = years * 12;
-    const { stocks, bonds, inflation } = marketData;
+    const { stocks, bonds, crypto, inflation } = marketData;
 
     // Weights (Input is already decimal 0.0 - 1.0 from index.html)
     const wS = configs.ALLOC_STOCKS || 0;
@@ -85,7 +81,10 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
             console.warn("Engine: Withdrawal Rate < 0 but no TARGET_ANNUAL_EXP defined.");
         }
     } else {
-        effectiveAnnualWithdrawal = INVESTED_AMOUNT * withdrawalRate;
+        // [Fixed] SWR should be based on TOTAL CAPITAL (Invested + Cash), not just Invested.
+        // This allows correct calculation for 0% Invested portfolios.
+        const totalCap = INVESTED_AMOUNT + (configs.CASH_BUFFER || 0);
+        effectiveAnnualWithdrawal = totalCap * withdrawalRate;
     }
 
     // Debug Log
@@ -117,7 +116,7 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
             // 1. Market Factors
             const rLogS = stocks[idx];
             const rLogB = bonds ? bonds[idx] : 0;
-            // const rLogC = 0; // TODO: Crypto
+            const rLogC = crypto ? crypto[idx] : 0; // Fixed: Read from crypto array
 
             const inflM = inflation[idx];
             if (isNaN(rLogS)) { survived = false; portfolio = 0; break; }
@@ -127,9 +126,10 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
             // Correct Growth Factor: P_t = P_{t-1} * (1 + R_weighted_linear)
             const rLinS = Math.exp(rLogS) - 1;
             const rLinB = Math.exp(rLogB) - 1;
+            const rLinC = Math.exp(rLogC) - 1;
 
             // Weighted linear return
-            const rLinPort = (wS * rLinS) + (wB * rLinB); // + (wC ... )
+            const rLinPort = (wS * rLinS) + (wB * rLinB) + (wC * rLinC);
 
             const growthFactor = 1 + rLinPort;
 
@@ -176,11 +176,22 @@ function simulatePortfolio(withdrawalRate, marketData, configs) {
                 survived = false; portfolio = 0; break;
             }
 
-            if (portfolio <= 0) {
-                survived = false;
+            // 3. Fallback: If portfolio went negative, try to cover from cash
+            if (portfolio < 0) {
+                const deficit = -portfolio;
                 portfolio = 0;
-                break;
+
+                if (cashBalance >= deficit) {
+                    cashBalance -= deficit;
+                } else {
+                    // Cash exhausted too -> True Ruin
+                    cashBalance = 0;
+                    survived = false;
+                    break;
+                }
             }
+
+
 
             // 3. COLA
             if ((m + 1) % 12 === 0) {

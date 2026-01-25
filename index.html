@@ -1359,8 +1359,16 @@
                 // If user has 1.44M Inv + 60k Cash (Ratio 0.0416), 
                 // shConfigs (1M Inv) should have ~41.6k Cash.
                 const bufferRatio = configs.INVESTED_AMOUNT > 0 ? configs.CASH_BUFFER / configs.INVESTED_AMOUNT : 0;
-                const shInvested = 1000000;
-                const shBuffer = shInvested * bufferRatio;
+                const shTotal = 1000000;
+                let shInvested, shBuffer;
+
+                const totalCap = configs.INVESTED_AMOUNT + configs.CASH_BUFFER;
+                if (totalCap > 0) {
+                    shInvested = shTotal * (configs.INVESTED_AMOUNT / totalCap);
+                    shBuffer = shTotal * (configs.CASH_BUFFER / totalCap);
+                } else {
+                    shInvested = 1000000; shBuffer = 0; // Fallback
+                }
 
                 const shConfigs = { ...configs, INVESTED_AMOUNT: shInvested, CASH_BUFFER: shBuffer, TARGET_ANNUAL_EXP: 0 };
 
@@ -1385,15 +1393,13 @@
                 const final = simulatePortfolio(-1, marketData, configs); // -1 withdrawal uses TargetAnnual
 
                 // SWR Display Logic:
-                // findSWR returns rate relative to INVESTED_AMOUNT.
-                // We want to display SWR relative to TOTAL CAPITAL (User's Net Worth).
-                // Safe Annual = bestSWR * INVESTED_AMOUNT.
-                // Display Rate = Safe Annual / (INVESTED + CASH).
+                // Engine now returns SWR based on Total Capital (Invested + Cash).
+                // So bestSWR is already the correct 'Net Worth SWR'.
 
-                const totalCapital = configs.INVESTED_AMOUNT + configs.CASH_BUFFER;
-                const displaySWR = (bestSWR * configs.INVESTED_AMOUNT) / totalCapital;
-                const displaySWR99 = (swr99 * configs.INVESTED_AMOUNT) / totalCapital;
-                const displaySWR90 = (swr90 * configs.INVESTED_AMOUNT) / totalCapital;
+                const totalCapital = configs.INVESTED_AMOUNT + configs.CASH_BUFFER; // Re-declare for clarity
+                const displaySWR = bestSWR;
+                const displaySWR99 = swr99;
+                const displaySWR90 = swr90;
 
                 document.getElementById("res-swr-val").innerText = (displaySWR * 100).toFixed(2) + "%";
                 document.getElementById("res-swr-99").innerText = (displaySWR99 * 100).toFixed(2);
