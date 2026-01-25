@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WealthGuard Simulator</title>
+    <title>Bitcoin Retirement Calculator</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Pyodide -->
@@ -300,8 +300,8 @@
             <div class="flex items-center gap-3 sm:gap-4">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="Bitcoin Logo"
                     class="w-8 h-8 sm:w-10 sm:h-10 drop-shadow-sm">
-                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">Wealth<span
-                        class="text-[#F7931A]">Guard</span> Simulator</h1>
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">Bitcoin <span
+                        class="text-[#F7931A]">Retirement</span> Calculator</h1>
             </div>
             <div id="status-indicator"
                 class="bg-gold-50/50 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-mono font-bold border border-gold-100 flex items-center gap-2">
@@ -345,14 +345,14 @@
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>
                         </svg>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Portfolio Setup</h3>
+                        <h3 class="text-sm font-bold text-[#F7931A] uppercase tracking-widest">Portfolio Setup</h3>
                     </div>
 
                     <div class="grid grid-cols-2 gap-x-4 gap-y-6">
                         <!-- Horizon -->
                         <div class="col-span-1">
                             <label
-                                class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Horizon
+                                class="block text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-1.5">Horizon
                                 (Years)</label>
                             <input type="number" id="inp-years" value="30"
                                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-slate-700 font-medium focus:outline-none focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] transition shadow-sm h-[46px]">
@@ -361,7 +361,7 @@
                         <!-- Cash Buffer -->
                         <div class="col-span-1">
                             <label
-                                class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Cash
+                                class="block text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-1.5">Cash
                                 Buffer ($)</label>
                             <div class="relative">
                                 <span class="absolute left-3.5 top-[11px] text-slate-400 text-sm">$</span>
@@ -377,7 +377,7 @@
                                     </div>
                                 </label>
                                 <label for="chk-refill-buffer"
-                                    class="text-[9px] font-black text-slate-400 uppercase cursor-pointer select-none tracking-tight">Smart
+                                    class="text-[9px] font-black text-[#F7931A] uppercase cursor-pointer select-none tracking-tight">Smart
                                     Refill</label>
                                 <div class="relative group">
                                     <svg class="w-2.5 h-2.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
@@ -386,18 +386,20 @@
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <div
-                                        class="absolute bottom-full right-0 mb-2 w-56 p-2.5 bg-slate-800 text-slate-300 text-[9px] leading-relaxed rounded-xl shadow-2xl hidden group-hover:block z-50 pointer-events-none border border-slate-700">
+                                        class="absolute bottom-full right-0 mb-2 w-56 p-2.5 bg-[#F7931A] text-white text-[9px] leading-relaxed rounded-xl shadow-2xl hidden group-hover:block z-50 pointer-events-none border border-[#de760b]">
                                         Refills buffer from profits only when Portfolio > 110% initial value.
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <div class="space-y-6 mt-6">
                         <!-- Invested Amount -->
-                        <div class="col-span-1">
+                        <div>
                             <label
-                                class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Invested
-                                ($)</label>
+                                class="block text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-1.5">Invested
+                                Amount ($)</label>
                             <div class="relative">
                                 <span class="absolute left-3.5 top-[11px] text-slate-400 text-sm">$</span>
                                 <input type="text" id="inp-initial" value="1.500.000"
@@ -405,40 +407,29 @@
                             </div>
                         </div>
 
-                        <!-- Target Annual Expenses -->
-                        <div class="col-span-1">
+                        <!-- Total Capital (Streamlined Bar) -->
+                        <!-- Total Capital (Standardized Design) -->
+                        <div>
                             <label
-                                class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Annual
-                                Exp ($)</label>
+                                class="block text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-1.5">Total
+                                Capital (Invested + Cash)</label>
+                            <div
+                                class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 flex items-center justify-end h-[46px] shadow-sm">
+                                <span id="disp-total-capital" class="text-sm font-mono font-bold text-slate-800">$
+                                    1.500.000</span>
+                            </div>
+                        </div>
+
+                        <!-- Target Annual Expenses -->
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-1.5">Target
+                                Annual Expenses ($)</label>
                             <div class="relative">
                                 <span class="absolute left-3.5 top-[11px] text-slate-400 text-sm">$</span>
                                 <input type="text" id="inp-target-annual" value="60.000"
                                     class="w-full pl-8 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-slate-700 font-mono focus:outline-none focus:border-[#F7931A] transition shadow-sm h-[46px]">
                             </div>
-                        </div>
-
-                        <!-- Total Capital Summary Card -->
-                        <div class="col-span-2">
-                            <div
-                                class="bg-indigo-50/40 border border-indigo-100/60 rounded-2xl p-4 flex items-center justify-between group transition-all hover:bg-indigo-50/60">
-                                <div>
-                                    <p class="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-1">
-                                        Current Total Capital</p>
-                                    <p id="disp-total-capital" class="text-xl font-mono font-bold text-slate-800">$
-                                        1.500.000</p>
-                                </div>
-                                <div
-                                    class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-indigo-100 group-hover:scale-110 transition-transform">
-                                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                        </path>
-                                    </svg>
-                                </div>
-                            </div>
-                            <p class="text-[9px] text-slate-400 mt-2 ml-1 italic font-medium">Auto-calculated: Sum of
-                                invested assets and cash buffer.</p>
                         </div>
                     </div>
 
@@ -769,47 +760,50 @@
                         <div
                             class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
                             <div
-                                class="absolute -right-6 -top-6 w-32 h-32 bg-blue-50/50 rounded-full group-hover:scale-110 transition-transform">
+                                class="absolute -right-6 -top-6 w-32 h-32 bg-orange-50/50 rounded-full group-hover:scale-110 transition-transform">
                             </div>
-                            <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest relative z-10 mb-2">
+                            <p
+                                class="text-[10px] font-bold text-[#F7931A] uppercase tracking-widest relative z-10 mb-2">
                                 Success Probability</p>
                             <p id="res-success-val"
                                 class="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold text-slate-800 text-right relative z-10">
                                 --%</p>
                             <div class="w-full bg-slate-100 rounded-full h-2.5 mt-6 relative z-10 overflow-hidden">
                                 <div id="res-success-bar"
-                                    class="bg-blue-500 h-full rounded-full shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-1000"
+                                    class="bg-[#F7931A] h-full rounded-full shadow-[0_0_15px_rgba(247,147,26,0.3)] transition-all duration-1000"
                                     style="width: 0%"></div>
                             </div>
                             <p id="txt-success-desc"
-                                class="text-[10px] text-slate-400 font-medium mt-5 leading-relaxed">Percentage of
+                                class="text-[10px] text-slate-400 font-medium mt-5 leading-relaxed">
+                                Percentage of
                                 scenarios where your capital survived the full term.</p>
-                            <p class="text-[10px] text-blue-500 font-bold mt-1">Your Planned Withdrawal Rate: <span
+                            <p class="text-[10px] text-[#F7931A] font-bold mt-1">Your Planned Withdrawal Rate: <span
                                     id="res-planned-wr">--</span>%</p>
                         </div>
 
                         <!-- Required Capital -->
+                        <!-- Required Capital -->
                         <div
-                            class="sm:col-span-2 lg:col-span-2 bg-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden group">
-                            <div
-                                class="absolute -right-16 -top-16 w-64 h-64 bg-gold-500/10 rounded-full group-hover:scale-110 transition-transform duration-1000">
-                            </div>
+                            class="sm:col-span-2 lg:col-span-2 bg-[#F7931A] rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden group">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg"
+                                alt="Bitcoin Logo"
+                                class="absolute -right-8 -top-8 w-64 h-64 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000 pointer-events-none">
                             <div
                                 class="flex flex-col md:flex-row md:items-center justify-between h-full relative z-10 gap-8">
                                 <div class="space-y-2">
-                                    <p class="text-[10px] font-bold text-gold-400 uppercase tracking-[0.2em]">Required
+                                    <p class="text-[10px] font-bold text-white/90 uppercase tracking-[0.2em]">Required
                                         Capital (Goal)</p>
                                     <p id="res-required-capital" class="text-6xl font-serif font-bold text-white">--</p>
-                                    <p class="text-[10px] text-slate-400 font-medium italic">Amount needed to achieve
+                                    <p class="text-[10px] text-white/80 font-medium italic">Amount needed to achieve
                                         your target success probability.</p>
                                 </div>
                                 <div
-                                    class="bg-slate-700/50 p-6 rounded-2xl border border-slate-600 min-w-[200px] flex flex-col justify-center items-center">
+                                    class="bg-black/20 p-6 rounded-2xl border border-white/10 min-w-[200px] flex flex-col justify-center items-center backdrop-blur-sm shadow-inner">
                                     <p id="lbl-shortfall"
-                                        class="text-[13px] text-gold-400 font-black uppercase tracking-widest text-center">
-                                        --</p>
+                                        class="text-[13px] text-white font-black uppercase tracking-widest text-center">
+                                        GOAL DISTANCE: <span id="res-shortfall-val">$ --</span></p>
                                     <p
-                                        class="text-[9px] text-slate-400 mt-2 uppercase font-bold text-center tracking-tighter">
+                                        class="text-[9px] text-white/70 mt-2 uppercase font-bold text-center tracking-tighter">
                                         Current Funding Gap</p>
                                 </div>
                             </div>
@@ -820,9 +814,9 @@
                 <!-- SECTION 2: THE REALITY (Possible Today) -->
                 <div class="space-y-6 pt-4">
                     <div class="flex items-center gap-4">
-                        <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">The
+                        <h2 class="text-xs font-black text-gold-500 uppercase tracking-[0.2em] whitespace-nowrap">The
                             Reality (Supported by Current Wealth)</h2>
-                        <div class="h-px bg-slate-200 flex-1"></div>
+                        <div class="h-px bg-gold-200 flex-1"></div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1402,7 +1396,31 @@
                 document.getElementById("res-swr-target-label").innerText = (displaySWR * 100).toFixed(2);
 
                 document.getElementById("res-success-val").innerText = (final.successRate * 100).toFixed(1) + "%";
-                document.getElementById("res-success-bar").style.width = (final.successRate * 100) + "%";
+                const successBar = document.getElementById("res-success-bar");
+                const successPct = final.successRate * 100;
+                const targetPct = configs.targetSuccess * 100;
+
+                // Color Logic: Red if < Target, Orange if >= Target (or close)
+                // Using "nearly" as effectively meeting the threshold for visual comfort, or just sticking to target.
+                // We will use 98% of target as "nearly" threshold if needed, but strict target is clearer.
+                // User said: "red until it reaches... orange when it reaches... nearly"
+                // Let's make it Red below (Target - 2%), and Orange if >= (Target - 2%)?
+                // Or simpler: Red if < Target. Orange if >= Target.
+
+                // Let's try: Red if < Target, Orange if >= Target.
+                // Actually user said "orange when it reaches the success rate nearly". 
+                // Let's assume a small tolerance of 2%.
+
+                if (successPct < (targetPct - 0.1)) {
+                    successBar.classList.remove("bg-[#F7931A]");
+                    successBar.classList.add("bg-red-500");
+                    successBar.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)"; // Red glow
+                } else {
+                    successBar.classList.remove("bg-red-500");
+                    successBar.classList.add("bg-[#F7931A]");
+                    successBar.style.boxShadow = "0 0 15px rgba(247, 147, 26, 0.4)"; // Orange glow
+                }
+                successBar.style.width = successPct + "%";
 
                 // Dynamic Text Description
                 const investedFmt = configs.INVESTED_AMOUNT.toLocaleString('de-DE');
