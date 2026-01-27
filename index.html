@@ -332,10 +332,10 @@
         <!-- Sidebar: Configuration -->
         <aside
             class="w-full lg:w-[420px] flex-none bg-white border-b lg:border-b-0 lg:border-r border-orange-200/30 z-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-            <div class="p-6 space-y-8">
+            <div class="p-6">
 
                 <!-- Section 1: Portfolio -->
-                <div class="space-y-4">
+                <div class="space-y-4 mb-6">
                     <div class="flex items-center gap-2 pb-2 border-b border-orange-100/30">
                         <svg class="w-5 h-5 text-[#F7931A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -392,20 +392,34 @@
                     </div>
 
                     <div class="space-y-6 mt-6">
-                        <!-- Invested Amount -->
-                        <div>
-                            <label
-                                class="block text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-1.5 focus-within:text-black">Invested
-                                Amount ($)</label>
-                            <div class="relative">
-                                <span class="absolute left-3.5 top-[11px] text-slate-500 text-sm font-bold">$</span>
-                                <input type="text" id="inp-initial" value="1.500.000"
-                                    class="w-full pl-8 bg-white border border-slate-300 rounded-xl px-4 py-2 text-slate-900 font-bold text-lg focus:outline-none focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] transition shadow-sm h-[46px] placeholder:text-slate-400">
+                        <!-- Inputs Grid -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Invested Amount -->
+                            <div>
+                                <label
+                                    class="block text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-1.5 focus-within:text-black">Invested
+                                    Amount ($)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3.5 top-[11px] text-slate-500 text-sm font-bold">$</span>
+                                    <input type="text" id="inp-initial" value="1.500.000"
+                                        class="w-full pl-8 bg-white border border-slate-300 rounded-xl px-4 py-2 text-slate-900 font-bold text-lg focus:outline-none focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] transition shadow-sm h-[46px] placeholder:text-slate-400">
+                                </div>
+                            </div>
+
+                            <!-- Target Annual Expenses -->
+                            <div>
+                                <label
+                                    class="block text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-1.5 focus-within:text-black">Target
+                                    Expenses ($)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3.5 top-[11px] text-slate-500 text-sm font-bold">$</span>
+                                    <input type="text" id="inp-target-annual" value="58.500"
+                                        class="w-full pl-8 bg-white border border-slate-300 rounded-xl px-4 py-2 text-slate-900 font-bold text-lg focus:outline-none focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] transition shadow-sm h-[46px] placeholder:text-slate-400">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Total Capital (Streamlined Bar) -->
-                        <!-- Total Capital (Standardized Design) -->
+                        <!-- Total Capital (Total) -->
                         <div>
                             <label
                                 class="block text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-1.5">Total
@@ -416,236 +430,237 @@
                                     1.500.000</span>
                             </div>
                         </div>
-
-                        <!-- Target Annual Expenses -->
-                        <div>
-                            <label
-                                class="block text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-1.5 focus-within:text-black">Target
-                                Annual Expenses ($)</label>
-                            <div class="relative">
-                                <span class="absolute left-3.5 top-[11px] text-slate-500 text-sm font-bold">$</span>
-                                <input type="text" id="inp-target-annual" value="58.500"
-                                    class="w-full pl-8 bg-white border border-slate-300 rounded-xl px-4 py-2 text-slate-900 font-bold text-lg focus:outline-none focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] transition shadow-sm h-[46px] placeholder:text-slate-400">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Withdrawal Guardrails (Blue Card Design) -->
-                    <!-- Withdrawal Guardrails -->
-                    <!-- Withdrawal Guardrails -->
-                    <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-200/50 mt-2 relative group-info">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Dynamic
-                                Spending Guardrails</span>
-
-                            <!-- Info Icon -->
-                            <div class="relative group cursor-help">
-                                <svg class="w-4 h-4 text-[#F7931A] opacity-70 group-hover:opacity-100 transition-opacity"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <!-- Tooltip -->
-                                <div
-                                    class="absolute right-0 top-6 w-64 bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed">
-                                    <p class="font-bold text-[#F7931A] mb-1">Flexibility Trade-off:</p>
-                                    <ul class="list-disc pl-3 mb-2 space-y-1">
-                                        <li><span class="text-red-300 font-bold">Cut Spending:</span> Accepting a lower
-                                            floor (e.g. -20%) improves survival odds (SWR) in crashes.</li>
-                                        <li><span class="text-green-300 font-bold">Boost Spending:</span> Higher ceiling
-                                            allows spending profits in good years.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <!-- Floor Setting (Downside) -->
-                            <div>
-                                <div class="flex justify-between items-baseline mb-1">
-                                    <label class="block text-[10px] text-slate-700 font-bold">
-                                        Max Annual Cut (%) <span class="text-red-400 text-[9px]">(Floor)</span>
-                                    </label>
-                                    <span class="text-[9px] text-slate-500 font-mono" id="disp-floor-limit">$ --</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <input type="number" id="inp-floor-cut" value="0" step="5" min="0" max="50"
-                                        class="w-full bg-white border border-red-100 focus:border-red-400 rounded px-2 py-1 text-slate-700 text-xs font-bold shadow-sm transition-colors focus:bg-red-50">
-                                </div>
-                                <p class="text-[9px] text-slate-400 mt-1">If "0%", you never cut spending (Safest
-                                    Mindset).</p>
-                                <p id="tip-floor-example"
-                                    class="text-[9px] text-orange-900 mt-1 leading-tight bg-orange-100/50 p-1.5 rounded border border-orange-200/50 hidden">
-                                    --
-                                </p>
-                            </div>
-
-                            <!-- Ceiling Settings (Upside) -->
-                            <div class="border-t border-slate-100 pt-2">
-                                <label class="block text-[10px] text-slate-700 font-bold mb-1">
-                                    Max Spend Increase % <span class="text-green-500 text-[9px]">(Ceiling)</span>
-                                </label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <span class="text-[9px] text-slate-400 block mb-0.5">Years 1-10</span>
-                                        <div class="relative">
-                                            <input type="number" id="inp-ceiling-early" value="100" step="10" min="100"
-                                                class="w-full bg-white border border-green-100 focus:border-green-400 rounded px-2 py-1 pr-5 text-slate-700 text-xs shadow-sm">
-                                            <span
-                                                class="absolute right-1.5 top-1 text-[10px] text-slate-400 font-bold">%</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] text-slate-400 block mb-0.5">Years 11+</span>
-                                        <div class="relative">
-                                            <input type="number" id="inp-ceiling-late" value="100" step="10" min="100"
-                                                class="w-full bg-white border border-green-100 focus:border-green-400 rounded px-2 py-1 pr-5 text-slate-700 text-xs shadow-sm">
-                                            <span
-                                                class="absolute right-1.5 top-1 text-[10px] text-slate-400 font-bold">%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-[9px] text-slate-400 mt-1 italic">
-                                    <span class="font-bold">Strategy:</span> Keep early years strict to survive Sequence
-                                    Risk, then relax later to enjoy wealth.
-                                </p>
-                            </div>
-                            <div class="mt-2 bg-orange-50/50 p-2 rounded border border-orange-200/50">
-                                <p class="text-[9px] text-slate-500 italic leading-snug">
-                                    <span class="font-bold text-slate-700">Mathematical Logic:</span> SWR is determined
-                                    by <span class="text-red-500 font-bold">Worst-Case Crashes</span> where your
-                                    portfolio drops immediately, so you never reach the "Ceiling" to spend more.
-                                </p>
-                                <p class="text-[9px] text-slate-500 italic leading-snug mt-1">
-                                    The Ceiling only activates in <span class="text-green-600 font-bold">Bull
-                                        Markets</span>, converting "Excess Wealth" into "Lifestyle" (reducing your final
-                                    unspent pile).
-                                </p>
-                                <p id="tip-ceiling-example"
-                                    class="text-[9px] text-orange-900 mt-2 leading-tight bg-orange-100/50 p-1.5 rounded border border-orange-200/50 hidden">
-                                    --
-                                </p>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
-
-                <!-- Sim Settings -->
-                <div class="space-y-4 pt-4 border-t border-orange-100/30">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-1">
-                            <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Sim Data
-                                Points</label>
-                            <input type="number" id="inp-num-sims" value="1000"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Target
-                                Success (%)</label>
-                            <input type="number" step="1" id="inp-target-success" value="90"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Simulation Button -->
-                <div class="pt-2 pb-6">
-                    <button id="btn-run" disabled
-                        class="w-full bg-[#F7931A] hover:bg-[#de760b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-200 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span>Run Simulation</span>
-                    </button>
-                </div>
-
-                <!-- Asset Allocation -->
-                <div class="space-y-4">
-                    <div class="flex items-center gap-2 pb-2 border-b border-orange-100/30">
-                        <svg class="w-5 h-5 text-[#F7931A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                        </svg>
-                        <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Asset Allocation
-                        </h3>
-                    </div>
-
-                    <div class="bg-orange-50/30 rounded-xl p-4 border border-orange-100/30 space-y-6">
-                        <!-- Bonds Slider -->
-                        <div class="pb-2 border-b border-white/50">
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="flex items-center gap-1 font-bold text-slate-900">
-                                    <span class="text-[#F7931A]">●</span> Bonds (FI)
-                                </span>
-                                <span id="lbl-bonds-pct" class="font-bold text-[#F7931A]">60%</span>
-                            </div>
-                            <input type="range"
-                                class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                min="0" max="100" step="5" id="inp-alloc-bonds-pct" value="60"
-                                oninput="updateAllocations('bonds')">
-                            <p class="text-[10px] text-slate-400 mt-1">Fixed income & capital preservation</p>
-                        </div>
-
-                        <!-- Stocks Slider -->
-                        <div>
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="flex items-center gap-1 font-bold text-slate-900">
-                                    <span class="text-[#F7931A]">●</span> Stocks (ETF)
-                                </span>
-                                <span id="lbl-stocks-pct" class="font-bold text-[#F7931A]">40%</span>
-                            </div>
-                            <input type="range"
-                                class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="40"
-                                oninput="updateAllocations('stocks')">
-                        </div>
-
-                        <!-- Crypto Slider -->
-                        <div>
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="flex items-center gap-1 font-bold text-slate-900">
-                                    <span class="text-[#F7931A]">●</span> Crypto (BTC)
-                                </span>
-                                <span id="lbl-crypto-pct" class="font-bold text-[#F7931A]">0%</span>
-                            </div>
-                            <input type="range"
-                                class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="0"
-                                oninput="updateAllocations('crypto')">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Deep Tweak Section -->
-                <div class="space-y-4">
-                    <button onclick="toggleAdvanced()"
+                <!-- 1. Asset Allocation (Collapsible) -->
+                <div class="border-t border-orange-100/30 pt-3">
+                    <button onclick="toggleAssetAlloc()"
                         class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
-                        <span>Advanced Market Assumptions</span>
-                        <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
-                            stroke="#F7931A" viewBox="0 0 24 24">
+                        <span>Asset Allocation</span>
+                        <svg id="icon-asset-alloc" class="w-4 h-4 transform transition-transform text-[#F7931A]"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                             </path>
                         </svg>
                     </button>
 
-                    <div id="pnl-advanced" class="advanced-panel space-y-6">
+                    <div id="pnl-asset-alloc" class="advanced-panel space-y-4 pt-4">
+                        <div class="bg-orange-50/30 rounded-xl p-4 border border-orange-100/30 space-y-6">
+                            <!-- Bonds Slider -->
+                            <div class="pb-2 border-b border-white/50">
+                                <div class="flex justify-between text-xs mb-2">
+                                    <span class="flex items-center gap-1 font-bold text-slate-900">
+                                        <span class="text-[#F7931A]">●</span> Bonds (FI)
+                                    </span>
+                                    <span id="lbl-bonds-pct" class="font-bold text-[#F7931A]">60%</span>
+                                </div>
+                                <input type="range"
+                                    class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                    min="0" max="100" step="5" id="inp-alloc-bonds-pct" value="60"
+                                    oninput="updateAllocations('bonds')">
+                                <p class="text-[10px] text-slate-400 mt-1">Fixed income & capital preservation</p>
+                            </div>
 
-                        <!-- Stress Test Parameters (New) -->
+                            <!-- Stocks Slider -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-2">
+                                    <span class="flex items-center gap-1 font-bold text-slate-900">
+                                        <span class="text-[#F7931A]">●</span> Stocks (ETF)
+                                    </span>
+                                    <span id="lbl-stocks-pct" class="font-bold text-[#F7931A]">40%</span>
+                                </div>
+                                <input type="range"
+                                    class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                    min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="40"
+                                    oninput="updateAllocations('stocks')">
+                            </div>
+
+                            <!-- Crypto Slider -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-2">
+                                    <span class="flex items-center gap-1 font-bold text-slate-900">
+                                        <span class="text-[#F7931A]">●</span> Crypto (BTC)
+                                    </span>
+                                    <span id="lbl-crypto-pct" class="font-bold text-[#F7931A]">0%</span>
+                                </div>
+                                <input type="range"
+                                    class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                    min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="0"
+                                    oninput="updateAllocations('crypto')">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Withdrawal Guardrails (Collapsible) -->
+                <div class="border-t border-orange-100/30 pt-3">
+                    <button onclick="toggleGuardrails()"
+                        class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
+                        <span>Withdrawal Guardrails</span>
+                        <svg id="icon-guardrails" class="w-4 h-4 transform transition-transform text-[#F7931A]"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <div id="pnl-guardrails" class="advanced-panel space-y-4 pt-4">
+                        <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-200/50 relative group-info">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Dynamic
+                                    Spending</span>
+
+                                <!-- Info Icon -->
+                                <div class="relative group cursor-help">
+                                    <svg class="w-4 h-4 text-[#F7931A] opacity-70 group-hover:opacity-100 transition-opacity"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <!-- Tooltip -->
+                                    <div
+                                        class="absolute right-0 top-6 w-64 bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed">
+                                        <p class="font-bold text-[#F7931A] mb-1">Flexibility Trade-off:</p>
+                                        <ul class="list-disc pl-3 mb-2 space-y-1">
+                                            <li><span class="text-red-300 font-bold">Cut Spending:</span> Accepting a
+                                                lower
+                                                floor (e.g. -20%) improves survival odds (SWR) in crashes.</li>
+                                            <li><span class="text-green-300 font-bold">Boost Spending:</span> Higher
+                                                ceiling
+                                                allows spending profits in good years.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <!-- Floor Setting (Downside) -->
+                                <div>
+                                    <div class="flex justify-between items-baseline mb-1">
+                                        <label class="block text-[10px] text-slate-700 font-bold">
+                                            Max Annual Cut (%) <span class="text-red-400 text-[9px]">(Floor)</span>
+                                        </label>
+                                        <span class="text-[9px] text-slate-500 font-mono" id="disp-floor-limit">$
+                                            --</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" id="inp-floor-cut" value="0" step="5" min="0" max="50"
+                                            class="w-full bg-white border border-red-100 focus:border-red-400 rounded px-2 py-1 text-slate-700 text-xs font-bold shadow-sm transition-colors focus:bg-red-50">
+                                    </div>
+                                    <p class="text-[9px] text-slate-400 mt-1">If "0%", you never cut spending (Safest
+                                        Mindset).</p>
+                                    <p id="tip-floor-example"
+                                        class="text-[9px] text-orange-900 mt-1 leading-tight bg-orange-100/50 p-1.5 rounded border border-orange-200/50 hidden">
+                                        --
+                                    </p>
+                                </div>
+
+                                <!-- Ceiling Settings (Upside) -->
+                                <div class="border-t border-slate-100 pt-2">
+                                    <label class="block text-[10px] text-slate-700 font-bold mb-1">
+                                        Max Spend Increase % <span class="text-green-500 text-[9px]">(Ceiling)</span>
+                                    </label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <span class="text-[9px] text-slate-400 block mb-0.5">Years 1-10</span>
+                                            <div class="relative">
+                                                <input type="number" id="inp-ceiling-early" value="100" step="10"
+                                                    min="100"
+                                                    class="w-full bg-white border border-green-100 focus:border-green-400 rounded px-2 py-1 pr-5 text-slate-700 text-xs shadow-sm">
+                                                <span
+                                                    class="absolute right-1.5 top-1 text-[10px] text-slate-400 font-bold">%</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-[9px] text-slate-400 block mb-0.5">Years 11+</span>
+                                            <div class="relative">
+                                                <input type="number" id="inp-ceiling-late" value="100" step="10"
+                                                    min="100"
+                                                    class="w-full bg-white border border-green-100 focus:border-green-400 rounded px-2 py-1 pr-5 text-slate-700 text-xs shadow-sm">
+                                                <span
+                                                    class="absolute right-1.5 top-1 text-[10px] text-slate-400 font-bold">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] text-slate-400 mt-1 italic">
+                                        <span class="font-bold">Strategy:</span> Keep early years strict to survive
+                                        Sequence
+                                        Risk, then relax later to enjoy wealth.
+                                    </p>
+                                </div>
+                                <div class="mt-2 bg-orange-50/50 p-2 rounded border border-orange-200/50">
+                                    <p class="text-[9px] text-slate-500 italic leading-snug">
+                                        <span class="font-bold text-slate-700">Mathematical Logic:</span> SWR is
+                                        determined
+                                        by <span class="text-red-500 font-bold">Worst-Case Crashes</span> where your
+                                        portfolio drops immediately, so you never reach the "Ceiling" to spend more.
+                                    </p>
+                                    <p class="text-[9px] text-slate-500 italic leading-snug mt-1">
+                                        The Ceiling only activates in <span class="text-green-600 font-bold">Bull
+                                            Markets</span>, converting "Excess Wealth" into "Lifestyle" (reducing your
+                                        final
+                                        unspent pile).
+                                    </p>
+                                    <p id="tip-ceiling-example"
+                                        class="text-[9px] text-orange-900 mt-2 leading-tight bg-orange-100/50 p-1.5 rounded border border-orange-200/50 hidden">
+                                        --
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Advanced Market Assumptions (Collapsible) -->
+                <div class="border-t border-orange-100/30 pt-3">
+                    <button onclick="toggleAdvanced()"
+                        class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
+                        <span>Advanced Market Assumptions</span>
+                        <svg id="icon-advanced" class="w-4 h-4 transform transition-transform text-[#F7931A]"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <div id="pnl-advanced" class="advanced-panel space-y-6 pt-4">
+
+                        <!-- Stress Test Parameters -->
                         <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
-                            <p class="text-[10px] uppercase font-bold text-red-500 mb-2">Stress Test / Bad Years</p>
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[10px] uppercase font-bold text-red-500">Stress Test / Bad Years</p>
+                                <!-- Info Tooltip -->
+                                <div class="relative group">
+                                    <svg class="w-4 h-4 text-red-400 cursor-help hover:text-red-600 transition-colors"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div
+                                        class="absolute right-0 top-6 w-72 bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed border border-slate-700">
+                                        <p class="font-bold text-[#F7931A] mb-2">The Math of "Consecutive Bad Years"</p>
+                                        <p class="mb-2 text-slate-300">A "Bad Year" is when Real Return < 0. For a
+                                                standard portfolio, chance is 30-40%.</p>
+                                                <p class="mb-1 text-slate-300">Probability of consecutive bad years
+                                                    drops
+                                                    exponentially:</p>
+                                                <ul class="space-y-1 text-slate-400 font-mono">
+                                                    <li><span class="text-white">2 Years:</span> ~16% (Often)</li>
+                                                    <li><span class="text-white">5 Years:</span> ~1% (Rare)</li>
+                                                    <li><span class="text-white">10 Years:</span> ~0.01% (Very Rare)
+                                                    </li>
+                                                    <li><span class="text-white">30 Years:</span> ~0% (Impossible)</li>
+                                                </ul>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="space-y-3">
                                 <div>
                                     <label class="block text-[10px] text-slate-700 font-bold mb-1">Max Consecutive
                                         Bad Years
                                         (Limit)</label>
-                                    <input type="number" id="inp-max-bad-years" value="5"
+                                    <input type="number" id="inp-max-consecutive-bad-years" value="5"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
                                     <p class="text-[9px] text-slate-600 font-bold mt-0.5">Limits recovery logic
                                         after this
@@ -789,8 +804,50 @@
                     </div>
                 </div>
 
+                <!-- 4. Simulation Config (Collapsible) -->
+                <div class="border-t border-orange-100/30 pt-3 pb-4">
+                    <button onclick="toggleSimParams()"
+                        class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
+                        <span>Simulation Parameter</span>
+                        <svg id="icon-sim-params" class="w-4 h-4 transform transition-transform text-[#F7931A]"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
 
-            </div>
+                    <div id="pnl-sim-params" class="advanced-panel space-y-4 pt-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-1">
+                                <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Sim Data
+                                    Points</label>
+                                <input type="number" id="inp-num-sims" value="1000"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Target
+                                    Success (%)</label>
+                                <input type="number" step="1" id="inp-target-success" value="95"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Button -->
+                <div class="pt-2 pb-6">
+                    <button id="btn-run" disabled
+                        class="w-full bg-[#F7931A] hover:bg-[#de760b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-200 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Run Simulation</span>
+                    </button>
+                </div>
         </aside>
 
         <!-- Main Content: Results -->

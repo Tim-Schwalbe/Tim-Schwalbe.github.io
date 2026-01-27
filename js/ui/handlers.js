@@ -149,9 +149,33 @@ window.Handlers = {
         const icon = document.getElementById('icon-advanced');
         panel.classList.toggle('open');
         icon.style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+    },
+
+    toggleAssetAlloc() {
+        const panel = document.getElementById('pnl-asset-alloc');
+        const icon = document.getElementById('icon-asset-alloc');
+        panel.classList.toggle('open');
+        icon.style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+    },
+
+    toggleGuardrails() {
+        const panel = document.getElementById('pnl-guardrails');
+        const icon = document.getElementById('icon-guardrails');
+        panel.classList.toggle('open');
+        icon.style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+    },
+
+    toggleSimParams() {
+        const panel = document.getElementById('pnl-sim-params');
+        const icon = document.getElementById('icon-sim-params');
+        panel.classList.toggle('open');
+        icon.style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
     }
 };
 
 // Global aliases for inline onclick/oninput handlers
 window.updateAllocations = window.Handlers.updateAllocations;
 window.toggleAdvanced = window.Handlers.toggleAdvanced;
+window.toggleAssetAlloc = window.Handlers.toggleAssetAlloc;
+window.toggleGuardrails = window.Handlers.toggleGuardrails;
+window.toggleSimParams = window.Handlers.toggleSimParams;
