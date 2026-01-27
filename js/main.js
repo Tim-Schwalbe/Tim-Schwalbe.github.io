@@ -127,7 +127,7 @@ async function runSimulation() {
     const safeMonthly = safeWithdrawalAmount / 12;
     const safeMonthlyEl = document.getElementById('res-safe-monthly');
     const targetPtrEl = document.getElementById('res-target-ptr');
-    if (safeMonthlyEl) safeMonthlyEl.innerText = Formatters.formatCurrency(safeMonthly / 1000, 1) + "k";
+    if (safeMonthlyEl) safeMonthlyEl.innerText = Formatters.formatCurrency(safeMonthly, 0);
     if (targetPtrEl) targetPtrEl.innerText = configs.TARGET_SUCCESS_PERCENT.toFixed(0);
 
     // Calculate other risk profiles (99% and 90%)
@@ -141,8 +141,8 @@ async function runSimulation() {
     const swr99El = document.getElementById('res-swr-99');
     const swr90El = document.getElementById('res-swr-90');
 
-    if (safe99El) safe99El.innerText = Formatters.formatCurrency(monthly99 / 1000, 1) + "k";
-    if (safe90El) safe90El.innerText = Formatters.formatCurrency(monthly90 / 1000, 1) + "k";
+    if (safe99El) safe99El.innerText = Formatters.formatCurrency(monthly99, 0);
+    if (safe90El) safe90El.innerText = Formatters.formatCurrency(monthly90, 0);
     if (swr99El) swr99El.innerText = (swr99 * 100).toFixed(2);
     if (swr90El) swr90El.innerText = (swr90 * 100).toFixed(2);
 
@@ -150,12 +150,12 @@ async function runSimulation() {
     const maxWealth = Math.max(...res.wealths);
     const maxMonthly = (maxWealth * 0.04) / 12; // Rough estimate
     const maxMonthlyEl = document.getElementById('res-max-monthly');
-    if (maxMonthlyEl) maxMonthlyEl.innerText = Formatters.formatCurrency(maxMonthly / 1000, 1) + "k";
+    if (maxMonthlyEl) maxMonthlyEl.innerText = Formatters.formatCurrency(maxMonthly, 0);
 
     // Target Monthly Display
     const targetMonthly = configs.TARGET_ANNUAL_EXP / 12;
     const targetMonthlyEl = document.getElementById('lbl-target-monthly');
-    if (targetMonthlyEl) targetMonthlyEl.innerText = Formatters.formatCurrency(targetMonthly / 1000, 1) + "k";
+    if (targetMonthlyEl) targetMonthlyEl.innerText = Formatters.formatCurrency(targetMonthly, 0);
 
     Renderer.updateSuccessBar(res.successRate, targetOdds);
     Renderer.renderHistogram(res.wealths, 'res-histogram');
@@ -168,8 +168,8 @@ async function runSimulation() {
     const medianEl = document.getElementById('res-median-end');
     const worstEl = document.getElementById('res-worst-case');
 
-    if (medianEl) medianEl.innerText = Formatters.formatCurrency(medianWealth / 1000, 0) + "k";
-    if (worstEl) worstEl.innerText = Formatters.formatCurrency(worstCaseWealth / 1000, 0) + "k";
+    if (medianEl) medianEl.innerText = Formatters.formatCurrency(medianWealth, 0);
+    if (worstEl) worstEl.innerText = Formatters.formatCurrency(worstCaseWealth, 0);
 
     // Show results and hide placeholder
     const resultsContainer = document.getElementById('results-container');

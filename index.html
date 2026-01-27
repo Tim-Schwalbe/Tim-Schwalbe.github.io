@@ -638,20 +638,39 @@
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <div
-                                        class="absolute right-0 top-6 w-72 bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed border border-slate-700">
-                                        <p class="font-bold text-[#F7931A] mb-2">The Math of "Consecutive Bad Years"</p>
-                                        <p class="mb-2 text-slate-300">A "Bad Year" is when Real Return < 0. For a
-                                                standard portfolio, chance is 30-40%.</p>
-                                                <p class="mb-1 text-slate-300">Probability of consecutive bad years
-                                                    drops
-                                                    exponentially:</p>
-                                                <ul class="space-y-1 text-slate-400 font-mono">
-                                                    <li><span class="text-white">2 Years:</span> ~16% (Often)</li>
-                                                    <li><span class="text-white">5 Years:</span> ~1% (Rare)</li>
-                                                    <li><span class="text-white">10 Years:</span> ~0.01% (Very Rare)
-                                                    </li>
-                                                    <li><span class="text-white">30 Years:</span> ~0% (Impossible)</li>
-                                                </ul>
+                                        class="absolute right-0 top-6 w-80 bg-[#F7931A] text-white text-[10px] p-4 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed border border-[#de760b]">
+                                        <p class="font-black text-white text-xs mb-2 border-b border-white/20 pb-1">Mean
+                                            Reversion (The "Sanity Filter")</p>
+                                        <p class="mb-2 text-white/90">Prevents "infinite doom" scenarios where markets
+                                            never recover. </p>
+
+                                        <div class="space-y-2 mb-3">
+                                            <p class="text-white/90"><span class="text-white font-bold underline">The
+                                                    Logic:</span> Low prices eventually attract buyers, snapping the
+                                                market back to historical averages.</p>
+                                            <p class="text-white/90"><span class="text-white font-bold underline">The
+                                                    Hard Override:</span> This is 100% true. If the limit is hit, the
+                                                sim ignores the random dice roll. It calculates the exact <span
+                                                    class="bg-white/20 px-1 rounded font-bold text-white">mathematical
+                                                    boost</span> needed to force exactly <span class="font-bold">+2%
+                                                    real growth</span>.</p>
+                                            <p class="text-white/90"><span class="text-white font-bold underline">The
+                                                    Reset:</span> After this mandated bounce, the bad-year counter
+                                                resets to zero and the simulation returns to random behavior.</p>
+                                        </div>
+
+                                        <div class="border-t border-white/20 pt-2">
+                                            <p
+                                                class="mb-1 text-white/70 font-bold uppercase tracking-widest text-[8px]">
+                                                Streak Probability (Market Noise):</p>
+                                            <ul class="space-y-1 text-white/70 font-mono text-[9px]">
+                                                <li><span class="text-white">2 Years:</span> ~16% (Common)</li>
+                                                <li><span class="text-white">5 Years:</span> ~1% (Rare)</li>
+                                                <li><span class="text-white">10 Years:</span> ~0.01% (Very Rare)</li>
+                                                <li><span class="text-white">15+ Years:</span> Exogenous Shock (Sanity
+                                                    check)</li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -660,12 +679,12 @@
                                     <label class="block text-[10px] text-slate-700 font-bold mb-1">Max Consecutive
                                         Bad Years
                                         (Limit)</label>
-                                    <input type="number" id="inp-max-consecutive-bad-years" value="5"
+                                    <input type="number" id="inp-max-consecutive-bad-years" value="15"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                    <p class="text-[9px] text-slate-600 font-bold mt-0.5">Limits recovery logic
-                                        after this
-                                        many
-                                        down years.</p>
+                                    <p class="text-[9px] text-slate-600 font-bold mt-0.5">
+                                        If an asset fails to beat inflation for this many years, the sim forces a +2%
+                                        real recovery year (Mean Reversion).
+                                    </p>
                                 </div>
 
                                 <div class="flex items-center gap-3 pt-1 border-t border-red-100/50">
