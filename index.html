@@ -7,8 +7,6 @@
     <title>Bitcoin Retirement Calculator</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Pyodide -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -22,12 +20,11 @@
             }
         }
     </script>
-    <script src="js/statistics.js"></script>
-    <script src="js/engine.js"></script>
     <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
+
 
     <style>
         body {
@@ -427,313 +424,377 @@
                                 Annual Expenses ($)</label>
                             <div class="relative">
                                 <span class="absolute left-3.5 top-[11px] text-slate-500 text-sm font-bold">$</span>
-                                <input type="text" id="inp-target-annual" value="60.000"
+                                <input type="text" id="inp-target-annual" value="58.500"
                                     class="w-full pl-8 bg-white border border-slate-300 rounded-xl px-4 py-2 text-slate-900 font-bold text-lg focus:outline-none focus:border-[#F7931A] focus:ring-1 focus:ring-[#F7931A] transition shadow-sm h-[46px] placeholder:text-slate-400">
                             </div>
                         </div>
                     </div>
 
                     <!-- Withdrawal Guardrails (Blue Card Design) -->
-                    <div class="bg-orange-50/20 rounded-lg p-3 border border-orange-100/30 mt-2">
+                    <!-- Withdrawal Guardrails -->
+                    <!-- Withdrawal Guardrails -->
+                    <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-200/50 mt-2 relative group-info">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Withdrawal
-                                Guardrails</span>
-                            <svg class="w-3 h-3 text-[#F7931A]/40" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                            <span class="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Dynamic
+                                Spending Guardrails</span>
+
+                            <!-- Info Icon -->
+                            <div class="relative group cursor-help">
+                                <svg class="w-4 h-4 text-[#F7931A] opacity-70 group-hover:opacity-100 transition-opacity"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <!-- Tooltip -->
+                                <div
+                                    class="absolute right-0 top-6 w-64 bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed">
+                                    <p class="font-bold text-[#F7931A] mb-1">Flexibility Trade-off:</p>
+                                    <ul class="list-disc pl-3 mb-2 space-y-1">
+                                        <li><span class="text-red-300 font-bold">Cut Spending:</span> Accepting a lower
+                                            floor (e.g. -20%) improves survival odds (SWR) in crashes.</li>
+                                        <li><span class="text-green-300 font-bold">Boost Spending:</span> Higher ceiling
+                                            allows spending profits in good years.</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="space-y-3">
+                            <!-- Floor Setting (Downside) -->
                             <div>
-                                <label class="block text-[10px] text-slate-700 font-bold mb-1">Floor Multiplier</label>
-                                <input type="number" id="inp-floor-mult" value="0.0" step="0.1"
-                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-slate-700 text-xs">
+                                <div class="flex justify-between items-baseline mb-1">
+                                    <label class="block text-[10px] text-slate-700 font-bold">
+                                        Max Annual Cut (%) <span class="text-red-400 text-[9px]">(Floor)</span>
+                                    </label>
+                                    <span class="text-[9px] text-slate-500 font-mono" id="disp-floor-limit">$ --</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="inp-floor-cut" value="0" step="5" min="0" max="50"
+                                        class="w-full bg-white border border-red-100 focus:border-red-400 rounded px-2 py-1 text-slate-700 text-xs font-bold shadow-sm transition-colors focus:bg-red-50">
+                                </div>
+                                <p class="text-[9px] text-slate-400 mt-1">If "0%", you never cut spending (Safest
+                                    Mindset).</p>
+                                <p id="tip-floor-example"
+                                    class="text-[9px] text-orange-900 mt-1 leading-tight bg-orange-100/50 p-1.5 rounded border border-orange-200/50 hidden">
+                                    --
+                                </p>
+                            </div>
+
+                            <!-- Ceiling Settings (Upside) -->
+                            <div class="border-t border-slate-100 pt-2">
+                                <label class="block text-[10px] text-slate-700 font-bold mb-1">
+                                    Max Spend Increase % <span class="text-green-500 text-[9px]">(Ceiling)</span>
+                                </label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-[9px] text-slate-400 block mb-0.5">Years 1-10</span>
+                                        <div class="relative">
+                                            <input type="number" id="inp-ceiling-early" value="100" step="10" min="100"
+                                                class="w-full bg-white border border-green-100 focus:border-green-400 rounded px-2 py-1 pr-5 text-slate-700 text-xs shadow-sm">
+                                            <span
+                                                class="absolute right-1.5 top-1 text-[10px] text-slate-400 font-bold">%</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] text-slate-400 block mb-0.5">Years 11+</span>
+                                        <div class="relative">
+                                            <input type="number" id="inp-ceiling-late" value="100" step="10" min="100"
+                                                class="w-full bg-white border border-green-100 focus:border-green-400 rounded px-2 py-1 pr-5 text-slate-700 text-xs shadow-sm">
+                                            <span
+                                                class="absolute right-1.5 top-1 text-[10px] text-slate-400 font-bold">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 mt-1 italic">
+                                    <span class="font-bold">Strategy:</span> Keep early years strict to survive Sequence
+                                    Risk, then relax later to enjoy wealth.
+                                </p>
+                            </div>
+                            <div class="mt-2 bg-orange-50/50 p-2 rounded border border-orange-200/50">
+                                <p class="text-[9px] text-slate-500 italic leading-snug">
+                                    <span class="font-bold text-slate-700">Mathematical Logic:</span> SWR is determined
+                                    by <span class="text-red-500 font-bold">Worst-Case Crashes</span> where your
+                                    portfolio drops immediately, so you never reach the "Ceiling" to spend more.
+                                </p>
+                                <p class="text-[9px] text-slate-500 italic leading-snug mt-1">
+                                    The Ceiling only activates in <span class="text-green-600 font-bold">Bull
+                                        Markets</span>, converting "Excess Wealth" into "Lifestyle" (reducing your final
+                                    unspent pile).
+                                </p>
+                                <p id="tip-ceiling-example"
+                                    class="text-[9px] text-orange-900 mt-2 leading-tight bg-orange-100/50 p-1.5 rounded border border-orange-200/50 hidden">
+                                    --
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Sim Settings -->
+                <div class="space-y-4 pt-4 border-t border-orange-100/30">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Sim Data
+                                Points</label>
+                            <input type="number" id="inp-num-sims" value="1000"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Target
+                                Success (%)</label>
+                            <input type="number" step="1" id="inp-target-success" value="90"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Button -->
+                <div class="pt-2 pb-6">
+                    <button id="btn-run" disabled
+                        class="w-full bg-[#F7931A] hover:bg-[#de760b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-200 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Run Simulation</span>
+                    </button>
+                </div>
+
+                <!-- Asset Allocation -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 pb-2 border-b border-orange-100/30">
+                        <svg class="w-5 h-5 text-[#F7931A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                        </svg>
+                        <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Asset Allocation
+                        </h3>
+                    </div>
+
+                    <div class="bg-orange-50/30 rounded-xl p-4 border border-orange-100/30 space-y-6">
+                        <!-- Bonds Slider -->
+                        <div class="pb-2 border-b border-white/50">
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="flex items-center gap-1 font-bold text-slate-900">
+                                    <span class="text-[#F7931A]">●</span> Bonds (FI)
+                                </span>
+                                <span id="lbl-bonds-pct" class="font-bold text-[#F7931A]">60%</span>
+                            </div>
+                            <input type="range"
+                                class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-bonds-pct" value="60"
+                                oninput="updateAllocations('bonds')">
+                            <p class="text-[10px] text-slate-400 mt-1">Fixed income & capital preservation</p>
+                        </div>
+
+                        <!-- Stocks Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="flex items-center gap-1 font-bold text-slate-900">
+                                    <span class="text-[#F7931A]">●</span> Stocks (ETF)
+                                </span>
+                                <span id="lbl-stocks-pct" class="font-bold text-[#F7931A]">40%</span>
+                            </div>
+                            <input type="range"
+                                class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="40"
+                                oninput="updateAllocations('stocks')">
+                        </div>
+
+                        <!-- Crypto Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="flex items-center gap-1 font-bold text-slate-900">
+                                    <span class="text-[#F7931A]">●</span> Crypto (BTC)
+                                </span>
+                                <span id="lbl-crypto-pct" class="font-bold text-[#F7931A]">0%</span>
+                            </div>
+                            <input type="range"
+                                class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
+                                min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="0"
+                                oninput="updateAllocations('crypto')">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deep Tweak Section -->
+                <div class="space-y-4">
+                    <button onclick="toggleAdvanced()"
+                        class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
+                        <span>Advanced Market Assumptions</span>
+                        <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
+                            stroke="#F7931A" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <div id="pnl-advanced" class="advanced-panel space-y-6">
+
+                        <!-- Stress Test Parameters (New) -->
+                        <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
+                            <p class="text-[10px] uppercase font-bold text-red-500 mb-2">Stress Test / Bad Years</p>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] text-slate-700 font-bold mb-1">Max Consecutive
+                                        Bad Years
+                                        (Limit)</label>
+                                    <input type="number" id="inp-max-bad-years" value="5"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                    <p class="text-[9px] text-slate-600 font-bold mt-0.5">Limits recovery logic
+                                        after this
+                                        many
+                                        down years.</p>
+                                </div>
+
+                                <div class="flex items-center gap-3 pt-1 border-t border-red-100/50">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="chk-force-start-crash" class="sr-only peer">
+                                        <div
+                                            class="w-7 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500">
+                                        </div>
+                                    </label>
+                                    <label for="chk-force-start-crash"
+                                        class="text-[10px] font-bold text-red-600 select-none cursor-pointer">Force
+                                        Crash at Start</label>
+                                </div>
+
+                                <div id="div-crash-config" class="hidden pl-5 space-y-2 border-l-2 border-red-100">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 mb-1">Crash Duration
+                                            (Years)</label>
+                                        <input type="number" id="inp-crash-duration" value="3"
+                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                    </div>
+                                    <p class="text-[9px] text-red-400 italic">Forces returns to be negative for the
+                                        first N years.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inflation -->
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
+                                    <input type="number" step="0.1" id="inp-infl-mean" value="3.1"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
+                                    <input type="number" step="0.001" id="inp-infl-vol" value="0.015"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Correlation -->
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Asset Correlation</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
+                                    <input type="number" step="0.05" id="inp-corr-start" value="0.20"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
+                                    <input type="number" step="0.05" id="inp-corr-end" value="0.20"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Crypto Params -->
+                        <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
+                            <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                    <input type="number" step="0.1" id="inp-c-cagr-start" value="32.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                    <input type="number" step="0.1" id="inp-c-cagr-end" value="8.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[10px] text-slate-700 font-bold mb-1">Ceiling
-                                        (Y1-10)</label>
-                                    <input type="number" id="inp-ceiling-early" value="100.0" step="0.1"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-slate-700 text-xs">
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                    <input type="number" step="0.1" id="inp-c-vol-start" value="40.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] text-slate-700 font-bold mb-1">Ceiling
-                                        (Y11-50)</label>
-                                    <input type="number" id="inp-ceiling-late" value="100.0" step="0.1"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-slate-700 text-xs">
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                    <input type="number" step="0.1" id="inp-c-vol-end" value="20.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stock Params -->
+                        <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                            <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                    <input type="number" step="0.1" id="inp-s-cagr-start" value="10.3"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                    <input type="number" step="0.1" id="inp-s-cagr-end" value="10.3"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                    <input type="number" step="0.1" id="inp-s-vol-start" value="20.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                    <input type="number" step="0.1" id="inp-s-vol-end" value="20.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bond Params -->
+                        <div class="bg-green-50/50 rounded-lg p-3 border border-green-100">
+                            <p class="text-[10px] uppercase font-bold text-green-400 mb-2">Bond Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR</label>
+                                    <input type="number" step="0.1" id="inp-b-cagr-start" value="5.2"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol</label>
+                                    <input type="number" step="0.1" id="inp-b-vol-start" value="6.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
-                    <!-- Sim Settings -->
-                    <div class="space-y-4 pt-4 border-t border-orange-100/30">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="col-span-1">
-                                <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Sim Data
-                                    Points</label>
-                                <input type="number" id="inp-num-sims" value="1000"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
-                            </div>
-                            <div class="col-span-1">
-                                <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Target
-                                    Success (%)</label>
-                                <input type="number" step="1" id="inp-target-success" value="95"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Simulation Button -->
-                    <div class="pt-2 pb-6">
-                        <button id="btn-run" disabled onclick="runSimulation()"
-                            class="w-full bg-[#F7931A] hover:bg-[#de760b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-200 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
-                                </path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span>Run Simulation</span>
-                        </button>
-                    </div>
-
-                    <!-- Asset Allocation -->
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-2 pb-2 border-b border-orange-100/30">
-                            <svg class="w-5 h-5 text-[#F7931A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                            </svg>
-                            <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Asset Allocation
-                            </h3>
-                        </div>
-
-                        <div class="bg-orange-50/30 rounded-xl p-4 border border-orange-100/30 space-y-6">
-                            <!-- Bonds Slider -->
-                            <div class="pb-2 border-b border-white/50">
-                                <div class="flex justify-between text-xs mb-2">
-                                    <span class="flex items-center gap-1 font-bold text-slate-900">
-                                        <span class="text-[#F7931A]">●</span> Bonds (FI)
-                                    </span>
-                                    <span id="lbl-bonds-pct" class="font-bold text-[#F7931A]">50%</span>
-                                </div>
-                                <input type="range"
-                                    class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                    min="0" max="100" step="5" id="inp-alloc-bonds-pct" value="50"
-                                    oninput="updateAllocations('bonds')">
-                                <p class="text-[10px] text-slate-400 mt-1">Fixed income & capital preservation</p>
-                            </div>
-
-                            <!-- Stocks Slider -->
-                            <div>
-                                <div class="flex justify-between text-xs mb-2">
-                                    <span class="flex items-center gap-1 font-bold text-slate-900">
-                                        <span class="text-[#F7931A]">●</span> Stocks (ETF)
-                                    </span>
-                                    <span id="lbl-stocks-pct" class="font-bold text-[#F7931A]">50%</span>
-                                </div>
-                                <input type="range"
-                                    class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                    min="0" max="100" step="5" id="inp-alloc-stocks-pct" value="50"
-                                    oninput="updateAllocations('stocks')">
-                            </div>
-
-                            <!-- Crypto Slider -->
-                            <div>
-                                <div class="flex justify-between text-xs mb-2">
-                                    <span class="flex items-center gap-1 font-bold text-slate-900">
-                                        <span class="text-[#F7931A]">●</span> Crypto (BTC)
-                                    </span>
-                                    <span id="lbl-crypto-pct" class="font-bold text-[#F7931A]">0%</span>
-                                </div>
-                                <input type="range"
-                                    class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
-                                    min="0" max="100" step="5" id="inp-alloc-crypto-pct" value="0"
-                                    oninput="updateAllocations('crypto')">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Deep Tweak Section -->
-                    <div class="space-y-4">
-                        <button onclick="toggleAdvanced()"
-                            class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
-                            <span>Advanced Market Assumptions</span>
-                            <svg id="icon-advanced" class="w-4 h-4 transform transition-transform" fill="none"
-                                stroke="#F7931A" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7">
-                                </path>
-                            </svg>
-                        </button>
-
-                        <div id="pnl-advanced" class="advanced-panel space-y-6">
-
-                            <!-- Stress Test Parameters (New) -->
-                            <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
-                                <p class="text-[10px] uppercase font-bold text-red-500 mb-2">Stress Test / Bad Years</p>
-                                <div class="space-y-3">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-700 font-bold mb-1">Max Consecutive
-                                            Bad Years
-                                            (Limit)</label>
-                                        <input type="number" id="inp-max-bad-years" value="5"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                        <p class="text-[9px] text-slate-600 font-bold mt-0.5">Limits recovery logic
-                                            after this
-                                            many
-                                            down years.</p>
-                                    </div>
-
-                                    <div class="flex items-center gap-3 pt-1 border-t border-red-100/50">
-                                        <label class="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" id="chk-force-start-crash" class="sr-only peer">
-                                            <div
-                                                class="w-7 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500">
-                                            </div>
-                                        </label>
-                                        <label for="chk-force-start-crash"
-                                            class="text-[10px] font-bold text-red-600 select-none cursor-pointer">Force
-                                            Crash at Start</label>
-                                    </div>
-
-                                    <div id="div-crash-config" class="hidden pl-5 space-y-2 border-l-2 border-red-100">
-                                        <div>
-                                            <label class="block text-[10px] text-slate-500 mb-1">Crash Duration
-                                                (Years)</label>
-                                            <input type="number" id="inp-crash-duration" value="3"
-                                                class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                        </div>
-                                        <p class="text-[9px] text-red-400 italic">Forces returns to be negative for the
-                                            first N years.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Inflation -->
-                            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                                <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
-                                        <input type="number" step="0.001" id="inp-infl-mean" value="0.025"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
-                                        <input type="number" step="0.001" id="inp-infl-vol" value="0.015"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Correlation -->
-                            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                                <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Asset Correlation</p>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
-                                        <input type="number" step="0.05" id="inp-corr-start" value="0.40"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
-                                        <input type="number" step="0.05" id="inp-corr-end" value="0.70"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Crypto Params -->
-                            <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
-                                <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
-                                <div class="grid grid-cols-2 gap-2 mb-2">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                        <input type="number" step="0.01" id="inp-c-cagr-start" value="0.32"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                        <input type="number" step="0.01" id="inp-c-cagr-end" value="0.08"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
-                                        <input type="number" step="0.01" id="inp-c-vol-start" value="0.40"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
-                                        <input type="number" step="0.01" id="inp-c-vol-end" value="0.20"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Stock Params -->
-                            <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
-                                <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
-                                <div class="grid grid-cols-2 gap-2 mb-2">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                        <input type="number" step="0.01" id="inp-s-cagr-start" value="0.08"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                        <input type="number" step="0.01" id="inp-s-cagr-end" value="0.08"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
-                                        <input type="number" step="0.01" id="inp-s-vol-start" value="0.16"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
-                                        <input type="number" step="0.01" id="inp-s-vol-end" value="0.16"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Bond Params -->
-                            <div class="bg-green-50/50 rounded-lg p-3 border border-green-100">
-                                <p class="text-[10px] uppercase font-bold text-green-400 mb-2">Bond Assumptions</p>
-                                <div class="grid grid-cols-2 gap-2 mb-2">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">CAGR</label>
-                                        <input type="number" step="0.001" id="inp-b-cagr-start" value="0.050"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 mb-1">Vol</label>
-                                        <input type="number" step="0.01" id="inp-b-vol-start" value="0.05"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
                 </div>
+
+
+            </div>
         </aside>
 
         <!-- Main Content: Results -->
-        <main id="main-results-panel" class="flex-1 bg-slate-50 p-4 sm:p-6 lg:p-10 relative">
+        <main id="main-results-panel" class="flex-1 bg-slate-50 p-4 sm:p-6 lg:px-10 lg:py-6 relative">
 
             <!-- Welcome / Empty State -->
             <div id="results-placeholder" class="text-center mt-32 opacity-40">
@@ -1003,10 +1064,13 @@
                 </div>
                 <pre>
 <span class="text-purple-400">for</span> (let y = 0; y < years; y++) {
-    <span class="text-slate-500">// 1. Determine Spending Limits (Guardrails)</span>
-    <span class="text-blue-300">const</span> withdrawal = Math.min(
-        Math.max(currentTarget, currentFloor), <span class="text-slate-500">// Floor Protection</span>
-        currentCeiling                         <span class="text-slate-500">// Ceiling Cap</span>
+    <span class="text-slate-500">// 1. Determine Spending Limits (Dynamic Upside)</span>
+    <span class="text-blue-300">const</span> baseFloor = initialTarget * accumulatedInflation;
+    <span class="text-blue-300">const</span> upsidePotential = currentPortfolio * initialSWR;
+    
+    <span class="text-blue-300">const</span> withdrawal = Math.max(
+        baseFloor,                             <span class="text-slate-500">// 1. Never Spend < Target</span>
+        Math.min(upsidePotential, maxCeiling)  <span class="text-slate-500">// 2. Capture Upside (Capped)</span>
     );
 
     <span class="text-slate-500">// 2. Cash Buffer Protection (Sequence Risk Shield)</span>
@@ -1036,9 +1100,11 @@
                         survival odds.</p>
                 </div>
                 <div class="p-4 border-l-2 border-blue-400">
-                    <h4 class="font-bold text-slate-700">Guardrails (The Brakes)</h4>
-                    <p class="text-sm text-slate-500 mt-2">If inflation spikes, your "Ceiling" prevents you from
-                        overspending. If your portfolio crashes, the "Floor" ensures you still have enough for basics.
+                    <h4 class="font-bold text-slate-700">Dynamic Spending (The Reward)</h4>
+                    <p class="text-sm text-slate-500 mt-2">
+                        Your spending has a <strong>Guaranteed Floor</strong> (Inflation-Adjusted). In Bull Markets, you
+                        automatically spend more ("Upside Model"), capped by your chosen Ceiling % to prevent lifestyle
+                        creep.
                     </p>
                 </div>
             </section>
@@ -1086,572 +1152,28 @@
     <!-- TUTORIAL OVERLAY -->
     <div id="tutorial-overlay" class="fixed inset-0 hidden z-50 pointer-events-none"></div>
 
-    <!-- NATIVE JS LOGIC -->
-    <script>
-        // --- VISUALIZATION & UI HELPERS ---
-        // Note: The core math is now in 'js/engine.js' and 'js/statistics.js'
 
-        function smoothScrollToTop(element, duration = 300) {
-            const start = element.scrollTop;
-            if (start <= 0) return;
-            const startTime = performance.now();
-
-            function scroll(currentTime) {
-                const timeElapsed = currentTime - startTime;
-                const progress = Math.min(timeElapsed / duration, 1);
-
-                // Ease out cubic
-                const ease = 1 - Math.pow(1 - progress, 3);
-
-                element.scrollTop = start * (1 - ease);
-
-                if (progress < 1) {
-                    requestAnimationFrame(scroll);
-                } else {
-                    element.scrollTop = 0; // Ensure exact 0
-                }
-            }
-            requestAnimationFrame(scroll);
-        }
-
-        function renderHistogram(data, targetDivId) {
-            const div = document.getElementById(targetDivId);
-            div.innerHTML = '<canvas id="hist-canvas" class="w-full h-[300px]"></canvas>';
-            const canvas = document.getElementById('hist-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-
-            const filteredData = data.filter(w => w < 100_000_000).map(w => w / 1e6);
-            if (filteredData.length === 0) return;
-
-            const min = 0;
-            const max = Math.max(...filteredData);
-            const bins = 50;
-            const counts = new Array(bins).fill(0);
-            filteredData.forEach(val => {
-                let b = Math.floor(((val - min) / (max - min)) * bins);
-                if (b >= bins) b = bins - 1;
-                counts[b]++;
-            });
-
-            const maxCount = Math.max(...counts);
-            const padding = 40;
-            const chartW = canvas.width - 2 * padding;
-            const chartH = canvas.height - 2 * padding;
-
-            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
-            for (let i = 0; i <= 5; i++) {
-                let y = padding + chartH - (i / 5) * chartH;
-                ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(padding + chartW, y); ctx.stroke();
-            }
-
-            const barW = chartW / bins;
-            ctx.fillStyle = '#f7931a';
-            ctx.globalAlpha = 0.8;
-            counts.forEach((c, i) => {
-                const h = (c / maxCount) * chartH;
-                ctx.fillRect(padding + i * barW, padding + chartH - h, barW - 1, h);
-            });
-
-            ctx.globalAlpha = 1.0; ctx.fillStyle = '#64748b';
-            ctx.font = '10px Inter'; ctx.textAlign = 'center';
-            for (let i = 0; i <= 5; i++) {
-                const val = (min + (max - min) * (i / 5)).toFixed(1);
-                ctx.fillText(val + "M", padding + (i / 5) * chartW, canvas.height - 20);
-            }
-            ctx.fillText("Wealth Distribution (Million $)", canvas.width / 2, canvas.height - 5);
-        }
-
-        const statusEl = document.getElementById("status-indicator");
-        const btnRun = document.getElementById("btn-run");
-        window.update_status = function (msg, colorClass) {
-            // Status messages removed per user request
-            // statusEl.innerHTML = `<span class="${colorClass}">${msg}</span>`;
-        }
-
-        function parseFormattedValue(val) {
-            if (typeof val !== 'string') return val;
-            // Handle dots as separators
-            return parseFloat(val.replace(/\./g, '')) || 0;
-        }
-
-        function formatNumberWithDots(val) {
-            let num = val.toString().replace(/\D/g, '');
-            if (num === "") return "";
-            return parseInt(num).toLocaleString('de-DE');
-        }
-
-        function handleCurrencyInput(e) {
-            const el = e.target;
-            let cursor = el.selectionStart;
-            let oldLen = el.value.length;
-
-            el.value = formatNumberWithDots(el.value);
-
-            let newLen = el.value.length;
-            el.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen));
-
-            updateTotalCapital();
-        }
-
-        function updateTotalCapital() {
-            const invested = parseFormattedValue(document.getElementById('inp-initial').value);
-            const buffer = parseFormattedValue(document.getElementById('inp-buffer').value);
-            const total = invested + buffer;
-            document.getElementById('disp-total-capital').innerText = "$ " + total.toLocaleString('de-DE');
-        }
-
-        // Attach listeners
-        document.getElementById('inp-initial').addEventListener('input', handleCurrencyInput);
-        document.getElementById('inp-buffer').addEventListener('input', handleCurrencyInput);
-        document.getElementById('inp-target-annual').addEventListener('input', handleCurrencyInput);
-
-        function updateAllocations(source) {
-            const cryptoEl = document.getElementById('inp-alloc-crypto-pct');
-            const stocksEl = document.getElementById('inp-alloc-stocks-pct');
-            const bondsEl = document.getElementById('inp-alloc-bonds-pct');
-
-            let cVal = parseInt(cryptoEl.value) || 0;
-            let sVal = parseInt(stocksEl.value) || 0;
-            let bVal = parseInt(bondsEl.value) || 0;
-
-            const total = cVal + sVal + bVal;
-
-            if (total !== 100) {
-                const diff = total - 100;
-                // Distribute the difference to the OTHER two sliders
-                if (source === 'stocks') {
-                    // Adjust Bonds first, then Crypto
-                    if (diff > 0) {
-                        let toTake = Math.min(bVal, diff);
-                        bVal -= toTake;
-                        cVal -= (diff - toTake);
-                    } else {
-                        bVal -= diff; // diff is negative
-                    }
-                } else if (source === 'crypto') {
-                    if (diff > 0) {
-                        let toTake = Math.min(sVal, diff);
-                        sVal -= toTake;
-                        bVal -= (diff - toTake);
-                    } else {
-                        sVal -= diff;
-                    }
-                } else if (source === 'bonds') {
-                    if (diff > 0) {
-                        let toTake = Math.min(sVal, diff);
-                        sVal -= toTake;
-                        cVal -= (diff - toTake);
-                    } else {
-                        sVal -= diff;
-                    }
-                }
-            }
-
-            // Clamping
-            cVal = Math.max(0, Math.min(100, cVal));
-            sVal = Math.max(0, Math.min(100, sVal));
-            bVal = 100 - cVal - sVal; // Ensure exact 100
-
-            cryptoEl.value = cVal;
-            stocksEl.value = sVal;
-            bondsEl.value = bVal;
-
-            document.getElementById('lbl-crypto-pct').innerText = cVal + "%";
-            document.getElementById('lbl-stocks-pct').innerText = sVal + "%";
-            document.getElementById('lbl-bonds-pct').innerText = bVal + "%";
-
-            // Visual feedback if bonds are low
-            const labelBonds = document.getElementById('lbl-bonds-pct');
-            labelBonds.className = bVal < 20 ? "font-mono font-bold text-red-500" : "font-mono font-bold text-green-600";
-        }
-
-        function toggleAdvanced() {
-            const panel = document.getElementById('pnl-advanced');
-            const icon = document.getElementById('icon-advanced');
-            panel.classList.toggle('open');
-            icon.style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
-        }
-
-        document.getElementById('chk-force-start-crash').addEventListener('change', (e) => {
-            document.getElementById('div-crash-config').classList.toggle('hidden', !e.target.checked);
-        });
-
-        async function runSimulation() {
-            btnRun.disabled = true;
-            btnRun.innerHTML = '<div class="loading-spinner"></div><span>Simulating...</span>';
-
-            // Allow UI to update
-            await new Promise(r => setTimeout(r, 50));
-
-            try {
-                const configs = {
-                    years: parseInt(document.getElementById("inp-years").value),
-                    numSims: parseInt(document.getElementById("inp-num-sims").value),
-                    INVESTED_AMOUNT: parseFormattedValue(document.getElementById("inp-initial").value),
-                    CASH_BUFFER: parseFormattedValue(document.getElementById("inp-buffer").value),
-                    ALLOC_CRYPTO: parseFloat(document.getElementById("inp-alloc-crypto-pct").value) / 100,
-                    ALLOC_STOCKS: parseFloat(document.getElementById("inp-alloc-stocks-pct").value) / 100,
-                    INFL_MEAN: parseFloat(document.getElementById("inp-infl-mean").value),
-                    INFL_VOL: parseFloat(document.getElementById("inp-infl-vol").value),
-                    CORR_START: parseFloat(document.getElementById("inp-corr-start").value),
-                    CORR_END: parseFloat(document.getElementById("inp-corr-end").value),
-                    C_CAGR_START: parseFloat(document.getElementById("inp-c-cagr-start").value),
-                    C_CAGR_END: parseFloat(document.getElementById("inp-c-cagr-end").value),
-                    C_VOL_START: parseFloat(document.getElementById("inp-c-vol-start").value),
-                    C_VOL_END: parseFloat(document.getElementById("inp-c-vol-end").value),
-                    S_CAGR_START: parseFloat(document.getElementById("inp-s-cagr-start").value),
-                    S_CAGR_END: parseFloat(document.getElementById("inp-s-cagr-end").value),
-                    S_VOL_START: parseFloat(document.getElementById("inp-s-vol-start").value),
-                    S_VOL_END: parseFloat(document.getElementById("inp-s-vol-end").value),
-                    B_CAGR_START: parseFloat(document.getElementById("inp-b-cagr-start").value),
-                    B_VOL_START: parseFloat(document.getElementById("inp-b-vol-start").value),
-                    FORCE_CRASH: document.getElementById("chk-force-start-crash").checked,
-                    CRASH_DURATION: parseInt(document.getElementById("inp-crash-duration").value),
-                    TARGET_ANNUAL_EXP: parseFormattedValue(document.getElementById("inp-target-annual").value),
-                    REFILL_CASH_BUFFER: document.getElementById("chk-refill-buffer").checked,
-                    FLOOR_MULT: parseFloat(document.getElementById("inp-floor-mult").value),
-                    CEILING_EARLY: parseFloat(document.getElementById("inp-ceiling-early").value),
-                    CEILING_LATE: parseFloat(document.getElementById("inp-ceiling-late").value),
-                    CEILING_LATE: parseFloat(document.getElementById("inp-ceiling-late").value),
-                    targetSuccess: (() => {
-                        let valStr = document.getElementById("inp-target-success").value.replace(',', '.');
-                        let val = parseFloat(valStr);
-                        // If user enters "95", treat as 95%. If "0.95", treat as 95%.
-                        // Threshold: if > 1, assume percentage (divide by 100).
-                        if (val > 1) val /= 100;
-                        return val || 0.95; // Default strict 95%
-                    })()
-                };
-
-                // --- DEBUG: LOG PARAMETERS ---
-                console.clear();
-                console.group("🚀 Simulation Results & Parameters");
-                console.table({
-                    "Invested Capital": { Value: configs.INVESTED_AMOUNT.toLocaleString() + " $" },
-                    "Cash Buffer": { Value: configs.CASH_BUFFER.toLocaleString() + " $" },
-                    "Total Capital": { Value: (configs.INVESTED_AMOUNT + configs.CASH_BUFFER).toLocaleString() + " $" },
-                    "Horizon": { Value: configs.years + " Years" },
-                    "Target Spend": { Value: configs.TARGET_ANNUAL_EXP.toLocaleString() + " $" },
-                    "Success Target": { Value: (configs.targetSuccess * 100) + "%" }
-                });
-                console.table({
-                    "Stocks Allocation": { Value: (configs.ALLOC_STOCKS || 0) * 100 + "%" },
-                    "Crypto Allocation": { Value: (configs.ALLOC_CRYPTO || 0) * 100 + "%" },
-                    "Bonds Allocation": { Value: (100 - (configs.ALLOC_STOCKS || 0) * 100 - (configs.ALLOC_CRYPTO || 0) * 100) + "%" }
-                });
-                console.table({
-                    "Stock Return (Nom)": { Value: (configs.S_CAGR_START * 100).toFixed(1) + "%" },
-                    "Stock Volatility": { Value: (configs.S_VOL_START * 100).toFixed(1) + "%" },
-                    "Bond Return (Nom)": { Value: (configs.B_CAGR_START * 100).toFixed(1) + "%" },
-                    "Bond Volatility": { Value: (configs.B_VOL_START * 100).toFixed(1) + "%" }
-                });
-                console.groupEnd();
-                // -----------------------------
-
-                update_status(`Simulating ${configs.numSims} Scenarios...`, "text-gold-600");
-                const marketData = generateMarketData(configs.numSims, configs.years, configs);
-
-                update_status("Calculating Risk Profiles...", "text-purple-500");
-
-                // Scale Buffer for the 1M normalized simulation
-                // If user has 1.44M Inv + 60k Cash (Ratio 0.0416), 
-                // shConfigs (1M Inv) should have ~41.6k Cash.
-                const bufferRatio = configs.INVESTED_AMOUNT > 0 ? configs.CASH_BUFFER / configs.INVESTED_AMOUNT : 0;
-                const shTotal = 1000000;
-                let shInvested, shBuffer;
-
-                const totalCap = configs.INVESTED_AMOUNT + configs.CASH_BUFFER;
-                if (totalCap > 0) {
-                    shInvested = shTotal * (configs.INVESTED_AMOUNT / totalCap);
-                    shBuffer = shTotal * (configs.CASH_BUFFER / totalCap);
-                } else {
-                    shInvested = 1000000; shBuffer = 0; // Fallback
-                }
-
-                const shConfigs = { ...configs, INVESTED_AMOUNT: shInvested, CASH_BUFFER: shBuffer, TARGET_ANNUAL_EXP: 0 };
-
-                const findSWR = (targetOdds) => {
-                    let low = 0.001, high = 0.20, best = 0.001;
-                    for (let i = 0; i < 15; i++) {
-                        let mid = (low + high) / 2;
-                        let res = simulatePortfolio(mid, marketData, shConfigs);
-                        console.log(`SWR Search: Rate ${(mid * 100).toFixed(2)}% -> Success ${(res.successRate * 100).toFixed(1)}%`);
-                        if (res.successRate >= targetOdds) { best = mid; low = mid; }
-                        else { high = mid; }
-                    }
-                    return best;
-                };
-
-                const bestSWR = findSWR(configs.targetSuccess);
-                const swr99 = findSWR(0.99);
-                const swr90 = findSWR(0.90);
-
-                update_status("Final Verification...", "text-indigo-500");
-                // Final run
-                const final = simulatePortfolio(-1, marketData, configs); // -1 withdrawal uses TargetAnnual
-
-                // SWR Display Logic:
-                // Engine now returns SWR based on Total Capital (Invested + Cash).
-                // So bestSWR is already the correct 'Net Worth SWR'.
-
-                const totalCapital = configs.INVESTED_AMOUNT + configs.CASH_BUFFER; // Re-declare for clarity
-                const displaySWR = bestSWR;
-                const displaySWR99 = swr99;
-                const displaySWR90 = swr90;
-
-                document.getElementById("res-swr-val").innerText = (displaySWR * 100).toFixed(2) + "%";
-                document.getElementById("res-swr-99").innerText = (displaySWR99 * 100).toFixed(2);
-                document.getElementById("res-swr-90").innerText = (displaySWR90 * 100).toFixed(2);
-                document.getElementById("res-swr-target-label").innerText = (displaySWR * 100).toFixed(2);
-
-                document.getElementById("res-success-val").innerText = (final.successRate * 100).toFixed(1) + "%";
-                const successBar = document.getElementById("res-success-bar");
-                const successPct = final.successRate * 100;
-                const targetPct = configs.targetSuccess * 100;
-
-                // Color Logic: Red if < Target, Orange if >= Target (or close)
-                // Using "nearly" as effectively meeting the threshold for visual comfort, or just sticking to target.
-                // We will use 98% of target as "nearly" threshold if needed, but strict target is clearer.
-                // User said: "red until it reaches... orange when it reaches... nearly"
-                // Let's make it Red below (Target - 2%), and Orange if >= (Target - 2%)?
-                // Or simpler: Red if < Target. Orange if >= Target.
-
-                // Let's try: Red if < Target, Orange if >= Target.
-                // Actually user said "orange when it reaches the success rate nearly". 
-                // Let's assume a small tolerance of 2%.
-
-                if (successPct < (targetPct - 0.1)) {
-                    successBar.classList.remove("bg-[#F7931A]", "bg-green-500");
-                    successBar.classList.add("bg-red-500");
-                    successBar.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)"; // Red glow
-                } else {
-                    successBar.classList.remove("bg-red-500", "bg-[#F7931A]");
-                    successBar.classList.add("bg-green-500");
-                    successBar.style.boxShadow = "0 0 15px rgba(34, 197, 94, 0.4)"; // Green glow
-                }
-                successBar.style.width = successPct + "%";
-
-                // Dynamic Text Description
-                const investedFmt = configs.INVESTED_AMOUNT.toLocaleString('de-DE');
-                const bufferFmt = configs.CASH_BUFFER.toLocaleString('de-DE');
-                const spendFmt = configs.TARGET_ANNUAL_EXP.toLocaleString('de-DE');
-                document.getElementById("txt-success-desc").innerHTML =
-                    `Percentage of scenarios where your capital (<strong>$ ${investedFmt}</strong> invested + <strong>$ ${bufferFmt}</strong> cash buffer) survived the full term with <strong>$ ${spendFmt}</strong> annual spending.`;
-
-                const plannedWR = configs.TARGET_ANNUAL_EXP / totalCapital;
-                document.getElementById("res-planned-wr").innerText = (plannedWR * 100).toFixed(2);
-
-                // Advanced UI Fields
-                document.getElementById("res-target-disp-desc").innerText = `Optimized for ${(configs.targetSuccess * 100).toFixed(0)}% survival odds`;
-                document.getElementById("res-target-ptr").innerText = (configs.targetSuccess * 100).toFixed(0);
-
-                const wealths = final.wealths.sort((a, b) => a - b);
-                const median = wealths[Math.floor(wealths.length / 2)];
-                const worst1 = wealths[Math.floor(wealths.length * 0.01)];
-
-                document.getElementById("res-median-end").innerText = "$ " + Math.round(median).toLocaleString('de-DE');
-                document.getElementById("res-worst-case").innerText = "$ " + Math.round(worst1).toLocaleString('de-DE');
-
-                // User requested 'Required Capital' to represent TOTAL Capital (Invested + Cash)
-                // We use displaySWR which is the Safe Rate against Total Wealth.
-                const reqCap = displaySWR > 0 ? configs.TARGET_ANNUAL_EXP / displaySWR : 0;
-                const initialTotal = configs.INVESTED_AMOUNT + configs.CASH_BUFFER;
-                const shortfall = Math.max(0, reqCap - initialTotal);
-
-                document.getElementById("res-required-capital").innerText = "$ " + Math.round(reqCap).toLocaleString('de-DE');
-
-                const goalText = shortfall <= 0 ? "Goal Reached" : `Goal distance: $ ${Math.round(shortfall).toLocaleString('de-DE')}`;
-                document.getElementById("lbl-shortfall").innerText = goalText;
-
-                // Monthly Reality
-                const targetMonthly = configs.TARGET_ANNUAL_EXP / 12;
-                const safeMonthly = (initialTotal * bestSWR) / 12;
-                const m99 = (initialTotal * swr99) / 12;
-                const m90 = (initialTotal * swr90) / 12;
-                let peakMonthly = targetMonthly * configs.CEILING_LATE;
-                if (targetMonthly === 0) peakMonthly = safeMonthly;
-
-                document.getElementById("res-safe-monthly").innerText = safeMonthly.toLocaleString('de-DE', { maximumFractionDigits: 0 }) + " $";
-                document.getElementById("res-safe-99").innerText = m99.toLocaleString('de-DE', { maximumFractionDigits: 0 }) + " $";
-                document.getElementById("res-safe-90").innerText = m90.toLocaleString('de-DE', { maximumFractionDigits: 0 }) + " $";
-                document.getElementById("res-max-monthly").innerText = peakMonthly.toLocaleString('de-DE', { maximumFractionDigits: 0 });
-                document.getElementById("lbl-target-monthly").innerText = targetMonthly.toLocaleString('de-DE', { maximumFractionDigits: 0 }) + " $";
-
-                // --- SINGLE LINE DEBUG OUTPUT ---
-                const allocStr = `S:${((configs.ALLOC_STOCKS || 0) * 100).toFixed(0)}/B:${(100 - (configs.ALLOC_STOCKS || 0) * 100 - (configs.ALLOC_CRYPTO || 0) * 100).toFixed(0)}/C:${((configs.ALLOC_CRYPTO || 0) * 100).toFixed(0)}`;
-                const retStr = `Ret:S${(configs.S_CAGR_START * 100).toFixed(1)}/B${(configs.B_CAGR_START * 100).toFixed(1)}`;
-                const volStr = `Vol:S${(configs.S_VOL_START * 100).toFixed(1)}/B${(configs.B_VOL_START * 100).toFixed(1)}`;
-                const infStr = `Inf:${(configs.INFL_MEAN * 100).toFixed(1)}(v${(configs.INFL_VOL * 100).toFixed(1)})`;
-
-                const safeSpd = displaySWR * (configs.INVESTED_AMOUNT + configs.CASH_BUFFER);
-                const resStr = `[SIM_FULL] Yrs:${configs.years} | Cap:${(configs.INVESTED_AMOUNT / 1000).toFixed(0)}k+${(configs.CASH_BUFFER / 1000).toFixed(0)}k | Spend:${(configs.TARGET_ANNUAL_EXP / 1000).toFixed(1)}k | ${allocStr} | ${retStr} | ${volStr} | ${infStr} | Tgt:${(configs.targetSuccess * 100).toFixed(0)}% => Succ:${(final.successRate * 100).toFixed(1)}% | SWR:${(displaySWR * 100).toFixed(2)}% (SafeSpd: ${Math.round(safeSpd / 1000)}k)`;
-                console.log(resStr);
-
-                // Diagnostic: Check 4% Rule specifically
-                const bench4 = simulatePortfolio(0.04, marketData, shConfigs);
-                console.log(`[BENCHMARK] Success Rate at 4.0% Withdrawal: ${(bench4.successRate * 100).toFixed(1)}% (Target: ${(configs.targetSuccess * 100).toFixed(0)}%)`);
-                // --------------------------------
-
-                document.getElementById("results-placeholder").classList.add("hidden");
-                document.getElementById("results-container").classList.remove("hidden");
-
-                renderHistogram(final.wealths, "plot-area");
-
-                // Mobile Auto-Scroll
-                if (window.innerWidth < 1024) {
-                    setTimeout(() => {
-                        const visionSection = document.getElementById("vision-section");
-                        if (visionSection) {
-                            visionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                    }, 100);
-                } else {
-                    // Desktop: Window Smooth Scroll
-                    // We want the whole page to scroll to the top
-                    setTimeout(() => {
-                        // Use our custom smooth scroll helper on document.documentElement (html) or body
-                        // To be safe, we can just use window.scrollTo with behavior
-                        const scrollTarget = document.documentElement.scrollTop > 0 ? document.documentElement : document.body;
-                        smoothScrollToTop(scrollTarget, 500);
-                    }, 150);
-                }
-
-            } catch (e) {
-                console.error(e);
-                alert("Error: " + e.message);
-            } finally {
-                btnRun.disabled = false;
-                btnRun.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Run Simulation</span>`;
-            }
-        }
-
-
-        // --- NAVIGATION LOGIC ---
-        function switchView(viewName) {
-            ['calculator', 'info', 'satoshi'].forEach(v => {
-                const el = document.getElementById('view-' + v);
-                const nav = document.getElementById('nav-' + v);
-                if (el) el.classList.add('hidden');
-                if (nav) nav.classList.remove('active', 'text-gold-600');
-            });
-
-            const targetEl = document.getElementById('view-' + viewName);
-            const targetNav = document.getElementById('nav-' + viewName);
-            if (targetEl) targetEl.classList.remove('hidden');
-            if (targetNav) targetNav.classList.add('active', 'text-gold-600');
-        }
-
-        // --- TUTORIAL LOGIC ---
-        const tutorialSteps = [
-            { id: 'inp-years', title: 'Time Horizon', text: 'How long do you want to plan for?' },
-            { id: 'inp-initial', title: 'Invested Capital', text: 'Your current starting portfolio value.' },
-            { id: 'inp-buffer', title: 'Cash Buffer', text: 'Cash set aside for emergencies.' },
-            { id: 'inp-alloc-crypto-pct', title: 'Asset Allocation', text: 'Balance between Crypto and Stocks.' },
-            { id: 'btn-run', title: 'Run Simulation', text: 'Starts the JS Monte Carlo engine.' }
-        ];
-
-        let currentStepIndex = -1;
-
-        function startTutorial() {
-            switchView('calculator');
-            currentStepIndex = 0;
-            const ov = document.getElementById('tutorial-overlay');
-            ov.classList.remove('hidden', 'pointer-events-none');
-            showTutorialStep();
-        }
-
-        function endTutorial() {
-            currentStepIndex = -1;
-            const ov = document.getElementById('tutorial-overlay');
-            ov.classList.add('hidden', 'pointer-events-none');
-            ov.innerHTML = '';
-        }
-
-        function showTutorialStep() {
-            const step = tutorialSteps[currentStepIndex];
-            const el = document.getElementById(step.targetOverride || step.id);
-            if (!el) { endTutorial(); return; }
-
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const rect = el.getBoundingClientRect();
-
-            // Simple positioning
-            let top = rect.bottom + window.scrollY + 12;
-            let left = rect.left + window.scrollX;
-
-            const tooltipHtml = `
-            <div class="tutorial-tooltip tooltip-bottom" style="top: ${top}px; left: ${left}px;">
-                <div class="flex justify-between items-start mb-2 border-b border-white/20 pb-2">
-                    <h4 class="font-bold text-white text-sm">${step.title}</h4>
-                </div>
-                <p class="text-sm text-white/90 mb-4">${step.text}</p>
-                <div class="flex gap-2">
-                    <button onclick="endTutorial()" class="text-xs text-white/60 hover:text-white">Skip</button>
-                    <button onclick="nextStep()" class="bg-white/20 text-white text-xs font-bold px-4 py-1.5 rounded">Next</button>
-                </div>
-            </div>`;
-            document.getElementById('tutorial-overlay').innerHTML = tooltipHtml;
-        }
-
-        function nextStep() {
-            currentStepIndex++;
-            if (currentStepIndex >= tutorialSteps.length) endTutorial();
-            else showTutorialStep();
-        }
-
-        // Initialize logic
-        (function main() {
-            // update_status("Engine Ready", "text-gold-700");
-            const btn = document.getElementById("btn-run");
-            if (btn) btn.disabled = false;
-
-            const overlay = document.getElementById('loading-overlay');
-            const spinner = document.getElementById('main-spinner');
-
-            // Create 21 rockets
-            for (let i = 0; i < 21; i++) {
-                const rocket = document.createElement('div');
-                rocket.className = 'rocket';
-                rocket.innerText = '🚀';
-                rocket.style.left = Math.random() * 90 + 5 + '%';
-                // Randomize speed slightly for variety but keep it "slower" (around 4s from CSS)
-                const delay = i * 150 + Math.random() * 200;
-                overlay.appendChild(rocket);
-
-                setTimeout(() => {
-                    rocket.classList.add('launch');
-                }, delay);
-            }
-
-            // Make the load up snappier (2 seconds total)
-            setTimeout(() => {
-                if (overlay) overlay.classList.add('fade-out');
-            }, 2000);
-            // Force scroll reset on load
-            function resetAllScrolls() {
-                window.scrollTo(0, 0);
-                const viewCalc = document.getElementById("view-calculator");
-                const mainPanel = document.getElementById("main-results-panel");
-                const aside = document.querySelector("#view-calculator aside");
-
-                if (viewCalc) viewCalc.scrollTop = 0;
-                if (mainPanel) mainPanel.scrollTop = 0;
-                if (aside) aside.scrollTop = 0;
-            }
-
-            // Execute immediately and after simple delays to fight browser restoration
-            if ('scrollRestoration' in history) {
-                history.scrollRestoration = 'manual';
-            }
-            resetAllScrolls();
-            setTimeout(resetAllScrolls, 100);
-            setTimeout(resetAllScrolls, 500);
-        })();
-
-    </script>
-
+    <!-- Global Scripts (No ES Modules) -->
+    <!-- Utils -->
+    <script defer src="js/utils/config.js"></script>
+
+    <!-- Engine -->
+    <script defer src="js/engine/stats.js"></script>
+    <script defer src="js/engine/market.js"></script>
+    <script defer src="js/engine/simulator.js"></script>
+    <script defer src="js/engine/swr.js"></script>
+
+    <!-- UI -->
+    <script defer src="js/ui/formatters.js"></script>
+    <script defer src="js/ui/renderer.js"></script>
+    <script defer src="js/ui/navigation.js"></script>
+    <script defer src="js/ui/tutorial.js"></script>
+    <script defer src="js/ui/animations.js"></script>
+    <script defer src="js/ui/handlers.js"></script>
+    <script defer src="js/ui/listeners.js"></script>
+
+    <!-- Main -->
+    <script defer src="js/main.js"></script>
 </body>
 
 </html>
