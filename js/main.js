@@ -171,6 +171,19 @@ async function runSimulation() {
     if (medianEl) medianEl.innerText = Formatters.formatCurrency(medianWealth, 0);
     if (worstEl) worstEl.innerText = Formatters.formatCurrency(worstCaseWealth, 0);
 
+    // Update Portfolio Mix Summary in Results
+    const sPct = configs.ALLOC_STOCKS * 100;
+    const cPct = configs.ALLOC_CRYPTO * 100;
+    const bPct = 100 - sPct - cPct;
+
+    document.getElementById('res-mix-stocks').innerText = sPct.toFixed(0) + "%";
+    document.getElementById('res-mix-bonds').innerText = bPct.toFixed(0) + "%";
+    document.getElementById('res-mix-crypto').innerText = cPct.toFixed(0) + "%";
+
+    document.getElementById('bar-mix-stocks').style.width = sPct + "%";
+    document.getElementById('bar-mix-bonds').style.width = bPct + "%";
+    document.getElementById('bar-mix-crypto').style.width = cPct + "%";
+
     // Show results and hide placeholder
     const resultsContainer = document.getElementById('results-container');
     const resultsPlaceholder = document.getElementById('results-placeholder');
@@ -178,12 +191,17 @@ async function runSimulation() {
     if (resultsPlaceholder) resultsPlaceholder.classList.add('hidden');
 
     // 6. Navigation Logic (Universal Scroll to Results)
+    // Using a slightly longer delay to ensure DOM and animations have settled
     setTimeout(() => {
-        const visionSection = document.getElementById('vision-section');
-        if (visionSection) {
-            visionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const setupSection = document.getElementById('setup-section');
+        if (setupSection) {
+            setupSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'nearest'
+            });
         }
-    }, 100);
+    }, 150);
 }
 
 // Global alias for inline onclick handlers

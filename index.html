@@ -136,13 +136,17 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(5px);
+                transform: translateY(10px);
             }
 
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .tutorial-tooltip::after {
@@ -888,6 +892,47 @@
 
             <!-- Results Container (Hidden initially) -->
             <div id="results-container" class="hidden space-y-16 max-w-6xl ml-0 mr-auto animate-fade-in pb-20">
+
+                <!-- Simulation Setup Summary -->
+                <div id="setup-section" class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-xs font-black text-black uppercase tracking-[0.2em] whitespace-nowrap">The Setup
+                            (Simulated Asset Mix)</h2>
+                        <div class="h-px bg-slate-200 flex-1"></div>
+                    </div>
+
+                    <div id="res-portfolio-mix-card" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Current
+                                Simulation Allocation</span>
+                            <div class="flex flex-wrap gap-x-6 gap-y-2">
+                                <span class="flex items-center gap-2 text-[11px] font-bold">
+                                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                    <span class="text-slate-500 uppercase tracking-tighter">Stocks:</span>
+                                    <span id="res-mix-stocks" class="text-slate-900">--%</span>
+                                </span>
+                                <span class="flex items-center gap-2 text-[11px] font-bold">
+                                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                    <span class="text-slate-500 uppercase tracking-tighter">Bonds:</span>
+                                    <span id="res-mix-bonds" class="text-slate-900">--%</span>
+                                </span>
+                                <span class="flex items-center gap-2 text-[11px] font-bold">
+                                    <div class="w-2 h-2 rounded-full bg-[#F7931A]"></div>
+                                    <span class="text-slate-500 uppercase tracking-tighter">Crypto:</span>
+                                    <span id="res-mix-crypto" class="text-slate-900">--%</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="w-full h-2.5 flex rounded-full overflow-hidden bg-slate-100 shadow-inner">
+                            <div id="bar-mix-stocks" class="bg-blue-500 h-full transition-all duration-1000"
+                                style="width: 0%"></div>
+                            <div id="bar-mix-bonds" class="bg-green-500 h-full transition-all duration-1000"
+                                style="width: 0%"></div>
+                            <div id="bar-mix-crypto" class="bg-[#F7931A] h-full transition-all duration-1000"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- SECTION 1: THE VISION (Required For Goal) -->
                 <div id="vision-section" class="space-y-6">
