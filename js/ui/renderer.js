@@ -26,15 +26,33 @@ window.Renderer = {
         canvas.style.width = rect.width + 'px';
         canvas.style.height = rect.height + 'px';
 
-        const filteredData = data.filter(w => w < 100_000_000).map(w => w / 1e6);
-        if (filteredData.length === 0) return;
+        // Use 95th percentile to determine cutoff, but cap at 500M to avoid compressing the chart too much
+        // If we just filter < 100M, we lose all the "moon bags" in crypto scenarios.
+        // Let's take all data, sort it, find P95.
+        const sorted = [...data].sort((a, b) => a - b);
+        const p95 = sorted[Math.floor(sorted.length * 0.95)] || 0;
+        const visualMax = Math.min(Math.max(p95, 10_000_000), 500_000_000); // At least 10M, max 500M
+
+        // Filter for visualization
+        const filteredData = data.filter(w => w <= visualMax).map(w => w / 1e6);
+
+        // Dynamic Binning (Sturges' formula or Sqrt rule)
+        // For N=1000, sqrt is ~31. For N=50, sqrt is ~7.
+        // We constrain between 10 and 50 to look good on UI.
+        const dataCount = filteredData.length;
+        if (dataCount === 0) return;
+
+        const calculatedBins = Math.ceil(Math.sqrt(dataCount));
+        const bins = Math.max(10, Math.min(50, calculatedBins));
 
         const min = 0;
         const max = Math.max(...filteredData);
-        const bins = 50;
+        // Avoid division by zero if all values are 0
+        const range = max - min || 1;
+
         const counts = new Array(bins).fill(0);
         filteredData.forEach(val => {
-            let b = Math.floor(((val - min) / (max - min)) * bins);
+            let b = Math.floor(((val - min) / range) * bins);
             if (b >= bins) b = bins - 1;
             counts[b]++;
         });
@@ -44,6 +62,7 @@ window.Renderer = {
         const chartW = rect.width - 2 * padding;
         const chartH = rect.height - 2 * padding;
 
+        // Draw Grid
         ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
         for (let i = 0; i <= 5; i++) {
             let y = padding + chartH - (i / 5) * chartH;
@@ -55,7 +74,7 @@ window.Renderer = {
         ctx.globalAlpha = 0.8;
         counts.forEach((c, i) => {
             const h = (c / maxCount) * chartH;
-            ctx.fillRect(padding + i * barW, padding + chartH - h, barW - 1, h);
+            ctx.fillRect(padding + i * barW, padding + chartH - h, Math.max(1, barW - 1), h);
         });
 
         ctx.globalAlpha = 1.0; ctx.fillStyle = '#64748b';

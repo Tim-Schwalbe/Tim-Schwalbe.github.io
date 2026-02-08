@@ -243,6 +243,27 @@ async function runSimulation() {
     if (res.stats) {
         const { stats } = res;
 
+        // --- Advanced Metrics ---
+        const fragEl = document.getElementById('res-fragility-score');
+        const longEl = document.getElementById('res-longevity-ext');
+        const stabEl = document.getElementById('res-stability-idx');
+        const estEl = document.getElementById('res-estate-strength');
+
+        if (fragEl) {
+            fragEl.innerText = stats.fragilityScore;
+            // Dynamic Coloring for Fragility
+            fragEl.className = `text-3xl font-serif font-bold ${stats.fragilityScore >= 7 ? 'text-red-500' : (stats.fragilityScore >= 4 ? 'text-[#F7931A]' : 'text-slate-800')}`;
+        }
+        if (longEl) longEl.innerText = "+" + Math.min(50, stats.longevityExtension).toFixed(0) + " Yrs";
+        if (stabEl) stabEl.innerText = stats.stabilityIndex.toFixed(0) + "%";
+        if (estEl) estEl.innerText = (stats.estateStrength * 100).toFixed(0) + "%";
+
+        // --- Cash Shield ---
+        const shieldRateEl = document.getElementById('res-cash-shield-rate');
+        const shieldMonthsEl = document.getElementById('res-cash-months');
+        if (shieldRateEl) shieldRateEl.innerText = (stats.cashShieldSuccessRate * 100).toFixed(0) + "%";
+        if (shieldMonthsEl) shieldMonthsEl.innerText = stats.cashShieldMonths.toFixed(0) + " Mo";
+
         // Asset Realized Performance
         const calcCAGR = (logReturns) => {
             if (!logReturns || logReturns.length === 0) return 0;

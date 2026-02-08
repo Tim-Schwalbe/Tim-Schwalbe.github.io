@@ -48,7 +48,11 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         ceilingHits: 0,
         floorHits: 0,
         maxMonthlyAcrossAll: 0,
-        totalSurvivorMonths: 0
+        totalSurvivorMonths: 0,
+        spendingVolatility: [],
+        earlyBadPaths: 0,
+        downMarketMonths: 0,
+        cashCoveredMonths: 0
     };
 
     for (let s = 0; s < numSims; s++) {
@@ -67,6 +71,10 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         let currentBaseNeed = initialAnnualWithdrawal;
         let currentMonthlyWithdrawal = initialAnnualWithdrawal / 12;
         let accumulatedInflation12m = 1.0;
+
+        // Local path stats
+        let pathAnnualSpends = [];
+        let earlyCrash = false;
 
         for (let m = 0; m < months; m++) {
             const idx = s * months + m;
@@ -114,14 +122,30 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
             currentBaseNeed = stepResult.currentBaseNeed;
             currentMonthlyWithdrawal = stepResult.currentMonthlyWithdrawal;
 
+            // Track Annual Spend for Volatility Calculation
+            if ((m + 1) % 12 === 0) {
+                pathAnnualSpends.push(currentMonthlyWithdrawal * 12);
+            }
+
             pathSpend += currentMonthlyWithdrawal;
             pathStats.totalSurvivorMonths++;
             if (stepResult.ceilingHit) pathStats.ceilingHits++;
             if (stepResult.floorHit) pathStats.floorHits++;
+
+            // Cash Shield Tracking
+            // stepResult doesn't explicitly return 'sourcedFromCash', need to deduce or update calculateMonthlyStep
+            // Actually, let's update calculateMonthlyStep to return 'sourcedFromCash'
+            if (stepResult.marketDown) {
+                pathStats.downMarketMonths++;
+                if (stepResult.sourcedFromCash) pathStats.cashCoveredMonths++;
+            }
+
             pathStats.maxMonthlyAcrossAll = Math.max(pathStats.maxMonthlyAcrossAll, currentMonthlyWithdrawal);
 
             if (stepResult.failed) {
-                cashBalance = 0; survived = false; break;
+                cashBalance = 0; survived = false;
+                if (m < 60) earlyCrash = true; // Failed in first 5 years
+                break;
             }
 
             // Stats Tracking
@@ -143,6 +167,17 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         finalWealths.push(finalWealth);
         pathStats.totalSpends.push(pathSpend);
         pathStats.realFinalWealths.push(finalWealth / pathInflationFactor);
+
+        // Calc Volatility for this path (StdDev of annual spends / Average Annual Spend)
+        if (pathAnnualSpends.length > 0) {
+            const avg = pathAnnualSpends.reduce((a, b) => a + b, 0) / pathAnnualSpends.length;
+            const variance = pathAnnualSpends.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / pathAnnualSpends.length;
+            const stdDev = Math.sqrt(variance);
+            // Stability metric: 1 - CV (Coefficient of Variation)
+            // Use simple CV for now: stdDev / avg
+            if (avg > 0) pathStats.spendingVolatility.push(stdDev / avg);
+        }
+        if (earlyCrash) pathStats.earlyBadPaths++;
 
         // Save path stats
         pathStats.maxDrawdowns.push(currentMaxDrawdown);
@@ -182,10 +217,66 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
             avgAnnualSpend: (avgTotalSpend / years),
             medianMonthlySpend: (median(pathStats.totalSpends) / (years * 12)),
             maxMonthlySpend: pathStats.maxMonthlyAcrossAll,
-            ceilingHitRate: pathStats.ceilingHits / (pathStats.totalSurvivorMonths || 1),
-            floorHitRate: pathStats.floorHits / (pathStats.totalSurvivorMonths || 1)
+            ceilingHitRate: (pathStats.ceilingHits * 12) / (pathStats.totalSurvivorMonths || 1),
+            floorHitRate: (pathStats.floorHits * 12) / (pathStats.totalSurvivorMonths || 1),
+
+            // New Metric: Cash Shield Efficiency
+            cashShieldSuccessRate: pathStats.downMarketMonths > 0 ? (pathStats.cashCoveredMonths / pathStats.downMarketMonths) : 1,
+            cashShieldMonths: pathStats.cashCoveredMonths / numSims, // Normalized to average per simulation
+
+            // Advanced Metrics
+            fragilityScore: calcFragilityScore(finalWealths, pathStats.earlyBadPaths, numSims),
+            longevityExtension: calcLongevityExtension(median(finalWealths), (avgTotalSpend / years), years),
+            stabilityIndex: calcStabilityIndex(pathStats.spendingVolatility, numSims),
+            estateStrength: calcEstateStrength(pathStats.realFinalWealths, INVESTED_AMOUNT)
         }
     };
+}
+
+// --- Helper Functions for Advanced Metrics ---
+// Expose for Testing
+window.calcFragilityScore = calcFragilityScore;
+window.calcLongevityExtension = calcLongevityExtension;
+window.calcStabilityIndex = calcStabilityIndex;
+window.calcEstateStrength = calcEstateStrength;
+
+function calcFragilityScore(wealths, earlyBadPaths, totalSims) {
+    if (!totalSims) return 0;
+    // Fragility Score: Percentage of paths that failed in the first 5 years relative to total failures.
+    // Or simpler: Just the raw % of paths that crashed early.
+    // Let's use early crash rate * 10, capped at 10.
+    // Example: 10% early failure rate = Score 1.0? Too low.
+    // Let's make it a 1-10 index. 
+    // If > 20% early failure => Score 10. 
+    // Score = (EarlyFailures / TotalSims) * 50. (20% * 50 = 10).
+    const earlyFailRate = earlyBadPaths / totalSims;
+    const score = Math.min(10, earlyFailRate * 50);
+    return Math.round(score * 10) / 10;
+}
+
+// Let's implement proper tracking in the main loop instead for accuracy.
+// Re-implementing simplified logic inside simple getters for now to avoid breaking loop structure above too much.
+// Actually, I'll add the logic inside the loop in a subsequent step if needed, but for now let's use derived stats.
+
+function calcLongevityExtension(medianFinalWealth, avgAnnualSpend, simYears) {
+    if (avgAnnualSpend <= 0) return 99;
+    const extraYears = medianFinalWealth / avgAnnualSpend;
+    return Math.min(extraYears, 50); // Cap at 50 extra years for display
+}
+
+function calcStabilityIndex(volatilitySum, count) {
+    if (!volatilitySum || volatilitySum.length === 0) return 100; // Default to 100% stable
+    // Volatility is CV (StdDev / Mean).
+    // Average CV across all paths.
+    const avgCV = volatilitySum.reduce((a, b) => a + b, 0) / volatilitySum.length;
+    // Stability Index = (1 - AvgCV) * 100.
+    // Example: Avg CV is 0.15 (15% variation). Stability = 85%.
+    return Math.max(0, Math.min(100, (1 - avgCV) * 100));
+}
+
+function calcEstateStrength(realFinalWealths, initialInvestment) {
+    const wins = realFinalWealths.filter(w => w > initialInvestment).length;
+    return wins / realFinalWealths.length;
 }
 
 /**
@@ -219,9 +310,11 @@ window.calculateMonthlyStep = function (state, inputs, config) {
     // 3. Withdrawals (Prime Harvesting)
     const isUnderwater = newPortfolio < INVESTED_AMOUNT;
     const isMarketDown = growthFactor < 1.0;
+    let sourcedFromCash = false;
 
     if ((isUnderwater || isMarketDown) && newCash >= currentMonthlyWithdrawal) {
         newCash -= currentMonthlyWithdrawal;
+        sourcedFromCash = true;
     } else {
         newPortfolio -= currentMonthlyWithdrawal;
 
@@ -290,7 +383,9 @@ window.calculateMonthlyStep = function (state, inputs, config) {
         failed: failed,
         growthFactor: growthFactor,
         ceilingHit: ceilingHit,
-        floorHit: floorHit
+        floorHit: floorHit,
+        marketDown: isMarketDown || isUnderwater, // Treat "Underwater" as a condition where we prefer cash too
+        sourcedFromCash: sourcedFromCash
     };
 }
 
