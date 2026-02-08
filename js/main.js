@@ -262,8 +262,8 @@ async function runSimulation() {
         document.getElementById('res-worst-dd').innerText = (stats.worstDrawdown * 100).toFixed(1) + "%";
 
         // Recovery stats
-        document.getElementById('res-median-recovery').innerText = stats.medianDrawdownDuration + " mo";
-        document.getElementById('res-worst-recovery').innerText = stats.worstDrawdownDuration + " mo";
+        document.getElementById('res-median-recovery').innerText = stats.medianDrawdownDuration + " months";
+        document.getElementById('res-worst-recovery').innerText = stats.worstDrawdownDuration + " months";
 
         // Survival Margin
         document.getElementById('res-median-low-cap').innerText = Formatters.formatCurrency(stats.medianLowestCapital, 0);
@@ -271,7 +271,7 @@ async function runSimulation() {
 
         // Sanity Filter Checks
         if (marketData.info) {
-            document.getElementById('res-max-bad-streak').innerText = marketData.info.maxStreakEncountered + " yrs";
+            document.getElementById('res-max-bad-streak').innerText = marketData.info.maxStreakEncountered + " years";
             document.getElementById('res-filter-triggers').innerText = marketData.info.constraintHits.toLocaleString();
         }
     }

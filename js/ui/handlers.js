@@ -101,36 +101,47 @@ window.Handlers = {
 
         if (total !== 100) {
             const diff = total - 100;
+            // Circular priority: adjust the "neighbor" first
             if (source === 'stocks') {
+                // Adjust Bonds first, then Crypto
                 if (diff > 0) {
-                    let toTake = Math.min(bVal, diff);
-                    bVal -= toTake;
-                    cVal -= (diff - toTake);
+                    let takeFromBonds = Math.min(bVal, diff);
+                    bVal -= takeFromBonds;
+                    cVal -= (diff - takeFromBonds);
                 } else {
-                    bVal -= diff;
-                }
-            } else if (source === 'crypto') {
-                if (diff > 0) {
-                    let toTake = Math.min(sVal, diff);
-                    sVal -= toTake;
-                    bVal -= (diff - toTake);
-                } else {
-                    sVal -= diff;
+                    bVal -= diff; // diff is negative, so this adds
                 }
             } else if (source === 'bonds') {
+                // Adjust Crypto first, then Stocks
                 if (diff > 0) {
-                    let toTake = Math.min(sVal, diff);
-                    sVal -= toTake;
-                    cVal -= (diff - toTake);
+                    let takeFromCrypto = Math.min(cVal, diff);
+                    cVal -= takeFromCrypto;
+                    sVal -= (diff - takeFromCrypto);
+                } else {
+                    cVal -= diff;
+                }
+            } else if (source === 'crypto') {
+                // Adjust Stocks first, then Bonds
+                if (diff > 0) {
+                    let takeFromStocks = Math.min(sVal, diff);
+                    sVal -= takeFromStocks;
+                    bVal -= (diff - takeFromStocks);
                 } else {
                     sVal -= diff;
                 }
             }
         }
 
+        // Final sanitation and ensure total is exactly 100
         cVal = Math.max(0, Math.min(100, cVal));
         sVal = Math.max(0, Math.min(100, sVal));
         bVal = 100 - cVal - sVal;
+
+        // One more check to handle edge case where bVal might become negative from subtraction
+        if (bVal < 0) {
+            sVal += bVal;
+            bVal = 0;
+        }
 
         cryptoEl.value = cVal;
         stocksEl.value = sVal;
@@ -140,8 +151,9 @@ window.Handlers = {
         document.getElementById('lbl-stocks-pct').innerText = sVal + "%";
         document.getElementById('lbl-bonds-pct').innerText = bVal + "%";
 
+        // Style consistency: Bonds now uses the same Orange theme as Stocks/Crypto
         const labelBonds = document.getElementById('lbl-bonds-pct');
-        labelBonds.className = bVal < 20 ? "font-mono font-bold text-red-500" : "font-mono font-bold text-green-600";
+        labelBonds.className = "font-bold text-[#F7931A]";
     },
 
     toggleAdvanced() {

@@ -64,7 +64,7 @@ window.Renderer = {
         // X-axis labels
         for (let i = 0; i <= 5; i++) {
             const val = (min + (max - min) * (i / 5)).toFixed(1);
-            ctx.fillText(val + "M", padding + (i / 5) * chartW, rect.height - 20);
+            ctx.fillText(val + " Million", padding + (i / 5) * chartW, rect.height - 20);
         }
         ctx.fillText("Wealth Distribution (Million $)", rect.width / 2, rect.height - 5);
 
