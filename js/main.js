@@ -12,7 +12,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Enable the Run button (no auto-run to avoid null reference errors)
     const runBtn = document.getElementById('btn-run');
     if (runBtn) runBtn.disabled = false;
+
+    // 4. Init Crash Displays
+    if (window.updateCrashAnnualDisplay) window.updateCrashAnnualDisplay();
 });
+
+// Helper: Update Crash Annual Displays
+window.updateCrashAnnualDisplay = function () {
+    const calcAnnual = (monthlyPct) => {
+        if (!monthlyPct) return 0;
+        // Formula: ((e^(r) )^12 - 1) * 100 where r = monthlyPct/100
+        // This matches the log-return application in the engine.
+        const r = monthlyPct / 100;
+        const annual = (Math.pow(Math.exp(r), 12) - 1) * 100;
+        return annual.toFixed(1); // e.g. -45.1
+    };
+
+    const updateField = (inputId, dispId) => {
+        const input = document.getElementById(inputId);
+        const disp = document.getElementById(dispId);
+        if (input && disp) {
+            const val = parseFloat(input.value) || 0;
+            const annual = calcAnnual(val);
+            disp.innerText = `~ ${annual}% Annual`;
+        }
+    };
+
+    updateField('inp-crash-floor-stocks', 'disp-crash-annual-stocks');
+    updateField('inp-crash-floor-crypto', 'disp-crash-annual-crypto');
+    updateField('inp-crash-floor-bonds', 'disp-crash-annual-bonds');
+};
 
 async function runSimulation() {
     console.log("🚀 Starting Simulation...");
@@ -67,6 +96,11 @@ async function runSimulation() {
     if (document.getElementById('chk-force-start-crash').checked) {
         configs.FORCE_CRASH = true;
         configs.CRASH_DURATION = parseInt(document.getElementById('inp-crash-duration').value) || 3;
+
+        // Read Floors (convert % to decimal)
+        configs.CRASH_FLOOR_STOCKS = (parseFloat(document.getElementById('inp-crash-floor-stocks').value) || -5.0) / 100;
+        configs.CRASH_FLOOR_CRYPTO = (parseFloat(document.getElementById('inp-crash-floor-crypto').value) || -10.0) / 100;
+        configs.CRASH_FLOOR_BONDS = (parseFloat(document.getElementById('inp-crash-floor-bonds').value) || -1.0) / 100;
     }
 
     // 2. Generate Market Data

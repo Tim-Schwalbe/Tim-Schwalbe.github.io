@@ -635,6 +635,22 @@
 
                     <div id="pnl-advanced" class="advanced-panel space-y-6 pt-4">
 
+                        <!-- Methodology Note -->
+                        <div
+                            class="bg-blue-50/50 rounded-lg p-3 border border-blue-100/50 text-[10px] text-slate-600 leading-relaxed">
+                            <p class="font-bold text-blue-900 mb-1">Morningstar 2025 Research Basis</p>
+                            We use the latest <span class="font-bold text-slate-800">Morningstar 'State of Retirement
+                                Income 2025'</span> research as our baseline. Their model suggest a <span
+                                class="font-bold text-[#F7931A]">3.9% Safe Withdrawal Rate</span> (90% success) for a
+                            balanced
+                            portfolio.
+                            <br><br>
+                            Starting from these conservative, industry-standard numbers (Stocks ~8%, Bonds ~4.5%,
+                            Inflation ~2.5%), you can slowly increase Bitcoin and Stock allocations to observe their
+                            impact
+                            on your Safe Withdrawal Rate and long-term wealth creation.
+                        </div>
+
                         <!-- Stress Test Parameters -->
                         <div class="bg-red-50/50 rounded-lg p-3 border border-red-100">
                             <div class="flex justify-between items-center mb-2">
@@ -710,15 +726,96 @@
                                         Crash at Start</label>
                                 </div>
 
-                                <div id="div-crash-config" class="hidden pl-5 space-y-2 border-l-2 border-red-100">
+                                <div id="div-crash-config" class="hidden pl-5 space-y-4 border-l-2 border-red-100 mt-2">
                                     <div>
                                         <label class="block text-[10px] text-slate-500 mb-1">Crash Duration
                                             (Years)</label>
                                         <input type="number" id="inp-crash-duration" value="3"
                                             class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
                                     </div>
-                                    <p class="text-[9px] text-red-400 italic">Forces returns to be negative for the
-                                        first N years.</p>
+
+                                    <!-- Crash Intensity Inputs -->
+                                    <div class="space-y-2">
+                                        <p class="text-[10px] font-bold text-slate-500">Monthly Return Floors (Cap)</p>
+
+                                        <!-- Stocks -->
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label class="text-[9px] text-slate-400">Stocks (Monthly Limit)</label>
+                                                <span id="disp-crash-annual-stocks"
+                                                    class="text-[9px] text-red-400 font-mono">~ -46% Annual</span>
+                                            </div>
+                                            <div class="relative">
+                                                <input type="number" id="inp-crash-floor-stocks" value="-5.0" step="0.5"
+                                                    max="0" oninput="updateCrashAnnualDisplay()"
+                                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-red-600 font-bold">
+                                                <span class="absolute right-6 top-1 text-[10px] text-slate-400">%</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Crypto -->
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label class="text-[9px] text-slate-400">Crypto (Monthly Limit)</label>
+                                                <span id="disp-crash-annual-crypto"
+                                                    class="text-[9px] text-red-400 font-mono">~ -71% Annual</span>
+                                            </div>
+                                            <div class="relative">
+                                                <input type="number" id="inp-crash-floor-crypto" value="-10.0"
+                                                    step="0.5" max="0" oninput="updateCrashAnnualDisplay()"
+                                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-red-600 font-bold">
+                                                <span class="absolute right-6 top-1 text-[10px] text-slate-400">%</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Bonds -->
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label class="text-[9px] text-slate-400">Bonds (Monthly Limit)</label>
+                                                <span id="disp-crash-annual-bonds"
+                                                    class="text-[9px] text-red-400 font-mono">~ -11% Annual</span>
+                                            </div>
+                                            <div class="relative">
+                                                <input type="number" id="inp-crash-floor-bonds" value="-1.0" step="0.1"
+                                                    max="0" oninput="updateCrashAnnualDisplay()"
+                                                    class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-red-600 font-bold">
+                                                <span class="absolute right-6 top-1 text-[10px] text-slate-400">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mechanics Tooltip/Info -->
+                                    <div
+                                        class="bg-red-100/50 p-2 rounded border border-red-200/50 relative group cursor-help">
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-3 h-3 text-red-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                </path>
+                                            </svg>
+                                            <span class="text-[9px] font-bold text-red-600 uppercase">How it
+                                                works</span>
+                                        </div>
+
+                                        <!-- Tooltip Content -->
+                                        <div
+                                            class="absolute bottom-full left-0 mb-2 w-64 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all z-50 pointer-events-none border border-white/10">
+                                            <p class="font-bold text-[#F7931A] mb-1">Mechanics: Forced Negativity</p>
+                                            <p class="mb-2 leading-relaxed">
+                                                During the crash period, we <span
+                                                    class="font-bold text-red-300">force</span> monthly returns to be at
+                                                least this bad.
+                                            </p>
+                                            <div class="bg-white/10 p-1.5 rounded mb-2 font-mono text-[9px]">
+                                                return = MIN(random_return, limit)
+                                            </div>
+                                            <p class="leading-relaxed">
+                                                If the random roll is +2%, it becomes -5%. If it's -8%, it stays -8%.
+                                                This guarantees a brutal, relentless downturn.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -729,7 +826,7 @@
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
-                                    <input type="number" step="0.1" id="inp-infl-mean" value="3.1"
+                                    <input type="number" step="0.1" id="inp-infl-mean" value="2.5"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
                                 </div>
                                 <div>
@@ -742,7 +839,39 @@
 
                         <!-- Correlation -->
                         <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Asset Correlation</p>
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[10px] uppercase font-bold text-slate-400">Asset Correlation</p>
+                                <!-- Info Tooltip -->
+                                <div class="relative group">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div
+                                        class="absolute right-0 top-6 w-72 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-4 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
+                                        <p
+                                            class="font-serif font-bold text-[#F7931A] text-xs mb-2 uppercase tracking-wider border-b border-white/20 pb-1.5">
+                                            Diversification Power</p>
+                                        <p class="mb-2 text-white/90">Controls how closely asset classes move together.
+                                        </p>
+
+                                        <div class="space-y-2">
+                                            <p class="text-white/90"><span class="text-red-300 font-bold">1.0
+                                                    (High):</span>
+                                                Assets lock-step. If Stocks crash, everything crashes. <span
+                                                    class="italic opacity-75">No safety net.</span></p>
+                                            <p class="text-white/90"><span class="text-green-300 font-bold">0.0
+                                                    (Low):</span> Assets ignore each other. When one zig, others zag.
+                                                <span class="italic opacity-75">Rebalancing bonuses occur here.</span>
+                                            </p>
+                                            <p class="text-white/90"><span class="text-[#F7931A] font-bold">Default
+                                                    (0.20):</span> Slight positive link. Realistic for modern global
+                                                markets.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
@@ -792,24 +921,24 @@
                             <div class="grid grid-cols-2 gap-2 mb-2">
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                    <input type="number" step="0.1" id="inp-s-cagr-start" value="10.3"
+                                    <input type="number" step="0.1" id="inp-s-cagr-start" value="8.0"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                    <input type="number" step="0.1" id="inp-s-cagr-end" value="10.3"
+                                    <input type="number" step="0.1" id="inp-s-cagr-end" value="8.0"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
-                                    <input type="number" step="0.1" id="inp-s-vol-start" value="20.0"
+                                    <input type="number" step="0.1" id="inp-s-vol-start" value="17.0"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
-                                    <input type="number" step="0.1" id="inp-s-vol-end" value="20.0"
+                                    <input type="number" step="0.1" id="inp-s-vol-end" value="17.0"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
                                 </div>
                             </div>
@@ -821,7 +950,7 @@
                             <div class="grid grid-cols-2 gap-2 mb-2">
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">CAGR</label>
-                                    <input type="number" step="0.1" id="inp-b-cagr-start" value="5.2"
+                                    <input type="number" step="0.1" id="inp-b-cagr-start" value="4.5"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
                                 </div>
                                 <div>
@@ -857,7 +986,7 @@
                             <div class="col-span-1">
                                 <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Target
                                     Success (%)</label>
-                                <input type="number" step="1" id="inp-target-success" value="95"
+                                <input type="number" step="1" id="inp-target-success" value="90"
                                     class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
                             </div>
                         </div>
@@ -1377,103 +1506,387 @@
     </div>
 
     <!-- VIEW: INFO / METHODOLOGY -->
-    <div id="view-info" class="hidden flex-1 overflow-y-auto bg-white p-10 animate-fade-in">
-        <div class="max-w-4xl mx-auto space-y-8">
-            <h2 class="text-4xl font-serif font-bold text-slate-800 text-right border-b border-gold-200 pb-4">
-                Methodology & Glossary</h2>
-            <section class="space-y-4">
-                <h3 class="text-2xl font-serif text-gold-600">Core Logic: Monte Carlo Simulation</h3>
-                <p class="text-slate-600 leading-relaxed">
-                    This calculator uses <strong>Monte Carlo Simulation</strong> to generate thousands of possible
-                    future market scenarios
-                    based on statistical parameters.
-                    This allows us to stress-test your portfolio against millions of potential realities, including
-                    those worse than history.
+    <div id="view-info" class="hidden flex-1 overflow-y-auto bg-white p-6 sm:p-10 animate-fade-in pb-32">
+        <div class="max-w-5xl mx-auto space-y-12">
+
+            <!-- Header -->
+            <header class="text-right border-b border-gold-200 pb-6">
+                <h2 class="text-3xl sm:text-5xl font-serif font-bold text-slate-900">Methodology & Verification</h2>
+                <p class="text-slate-500 mt-2 font-mono text-xs uppercase tracking-widest">Trust, but Verify • Est. 2026
                 </p>
-            </section>
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                    <h4 class="font-bold text-slate-700 mb-2">CAGR (Compound Annual Growth Rate)</h4>
-                    <p class="text-sm text-slate-500">The mean annual return.</p>
-                </div>
-                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                    <h4 class="font-bold text-slate-700 mb-2">Volatility (Risk)</h4>
-                    <p class="text-sm text-slate-500">Standard deviation of returns. We use a "Skewed Normal"
-                        distribution.</p>
-                </div>
-                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                    <h4 class="font-bold text-slate-700 mb-2">Gaussian Copula (Correlation)</h4>
-                    <p class="text-sm text-slate-500">Mathematical method to link the random movements of Stocks and
-                        Crypto.</p>
-                </div>
-                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                    <h4 class="font-bold text-slate-700 mb-2">Safe Withdrawal Rate (SWR)</h4>
-                    <p class="text-sm text-slate-500">The percentage of your portfolio you can withdraw annually without
-                        depleting it.</p>
-                </div>
-            </section>
-        </div>
+            </header>
 
-        <!-- CALCULATION LOGIC SECTION -->
-        <div class="max-w-4xl mx-auto space-y-8 mt-16 pt-16 border-t border-slate-100">
-            <h3 class="text-2xl font-serif font-bold text-gold-600">Calculation Logic Explained</h3>
-
-            <div class="bg-slate-900 rounded-xl p-6 overflow-hidden text-sm font-mono text-slate-300">
-                <div class="flex items-center gap-2 mb-4 text-green-400 border-b border-slate-700 pb-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-                    </svg>
-                    <span>Portfolio Simulation Loop (Code Excerpt)</span>
+            <!-- 1. Morningstar Basis -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <div class="h-px bg-slate-200 flex-1"></div>
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">The Foundation</h3>
+                    <div class="h-px bg-slate-200 flex-1"></div>
                 </div>
-                <pre>
-<span class="text-purple-400">for</span> (let y = 0; y < years; y++) {
-    <span class="text-slate-500">// 1. Determine Spending Limits (Dynamic Upside)</span>
-    <span class="text-blue-300">const</span> baseFloor = initialTarget * accumulatedInflation;
-    <span class="text-blue-300">const</span> upsidePotential = currentPortfolio * initialSWR;
-    
-    <span class="text-blue-300">const</span> withdrawal = Math.max(
-        baseFloor,                             <span class="text-slate-500">// 1. Never Spend < Target</span>
-        Math.min(upsidePotential, maxCeiling)  <span class="text-slate-500">// 2. Capture Upside (Capped)</span>
-    );
 
-    <span class="text-slate-500">// 2. Cash Buffer Protection (Sequence Risk Shield)</span>
-    <span class="text-purple-400">if</span> (marketReturn < 0) {
-        <span class="text-slate-500">// MARKET DOWN: "Prime Harvesting"</span>
-        <span class="text-slate-500">// We spend Cash first to avoid selling depreciated assets.</span>
-        cashDraw = Math.min(withdrawal, cash);
-    } <span class="text-purple-400">else</span> {
-        <span class="text-slate-500">// MARKET UP: Spend from Portfolio Gains</span>
-        cashDraw = 0;
-    }
-}
-</pre>
-            </div>
-
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="p-4 border-l-2 border-gold-400">
-                    <h4 class="font-bold text-slate-700">Volatility (The Risk)</h4>
-                    <p class="text-sm text-slate-500 mt-2">We use <strong>Skew Normal Distributions</strong> to model
-                        "Fat Tails" (Crashes). Standard Bell Curves underestimate how often the market drops -20% or
-                        more.</p>
-                </div>
-                <div class="p-4 border-l-2 border-green-400">
-                    <h4 class="font-bold text-slate-700">Cash Buffer (The Shield)</h4>
-                    <p class="text-sm text-slate-500 mt-2">When the market is down (Negative Return), the simulation
-                        automatically draws from your Cash Buffer instead of selling stocks. This drastically improves
-                        survival odds.</p>
-                </div>
-                <div class="p-4 border-l-2 border-blue-400">
-                    <h4 class="font-bold text-slate-700">Dynamic Spending (The Reward)</h4>
-                    <p class="text-sm text-slate-500 mt-2">
-                        Your spending has a <strong>Guaranteed Floor</strong> (Inflation-Adjusted). In Bull Markets, you
-                        automatically spend more ("Upside Model"), capped by your chosen Ceiling % to prevent lifestyle
-                        creep.
+                <div class="bg-blue-50/50 border border-blue-100 p-6 rounded-2xl">
+                    <h4 class="text-2xl font-serif text-blue-900 font-bold mb-4">Morningstar 2025 Standard</h4>
+                    <p class="text-slate-700 leading-relaxed mb-6">
+                        This calculator is calibrated to the <strong>Morningstar "State of Retirement Income
+                            2025"</strong> research.
+                        While many tools use outdated "4% Rule" logic from the 1990s, we use forward-looking capital
+                        market assumptions
+                        for the next 30 years.
                     </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-blue-100/50 shadow-sm">
+                            <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">Safe
+                                Withdrawal Rate</span>
+                            <span class="block text-3xl font-bold text-blue-600">3.9%</span>
+                            <span class="text-[10px] text-slate-500">For 90% Success Probability</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-blue-100/50 shadow-sm">
+                            <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">Asset
+                                Allocation</span>
+                            <span class="block text-3xl font-bold text-slate-700">40/60</span>
+                            <span class="text-[10px] text-slate-500">Stocks / Bonds (Balanced)</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-blue-100/50 shadow-sm">
+                            <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">Time
+                                Horizon</span>
+                            <span class="block text-3xl font-bold text-slate-700">30 Yrs</span>
+                            <span class="text-[10px] text-slate-500">Standard Retirement</span>
+                        </div>
+                    </div>
                 </div>
+            </section>
+
+            <!-- 2. Deep Dive: Math Models -->
+            <section class="space-y-12">
+                <div class="flex items-center gap-4">
+                    <div class="h-px bg-slate-200 flex-1"></div>
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">The Mathematics</h3>
+                    <div class="h-px bg-slate-200 flex-1"></div>
+                </div>
+
+                <!-- A. Market Returns (GBM) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="space-y-4">
+                        <h4 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span class="text-[#F7931A]">01.</span> Asset Returns (GBM)
+                        </h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            We model asset prices using <strong>Geometric Brownian Motion (GBM)</strong>, the standard
+                            model for financial mathematics. Asset prices evolve based on two components:
+                        </p>
+                        <ul class="space-y-2 text-sm text-slate-600 list-disc pl-4">
+                            <li><strong>Drift (&mu;):</strong> The expected average return (CAGR).</li>
+                            <li><strong>Shock (&sigma;<i>Z</i>):</strong> The random volatility, where <i>Z</i> is a
+                                random number
+                                from a Normal Distribution.</li>
+                        </ul>
+                        <div class="bg-slate-900 text-slate-300 p-3 rounded-lg font-mono text-xs overflow-x-auto">
+                            Price(t) = Price(t-1) * e^((&mu; - &sigma;&sup2;/2)dt + &sigma;&radic;dt * Z)
+                        </div>
+                    </div>
+
+                    <!-- TEST WIDGET 1 -->
+                    <div class="bg-white border-2 border-slate-100 p-6 rounded-2xl shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-black bg-slate-100 px-2 py-1 rounded text-slate-500">LIVE
+                                VERIFICATION</span>
+                            <span class="text-xs font-bold text-green-600">Simulate 1 Year</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 block">CAGR</label>
+                                    <input type="number" id="test-gbm-cagr" value="8.0"
+                                        class="w-full border rounded px-2 py-1 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 block">Volatility</label>
+                                    <input type="number" id="test-gbm-vol" value="17.0"
+                                        class="w-full border rounded px-2 py-1 text-xs font-mono">
+                                </div>
+                            </div>
+                            <button onclick="runVerification('GBM')"
+                                class="w-full bg-slate-800 text-white text-xs font-bold py-2 rounded hover:bg-black transition">
+                                Generate Random Year
+                            </button>
+                            <div id="res-test-gbm"
+                                class="hidden bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                                <div class="flex justify-between">
+                                    <span>Result:</span>
+                                    <span id="out-gbm-res" class="font-mono font-bold text-slate-900">--</span>
+                                </div>
+                                <div class="text-[9px] text-slate-400 mt-1">Click multiple times to see randomness.
+                                    Average will converge to CAGR.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- B. Correlation (Cholesky) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start border-t border-slate-100 pt-8">
+                    <div class="space-y-4">
+                        <h4 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span class="text-[#F7931A]">02.</span> Correlation (Cholesky)
+                        </h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Assets don't move in isolation. When Stocks crash, Crypto often crashes too. We use
+                            <strong>Cholesky Decomposition</strong> to link the random "dice rolls" of different assets
+                            based on your correlation input.
+                        </p>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            This preserves the structural risk of diversification failing during panics.
+                        </p>
+                    </div>
+
+                    <!-- TEST WIDGET 2 -->
+                    <div class="bg-white border-2 border-slate-100 p-6 rounded-2xl shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-black bg-slate-100 px-2 py-1 rounded text-slate-500">LIVE
+                                VERIFICATION</span>
+                            <span class="text-xs font-bold text-purple-600">Verify Math</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 block">Target Correlation (0.0 to
+                                    1.0)</label>
+                                <input type="number" id="test-corr-val" value="0.65" step="0.05" max="1" min="-1"
+                                    class="w-full border rounded px-2 py-1 text-xs font-mono">
+                            </div>
+                            <button onclick="runVerification('CORR')"
+                                class="w-full bg-slate-800 text-white text-xs font-bold py-2 rounded hover:bg-black transition">
+                                Generate 1000 Correlated Pairs
+                            </button>
+                            <div id="res-test-corr"
+                                class="hidden bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                                <div class="flex justify-between">
+                                    <span>Calculated Correlation:</span>
+                                    <span id="out-corr-res" class="font-mono font-bold text-slate-900">--</span>
+                                </div>
+                                <div class="text-[9px] text-slate-400 mt-1">Measured Pearson correlation of generated
+                                    samples.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- C. Inflation -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start border-t border-slate-100 pt-8">
+                    <div class="space-y-4">
+                        <h4 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span class="text-[#F7931A]">03.</span> Inflation Decay
+                        </h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Inflation is treated as a stochastic process, meaning it varies year to year around your
+                            Expected Mean.
+                            The simulation adjusts your "Real Purchasing Power" monthly.
+                        </p>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            $1,000,000 today is worth significantly less in 30 years.
+                        </p>
+                    </div>
+
+                    <!-- TEST WIDGET 3 -->
+                    <div class="bg-white border-2 border-slate-100 p-6 rounded-2xl shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-black bg-slate-100 px-2 py-1 rounded text-slate-500">LIVE
+                                VERIFICATION</span>
+                            <span class="text-xs font-bold text-red-600">Reality Check</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 block">Cash Amount</label>
+                                    <input type="number" id="test-infl-cash" value="100"
+                                        class="w-full border rounded px-2 py-1 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 block">Years Later</label>
+                                    <input type="number" id="test-infl-years" value="1"
+                                        class="w-full border rounded px-2 py-1 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 block">Inflation %</label>
+                                    <input type="number" id="test-infl-rate" value="10.0" step="0.1"
+                                        class="w-full border rounded px-2 py-1 text-xs font-mono">
+                                </div>
+                            </div>
+                            <button onclick="runVerification('INFL')"
+                                class="w-full bg-slate-800 text-white text-xs font-bold py-2 rounded hover:bg-black transition">
+                                Calculate Real Value
+                            </button>
+                            <div id="res-test-infl"
+                                class="hidden bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                                <div class="flex justify-between mb-1">
+                                    <span>Nominal:</span>
+                                    <span id="out-infl-nom" class="font-mono text-slate-500">--</span>
+                                </div>
+                                <div class="flex justify-between border-t border-slate-200 pt-1">
+                                    <span>Real Value (Today's $):</span>
+                                    <span id="out-infl-real" class="font-mono font-bold text-slate-900">--</span>
+                                </div>
+                                <div class="text-[9px] text-slate-400 mt-2 italic bg-slate-100 p-2 rounded">
+                                    <strong>Why 90.91? (Not 90)</strong><br>
+                                    Inflation adds to the price divisor: $100 / 1.10 = $90.909...<br>
+                                    Your $100 next year buys the same amount of goods as $90.91 today.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- 4. The Engine Explained (Simulation Details) -->
+            <section class="space-y-12 border-t border-slate-200 pt-12">
+                <div class="flex items-center gap-4">
+                    <div class="h-px bg-slate-200 flex-1"></div>
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">The Engine Explained</h3>
+                    <div class="h-px bg-slate-200 flex-1"></div>
+                </div>
+
+                <div class="space-y-8">
+                    <!-- A. The Brain (Solver) -->
+                    <div class="bg-slate-900 text-slate-300 p-8 rounded-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h4 class="text-2xl font-serif text-white font-bold mb-4">1. The Solver (The Brain)</h4>
+                        <p class="mb-4 text-slate-400">
+                            How do we know 3.9% is "Safe"? We don't guess. We use a <strong>Bisection Search
+                                Algorithm</strong>.
+                        </p>
+                        <ul class="space-y-2 text-sm font-mono text-blue-300">
+                            <li>> TARGET: 90% Success Rate</li>
+                            <li>> TRY: 4.0% Withdrawal... Result: 88% (FAIL) -> Too High</li>
+                            <li>> TRY: 3.5% Withdrawal... Result: 95% (PASS) -> Too Low</li>
+                            <li>> TRY: 3.75% Withdrawal... Result: 92% (PASS) -> Close...</li>
+                            <li>> ... (Repeats 25 times for extreme precision) ...</li>
+                            <li>> FOUND: 3.92% is the Maximum Safe Rate.</li>
+                        </ul>
+                    </div>
+
+                    <!-- B. The Heart (Simulation Loop) -->
+                    <div>
+                        <h4 class="text-2xl font-serif text-slate-900 font-bold mb-6">2. The Simulation Loop (The Heart)
+                        </h4>
+                        <p class="text-slate-600 mb-8 max-w-2xl">
+                            For <strong>every single month</strong> of the 30-year horizon, the engine performs these 4
+                            distinct steps for each of the 3,000 simulations.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Step 1 -->
+                            <div class="border border-slate-100 p-6 rounded-xl hover:shadow-md transition bg-white">
+                                <div class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2">Step 01
+                                </div>
+                                <h5 class="font-bold text-slate-800 mb-2">The Market Pulse</h5>
+                                <p class="text-sm text-slate-500">
+                                    We roll the dice. Using the Correlation Matrix, we generate linked returns for
+                                    Stocks, Bonds, and Crypto.
+                                    If the market crashes, all assets might drop together.
+                                </p>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="border border-slate-100 p-6 rounded-xl hover:shadow-md transition bg-white">
+                                <div class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Step 02</div>
+                                <h5 class="font-bold text-slate-800 mb-2">Inflation Check</h5>
+                                <p class="text-sm text-slate-500">
+                                    We adjust your "Target Spending" based on this month's specific inflation.
+                                    If inflation spiked, your requested monthly cash needs go UP to maintain lifestyle.
+                                </p>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="border border-slate-100 p-6 rounded-xl hover:shadow-md transition bg-white">
+                                <div class="text-xs font-bold text-purple-500 uppercase tracking-widest mb-2">Step 03
+                                </div>
+                                <h5 class="font-bold text-slate-800 mb-2">The Decision (Dynamic Spending)</h5>
+                                <p class="text-sm text-slate-500">
+                                    The engine decides how much you <em>actually</em> withdraw:
+                                </p>
+                                <div
+                                    class="bg-slate-50 p-2 mt-2 rounded font-mono text-[10px] text-slate-600 border border-slate-200">
+                                    Withdrawal = Max(Floor, Min(Upside, Ceiling))
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-2">
+                                    It guarantees your Floor (Basic Needs) but CAPS your Upside (Luxury) to prevent
+                                    overspending.
+                                </p>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="border border-slate-100 p-6 rounded-xl hover:shadow-md transition bg-white">
+                                <div class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-2">Step 04
+                                </div>
+                                <h5 class="font-bold text-slate-800 mb-2">The Shield (Cash Buffer)</h5>
+                                <p class="text-sm text-slate-500">
+                                    <strong>Critical Logic:</strong> If the portfolio dropped this month (Return < 0),
+                                        we use "Prime Harvesting" . We withdraw from the <strong>Cash Buffer</strong>
+                                        first. We do NOT sell Stocks when they are down.
+                                        This prevents "Sequence of Returns Risk" death spirals.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </section>
         </div>
 
+
+
+
+        <!-- VERIFICATION HANDLER SCRIPT -->
+        <script>
+            function runVerification(type) {
+                if (!window.Verification) {
+                    alert("Verification module not loaded yet.");
+                    return;
+                }
+
+                if (type === 'GBM') {
+                    const cagr = parseFloat(document.getElementById('test-gbm-cagr').value) / 100;
+                    const vol = parseFloat(document.getElementById('test-gbm-vol').value) / 100;
+                    const res = window.Verification.testGBM(cagr, vol, 1000);
+                    const el = document.getElementById('res-test-gbm');
+                    el.classList.remove('hidden');
+
+                    const sign = res.returnPct >= 0 ? '+' : '';
+                    const color = res.returnPct >= 0 ? 'text-green-600' : 'text-red-600';
+                    document.getElementById('out-gbm-res').innerHTML = `<span class="${color}">${sign}${(res.returnPct * 100).toFixed(2)}%</span>`;
+                }
+
+                if (type === 'CORR') {
+                    const target = parseFloat(document.getElementById('test-corr-val').value);
+                    const res = window.Verification.testCorrelation(target);
+                    const el = document.getElementById('res-test-corr');
+                    el.classList.remove('hidden');
+                    document.getElementById('out-corr-res').innerText = res.observed.toFixed(4);
+                }
+
+                if (type === 'INFL') {
+                    const cash = parseFloat(document.getElementById('test-infl-cash').value);
+                    const years = parseFloat(document.getElementById('test-infl-years').value);
+                    const rate = parseFloat(document.getElementById('test-infl-rate').value) / 100;
+                    const res = window.Verification.testInflation(cash, rate, years);
+
+                    const el = document.getElementById('res-test-infl');
+                    el.classList.remove('hidden');
+                    document.getElementById('out-infl-nom').innerText = Formatters.formatCurrency(res.nominal, 2);
+                    document.getElementById('out-infl-real').innerText = Formatters.formatCurrency(res.real, 2);
+                }
+            }
+        </script>
     </div>
 
     <!-- VIEW: SATOSHI NAKAMOTO -->
@@ -1490,7 +1903,8 @@
                 <p>
                     <span class="text-6xl float-left mr-4 mt-[-10px] font-bold text-gold-500">O</span>n October 31,
                     2008, a link to a paper titled
-                    <em>"Bitcoin: A Peer-to-Peer Electronic Cash System"</em> was posted to a cryptography mailing list.
+                    <em>"Bitcoin: A Peer-to-Peer Electronic Cash System"</em> was posted to a cryptography mailing
+                    list.
                     The author was <strong>Satoshi Nakamoto</strong>.
                 </p>
                 <p>
@@ -1499,7 +1913,8 @@
                 </p>
                 <blockquote
                     class="border-l-4 border-gold-400 pl-6 italic my-8 text-slate-500 bg-gold-50 py-4 pr-4 rounded-r-lg">
-                    "The root problem with conventional currency is all the trust that's required to make it work... the
+                    "The root problem with conventional currency is all the trust that's required to make it work...
+                    the
                     history of fiat currencies is full of breaches of that trust."
                 </blockquote>
                 <p>
@@ -1522,6 +1937,7 @@
     <script defer src="js/utils/config.js"></script>
 
     <!-- Engine -->
+    <script defer src="js/engine/verification.js"></script>
     <script defer src="js/engine/stats.js"></script>
     <script defer src="js/engine/market.js"></script>
     <script defer src="js/engine/simulator.js"></script>
