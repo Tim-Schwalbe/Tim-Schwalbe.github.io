@@ -190,11 +190,9 @@ async function runSimulation() {
     if (swr99El) swr99El.innerText = (swr99 * 100).toFixed(2);
     if (swr90El) swr90El.innerText = (swr90 * 100).toFixed(2);
 
-    // Max monthly (using highest wealth scenario)
-    const maxWealth = Math.max(...res.wealths);
-    const maxMonthly = (maxWealth * 0.04) / 12; // Rough estimate
+    // Max monthly (realized during the simulation)
     const maxMonthlyEl = document.getElementById('res-max-monthly');
-    if (maxMonthlyEl) maxMonthlyEl.innerText = Formatters.formatCurrency(maxMonthly, 0);
+    if (maxMonthlyEl) maxMonthlyEl.innerText = Formatters.formatCurrency(res.stats.maxMonthlySpend, 0);
 
     // Target Monthly Display
     const targetMonthly = configs.TARGET_ANNUAL_EXP / 12;
@@ -202,7 +200,6 @@ async function runSimulation() {
     if (targetMonthlyEl) targetMonthlyEl.innerText = Formatters.formatCurrency(targetMonthly, 0);
 
     Renderer.updateSuccessBar(res.successRate, targetOdds);
-    Renderer.renderHistogram(res.wealths, 'res-histogram');
 
     // Median & Worst Case Stats
     const sortedWealths = [...res.wealths].sort((a, b) => a - b);
@@ -210,9 +207,18 @@ async function runSimulation() {
     const worstCaseWealth = sortedWealths[Math.floor(sortedWealths.length * 0.01)] || 0;
 
     const medianEl = document.getElementById('res-median-end');
+    const realWealthEl = document.getElementById('res-real-wealth');
+    const inflationImpactEl = document.getElementById('res-inflation-impact');
     const worstEl = document.getElementById('res-worst-case');
 
     if (medianEl) medianEl.innerText = Formatters.formatCurrency(medianWealth, 0);
+    if (realWealthEl) realWealthEl.innerText = Formatters.formatCurrency(res.stats.medianRealFinalWealth, 0);
+
+    if (inflationImpactEl && medianWealth > 0) {
+        const impact = (res.stats.medianRealFinalWealth / medianWealth) - 1;
+        inflationImpactEl.innerText = (impact * 100).toFixed(0) + "% vs. Nominal";
+    }
+
     if (worstEl) worstEl.innerText = Formatters.formatCurrency(worstCaseWealth, 0);
 
     // Update Portfolio Mix Summary in Results
@@ -238,7 +244,6 @@ async function runSimulation() {
         const { stats } = res;
 
         // Asset Realized Performance
-        // Using log-sum to avoid numerical overflow (Infinity%)
         const calcCAGR = (logReturns) => {
             if (!logReturns || logReturns.length === 0) return 0;
             let sumLog = 0;
@@ -269,10 +274,18 @@ async function runSimulation() {
         document.getElementById('res-median-low-cap').innerText = Formatters.formatCurrency(stats.medianLowestCapital, 0);
         document.getElementById('res-absolute-low-cap').innerText = Formatters.formatCurrency(stats.absoluteLowestCapital, 0);
 
+        // Lifestyle & Flexibility
+        document.getElementById('res-realized-monthly').innerText = Formatters.formatCurrency(stats.medianMonthlySpend, 0);
+        document.getElementById('res-total-lifetime-spend').innerText = Formatters.formatCurrency(stats.medianTotalSpend, 0);
+
         // Sanity Filter Checks
         if (marketData.info) {
             document.getElementById('res-max-bad-streak').innerText = marketData.info.maxStreakEncountered + " years";
             document.getElementById('res-filter-triggers').innerText = marketData.info.constraintHits.toLocaleString();
+
+            // Hit Rates
+            document.getElementById('res-ceiling-usage').innerText = (stats.ceilingHitRate * 100).toFixed(1) + "%";
+            document.getElementById('res-floor-usage').innerText = (stats.floorHitRate * 100).toFixed(1) + "%";
         }
     }
 
@@ -281,6 +294,14 @@ async function runSimulation() {
     const resultsPlaceholder = document.getElementById('results-placeholder');
     if (resultsContainer) resultsContainer.classList.remove('hidden');
     if (resultsPlaceholder) resultsPlaceholder.classList.add('hidden');
+
+    // Render histogram after DOM is visible and layout is complete
+    // Use requestAnimationFrame to ensure layout/paint cycle completes
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            Renderer.renderHistogram(res.wealths, 'res-histogram');
+        }, 50);
+    });
 
     // 6. Navigation Logic (Universal Scroll to Results)
     // Using a slightly longer delay to ensure DOM and animations have settled

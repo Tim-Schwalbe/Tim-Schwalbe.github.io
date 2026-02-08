@@ -42,13 +42,21 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
     const pathStats = {
         maxDrawdowns: [],
         drawdownDurations: [],
-        lowestCapitals: []
+        lowestCapitals: [],
+        totalSpends: [],
+        realFinalWealths: [],
+        ceilingHits: 0,
+        floorHits: 0,
+        maxMonthlyAcrossAll: 0,
+        totalSurvivorMonths: 0
     };
 
     for (let s = 0; s < numSims; s++) {
         let portfolio = INVESTED_AMOUNT;
         let cashBalance = configs.CASH_BUFFER || 0;
         let survived = true;
+        let pathSpend = 0;
+        let pathInflationFactor = 1.0;
 
         let peakTotalWealth = portfolio + cashBalance;
         let currentMaxDrawdown = 0;
@@ -56,9 +64,8 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         let maxDrawdownDuration = 0;
         let lowestTotalWealth = peakTotalWealth;
 
-        let currentAnnualWithdrawal = initialAnnualWithdrawal;
         let currentBaseNeed = initialAnnualWithdrawal;
-        let currentMonthlyWithdrawal = currentAnnualWithdrawal / 12;
+        let currentMonthlyWithdrawal = initialAnnualWithdrawal / 12;
         let accumulatedInflation12m = 1.0;
 
         for (let m = 0; m < months; m++) {
@@ -70,7 +77,9 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
 
             if (isNaN(rLogS)) { survived = false; portfolio = 0; break; }
 
-            // LIVE INSPECTION HOOK: Use the exposed function for the core logic
+            // Track total path inflation
+            pathInflationFactor *= (1 + inflM);
+
             const stepResult = window.calculateMonthlyStep(
                 {
                     portfolio,
@@ -104,15 +113,18 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
             accumulatedInflation12m = stepResult.accumulatedInflation;
             currentBaseNeed = stepResult.currentBaseNeed;
             currentMonthlyWithdrawal = stepResult.currentMonthlyWithdrawal;
-            // Note: currentAnnualWithdrawal is derived from monthly * 12 inside the step result implicitly, 
-            // but we track it for next loop's reference if needed? 
-            // Actually calculateMonthlyStep handles the annual update of currentMonthlyWithdrawal directly.
+
+            pathSpend += currentMonthlyWithdrawal;
+            pathStats.totalSurvivorMonths++;
+            if (stepResult.ceilingHit) pathStats.ceilingHits++;
+            if (stepResult.floorHit) pathStats.floorHits++;
+            pathStats.maxMonthlyAcrossAll = Math.max(pathStats.maxMonthlyAcrossAll, currentMonthlyWithdrawal);
 
             if (stepResult.failed) {
                 cashBalance = 0; survived = false; break;
             }
 
-            // Stats Tracking (Re-implemented using step results)
+            // Stats Tracking
             const currentTotalWealth = portfolio + cashBalance;
             if (currentTotalWealth > peakTotalWealth) {
                 peakTotalWealth = currentTotalWealth;
@@ -127,7 +139,10 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         }
 
         if (survived) successCount++;
-        finalWealths.push(portfolio + cashBalance);
+        const finalWealth = portfolio + cashBalance;
+        finalWealths.push(finalWealth);
+        pathStats.totalSpends.push(pathSpend);
+        pathStats.realFinalWealths.push(finalWealth / pathInflationFactor);
 
         // Save path stats
         pathStats.maxDrawdowns.push(currentMaxDrawdown);
@@ -141,9 +156,12 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
 
     // Aggregate stats
     const median = arr => {
+        if (arr.length === 0) return 0;
         const s = [...arr].sort((a, b) => a - b);
         return s[Math.floor(s.length / 2)];
     };
+
+    const avgTotalSpend = pathStats.totalSpends.reduce((a, b) => a + b, 0) / (pathStats.totalSpends.length || 1);
 
     return {
         successRate: successCount / numSims,
@@ -154,7 +172,18 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
             medianLowestCapital: median(pathStats.lowestCapitals),
             absoluteLowestCapital: Math.min(...pathStats.lowestCapitals),
             medianDrawdownDuration: median(pathStats.drawdownDurations),
-            worstDrawdownDuration: Math.max(...pathStats.drawdownDurations)
+            worstDrawdownDuration: Math.max(...pathStats.drawdownDurations),
+
+            // Legacy / Real Wealth
+            medianRealFinalWealth: median(pathStats.realFinalWealths),
+
+            // Lifestyle Stats
+            medianTotalSpend: median(pathStats.totalSpends),
+            avgAnnualSpend: (avgTotalSpend / years),
+            medianMonthlySpend: (median(pathStats.totalSpends) / (years * 12)),
+            maxMonthlySpend: pathStats.maxMonthlyAcrossAll,
+            ceilingHitRate: pathStats.ceilingHits / (pathStats.totalSurvivorMonths || 1),
+            floorHitRate: pathStats.floorHits / (pathStats.totalSurvivorMonths || 1)
         }
     };
 }
@@ -227,6 +256,8 @@ window.calculateMonthlyStep = function (state, inputs, config) {
     // 5. Annual Adjustment (Spending Updates)
     let newBaseNeed = currentBaseNeed;
     let newAnnualWithdrawal = currentMonthlyWithdrawal * 12; // Default unchanged
+    let ceilingHit = false;
+    let floorHit = false;
 
     if ((monthIdx + 1) % 12 === 0) {
         newBaseNeed *= newInflation;
@@ -239,9 +270,15 @@ window.calculateMonthlyStep = function (state, inputs, config) {
         const floorPct = (FLOOR_PCT || 100) / 100;
         const effectiveFloor = newBaseNeed * floorPct;
 
-        newAnnualWithdrawal = Math.max(effectiveFloor, Math.min(variableSpend, maxCap));
-        // Reset inflation accumulator for next year's logic relative to base
-        // Actually, logic in original code resets accumulator to 1.0 after applying to base.
+        if (variableSpend > maxCap) {
+            ceilingHit = true;
+            newAnnualWithdrawal = maxCap;
+        } else if (variableSpend < effectiveFloor) {
+            floorHit = true;
+            newAnnualWithdrawal = effectiveFloor;
+        } else {
+            newAnnualWithdrawal = variableSpend;
+        }
     }
 
     return {
@@ -251,7 +288,9 @@ window.calculateMonthlyStep = function (state, inputs, config) {
         currentBaseNeed: newBaseNeed,
         currentMonthlyWithdrawal: newAnnualWithdrawal / 12,
         failed: failed,
-        growthFactor: growthFactor
+        growthFactor: growthFactor,
+        ceilingHit: ceilingHit,
+        floorHit: floorHit
     };
 }
 
