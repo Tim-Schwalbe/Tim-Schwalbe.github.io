@@ -46,18 +46,27 @@ window.updateCrashAnnualDisplay = function () {
 async function runSimulation() {
     console.log("🚀 Starting Simulation...");
 
+    const parseInput = (id, fallback, isInt = true) => {
+        const el = document.getElementById(id);
+        const val = el ? el.value : "";
+        if (val === "") return fallback;
+        const num = isInt ? parseInt(val) : parseFloat(val);
+        return isNaN(num) ? fallback : num;
+    };
+
     // 1. Gather Configs
     const configs = {
-        years: parseInt(document.getElementById('inp-years').value) || 30,
+        years: parseInput('inp-years', 30),
         INVESTED_AMOUNT: Formatters.parseFormattedValue(document.getElementById('inp-initial').value),
         CASH_BUFFER: Formatters.parseFormattedValue(document.getElementById('inp-buffer').value),
         TARGET_ANNUAL_EXP: Formatters.parseFormattedValue(document.getElementById('inp-target-annual').value),
-        ALLOC_CRYPTO: (parseInt(document.getElementById('inp-alloc-crypto-pct').value) || 0) / 100,
-        ALLOC_STOCKS: (parseInt(document.getElementById('inp-alloc-stocks-pct').value) || 0) / 100,
-        TARGET_SUCCESS_PERCENT: parseFloat(document.getElementById('inp-target-success').value) || 95,
+        ALLOC_CRYPTO: parseInput('inp-alloc-crypto-pct', 0) / 100,
+        ALLOC_STOCKS: parseInput('inp-alloc-stocks-pct', 0) / 100,
+        TARGET_SUCCESS_PERCENT: parseInput('inp-target-success', 95, false),
 
         // Advanced
-        numSims: parseInt(document.getElementById('inp-num-sims').value) || 1000,
+        numSims: parseInput('inp-num-sims', 1000),
+        ENFORCE_MAX_BAD_STREAK: true,
         ...Config.getConfig(window, 'DEFAULT_CONFIGS', {}) // Fallback
     };
 
@@ -71,11 +80,10 @@ async function runSimulation() {
     ];
 
     percentParams.forEach(param => {
-        const el = document.getElementById('inp-' + param.toLowerCase().replace(/_/g, '-'));
-        if (el) configs[param] = parseFloat(el.value) / 100;
+        const val = parseInput('inp-' + param.toLowerCase().replace(/_/g, '-'), null, false);
+        if (val !== null) configs[param] = val / 100;
     });
 
-    // 2. Raw Parameters (Keep as is: Correlation is 0.20, Bad Years is int)
     // 2. Raw Parameters
     const rawParams = [
         'CORR_START', 'CORR_END',
@@ -84,8 +92,8 @@ async function runSimulation() {
     ];
 
     rawParams.forEach(param => {
-        const el = document.getElementById('inp-' + param.toLowerCase().replace(/_/g, '-'));
-        if (el) configs[param] = parseFloat(el.value);
+        const val = parseInput('inp-' + param.toLowerCase().replace(/_/g, '-'), null, false);
+        if (val !== null) configs[param] = val;
     });
 
     // Special: Convert Floor Cut to Floor %
@@ -95,12 +103,12 @@ async function runSimulation() {
     // Crash Settings
     if (document.getElementById('chk-force-start-crash').checked) {
         configs.FORCE_CRASH = true;
-        configs.CRASH_DURATION = parseInt(document.getElementById('inp-crash-duration').value) || 3;
+        configs.CRASH_DURATION = parseInput('inp-crash-duration', 3);
 
         // Read Floors (convert % to decimal)
-        configs.CRASH_FLOOR_STOCKS = (parseFloat(document.getElementById('inp-crash-floor-stocks').value) || -5.0) / 100;
-        configs.CRASH_FLOOR_CRYPTO = (parseFloat(document.getElementById('inp-crash-floor-crypto').value) || -10.0) / 100;
-        configs.CRASH_FLOOR_BONDS = (parseFloat(document.getElementById('inp-crash-floor-bonds').value) || -1.0) / 100;
+        configs.CRASH_FLOOR_STOCKS = parseInput('inp-crash-floor-stocks', -5.0, false) / 100;
+        configs.CRASH_FLOOR_CRYPTO = parseInput('inp-crash-floor-crypto', -10.0, false) / 100;
+        configs.CRASH_FLOOR_BONDS = parseInput('inp-crash-floor-bonds', -1.0, false) / 100;
     }
 
     // 2. Generate Market Data
