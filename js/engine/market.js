@@ -1,4 +1,3 @@
-// REMOVED IMPORTS: Stats from ./stats.js, getConfig from ../utils/config.js
 // DEPENDENCIES: window.Stats, window.Config
 
 window.generateMarketData = function (numSims, years, configs) {
@@ -32,6 +31,9 @@ window.generateMarketData = function (numSims, years, configs) {
 
     const FORCE_CRASH = Config.getConfig(configs, 'FORCE_CRASH', false);
     const CRASH_DURATION = Config.getConfig(configs, 'CRASH_DURATION', 3);
+
+    let totalConstraintHits = 0;
+    let maxGlobalBadStreak = 0;
 
     for (let s = 0; s < numSims; s++) {
         for (let m = 0; m < months; m++) {
@@ -82,16 +84,27 @@ window.generateMarketData = function (numSims, years, configs) {
             }
         }
 
-        // 4. Max Consecutive Bad Years Constraint
-        applyBadYearsConstraint(s, years, months, stockReturns, bondReturns, cryptoReturns, inflationPath, configs);
+        const constraints = applyBadYearsConstraint(s, years, months, stockReturns, bondReturns, cryptoReturns, inflationPath, configs);
+        totalConstraintHits += constraints.hits;
+        maxGlobalBadStreak = Math.max(maxGlobalBadStreak, constraints.maxStreak);
     }
 
-    return { stocks: stockReturns, bonds: bondReturns, crypto: cryptoReturns, inflation: inflationPath };
+    return {
+        stocks: stockReturns,
+        bonds: bondReturns,
+        crypto: cryptoReturns,
+        inflation: inflationPath,
+        info: {
+            constraintHits: totalConstraintHits,
+            maxStreakEncountered: maxGlobalBadStreak
+        }
+    };
 }
 
 function applyBadYearsConstraint(s, years, months, stockReturns, bondReturns, cryptoReturns, inflationPath, configs) {
     const limitBadYears = Config.getConfig(configs, 'MAX_CONSECUTIVE_BAD_YEARS', 100);
-    if (limitBadYears >= 50) return;
+    const result = { hits: 0, maxStreak: 0 };
+    if (limitBadYears >= 50) return result;
 
     const assets = [
         { name: 'stocks', data: stockReturns },
@@ -114,11 +127,13 @@ function applyBadYearsConstraint(s, years, months, stockReturns, bondReturns, cr
 
             if (annualGrowth < annualInflation) {
                 consecutiveBad++;
+                result.maxStreak = Math.max(result.maxStreak, consecutiveBad);
             } else {
                 consecutiveBad = 0;
             }
 
             if (consecutiveBad > limitBadYears) {
+                result.hits++;
                 const targetGrowth = annualInflation * 1.02;
                 const requiredBoost = Math.log(targetGrowth) - Math.log(annualGrowth);
                 const monthlyBoost = requiredBoost / 12;
@@ -129,4 +144,5 @@ function applyBadYearsConstraint(s, years, months, stockReturns, bondReturns, cr
             }
         }
     }
+    return result;
 }

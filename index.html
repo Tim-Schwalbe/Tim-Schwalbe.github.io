@@ -381,13 +381,16 @@
                                     class="text-[9px] font-black text-slate-900 uppercase cursor-pointer select-none tracking-tight">Smart
                                     Refill</label>
                                 <div class="relative group">
-                                    <svg class="w-2.5 h-2.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                    <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <div
-                                        class="absolute bottom-full right-0 mb-2 w-56 p-2.5 bg-[#F7931A] text-white text-[9px] leading-relaxed rounded-xl shadow-2xl hidden group-hover:block z-50 pointer-events-none border border-[#de760b]">
+                                        class="absolute bottom-full right-0 mb-3 w-64 p-4 bg-slate-900/95 backdrop-blur-md text-white text-[10px] rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50 shadow-2xl border border-white/10 leading-relaxed">
+                                        <p
+                                            class="font-serif font-bold text-[#F7931A] text-xs mb-1.5 uppercase tracking-wider">
+                                            Smart Buffer Strategy</p>
                                         Refills buffer from profits only when Portfolio > 110% initial value.
                                     </div>
                                 </div>
@@ -517,15 +520,17 @@
 
                                 <!-- Info Icon -->
                                 <div class="relative group cursor-help">
-                                    <svg class="w-4 h-4 text-[#F7931A] opacity-70 group-hover:opacity-100 transition-opacity"
+                                    <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <!-- Tooltip -->
                                     <div
-                                        class="absolute right-0 top-6 w-64 bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed">
-                                        <p class="font-bold text-[#F7931A] mb-1">Flexibility Trade-off:</p>
+                                        class="absolute right-0 top-6 w-72 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-4 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
+                                        <p
+                                            class="font-serif font-bold text-[#F7931A] text-xs mb-1.5 uppercase tracking-wider">
+                                            Flexibility Trade-off</p>
                                         <ul class="list-disc pl-3 mb-2 space-y-1">
                                             <li><span class="text-red-300 font-bold">Cut Spending:</span> Accepting a
                                                 lower
@@ -636,29 +641,31 @@
                                 <p class="text-[10px] uppercase font-bold text-red-500">Stress Test / Bad Years</p>
                                 <!-- Info Tooltip -->
                                 <div class="relative group">
-                                    <svg class="w-4 h-4 text-red-400 cursor-help hover:text-red-600 transition-colors"
+                                    <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <div
-                                        class="absolute right-0 top-6 w-80 bg-[#F7931A] text-white text-[10px] p-4 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none group-hover:pointer-events-auto leading-relaxed border border-[#de760b]">
-                                        <p class="font-black text-white text-xs mb-2 border-b border-white/20 pb-1">Mean
+                                        class="absolute right-0 top-6 w-80 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-4 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
+                                        <p
+                                            class="font-serif font-bold text-[#F7931A] text-xs mb-2 uppercase tracking-wider border-b border-white/20 pb-1.5">
+                                            Mean
                                             Reversion (The "Sanity Filter")</p>
                                         <p class="mb-2 text-white/90">Prevents "infinite doom" scenarios where markets
                                             never recover. </p>
 
                                         <div class="space-y-2 mb-3">
-                                            <p class="text-white/90"><span class="text-white font-bold underline">The
+                                            <p class="text-white/90"><span class="text-[#F7931A] font-bold">The
                                                     Logic:</span> Low prices eventually attract buyers, snapping the
                                                 market back to historical averages.</p>
-                                            <p class="text-white/90"><span class="text-white font-bold underline">The
+                                            <p class="text-white/90"><span class="text-[#F7931A] font-bold">The
                                                     Hard Override:</span> This is 100% true. If the limit is hit, the
                                                 sim ignores the random dice roll. It calculates the exact <span
                                                     class="bg-white/20 px-1 rounded font-bold text-white">mathematical
                                                     boost</span> needed to force exactly <span class="font-bold">+2%
                                                     real growth</span>.</p>
-                                            <p class="text-white/90"><span class="text-white font-bold underline">The
+                                            <p class="text-white/90"><span class="text-[#F7931A] font-bold">The
                                                     Reset:</span> After this mandated bounce, the bad-year counter
                                                 resets to zero and the simulation returns to random behavior.</p>
                                         </div>
@@ -910,16 +917,19 @@
                                     <div class="w-2 h-2 rounded-full bg-blue-500"></div>
                                     <span class="text-slate-500 uppercase tracking-tighter">Stocks:</span>
                                     <span id="res-mix-stocks" class="text-slate-900">--%</span>
+                                    <span id="res-mix-val-stocks" class="text-slate-400 font-medium ml-1">(--)</span>
                                 </span>
                                 <span class="flex items-center gap-2 text-[11px] font-bold">
                                     <div class="w-2 h-2 rounded-full bg-green-500"></div>
                                     <span class="text-slate-500 uppercase tracking-tighter">Bonds:</span>
                                     <span id="res-mix-bonds" class="text-slate-900">--%</span>
+                                    <span id="res-mix-val-bonds" class="text-slate-400 font-medium ml-1">(--)</span>
                                 </span>
                                 <span class="flex items-center gap-2 text-[11px] font-bold">
                                     <div class="w-2 h-2 rounded-full bg-[#F7931A]"></div>
                                     <span class="text-slate-500 uppercase tracking-tighter">Crypto:</span>
                                     <span id="res-mix-crypto" class="text-slate-900">--%</span>
+                                    <span id="res-mix-val-crypto" class="text-slate-400 font-medium ml-1">(--)</span>
                                 </span>
                             </div>
                         </div>
@@ -985,7 +995,7 @@
                                         your target success probability.</p>
                                 </div>
                                 <div
-                                    class="bg-black/20 p-6 rounded-2xl border border-white/10 min-w-[200px] flex flex-col justify-center items-center backdrop-blur-sm shadow-inner">
+                                    class="bg-slate-900/60 p-6 rounded-2xl border border-white/10 min-w-[200px] flex flex-col justify-center items-center backdrop-blur-md shadow-inner">
                                     <p id="lbl-shortfall"
                                         class="text-[13px] text-white font-black uppercase tracking-widest text-center">
                                         GOAL DISTANCE: <span id="res-shortfall-val">$ --</span></p>
@@ -1121,16 +1131,249 @@
 
                     <!-- Chart -->
                     <div class="bg-white rounded-3xl p-8 shadow-sm border-2 border-slate-200">
-                        <div id="plot-area"
+                        <div id="res-histogram"
                             class="w-full flex justify-center items-center bg-slate-50 rounded-2xl p-4 min-h-[300px]">
                             <span class="text-slate-500 text-sm">Chart will render here...</span>
                         </div>
                     </div>
                 </div>
 
+                <!-- SECTION 3: THE MECHANICS (Simulation Deep-Dive) -->
+                <div id="mechanics-section" class="space-y-6 pt-4">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-xs font-black text-black uppercase tracking-[0.2em] whitespace-nowrap">The
+                            Mechanics (Simulation Deep-Dive)</h2>
+                        <div class="h-px bg-slate-200 flex-1"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Realized Market Returns -->
+                        <div class="lg:col-span-3 bg-white rounded-3xl p-8 shadow-sm border-2 border-slate-200">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold tracking-[0.2em] text-slate-400 mb-1">
+                                        Realized Market Performance</p>
+                                    <h3 class="text-lg font-serif font-bold text-slate-800 flex items-center gap-2">
+                                        Actual Average CAGRs Simulated
+                                        <div class="group/tip relative inline-block">
+                                            <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                </path>
+                                            </svg>
+                                            <div
+                                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-72 p-4 bg-slate-900/95 backdrop-blur-md text-white text-[10px] rounded-2xl opacity-0 group-hover/tip:opacity-100 transition-all duration-300 pointer-events-none z-50 shadow-2xl leading-relaxed border border-white/10">
+                                                <p
+                                                    class="font-serif font-bold text-[#F7931A] text-xs mb-1.5 uppercase tracking-wider">
+                                                    Historical Sanity Check</p>
+                                                The <strong>Geometric Mean</strong> of all generated monthly price
+                                                returns. This confirms the random simulation paths correctly averaged
+                                                out to your input assumptions over the long term.
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <span
+                                    class="text-[9px] bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-bold">100%
+                                    Path Realization</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                                <div class="space-y-1">
+                                    <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Stocks</p>
+                                    <p id="res-realized-stocks" class="text-3xl font-serif font-bold text-slate-800">--%
+                                    </p>
+                                    <p class="text-[9px] text-slate-400">Gen. Average Return</p>
+                                </div>
+                                <div class="space-y-1 border-l border-slate-100 pl-8">
+                                    <p class="text-[10px] text-green-500 font-bold uppercase tracking-widest">Bonds</p>
+                                    <p id="res-realized-bonds" class="text-3xl font-serif font-bold text-slate-800">--%
+                                    </p>
+                                    <p class="text-[9px] text-slate-400">Gen. Average Return</p>
+                                </div>
+                                <div class="space-y-1 border-l border-slate-100 pl-8">
+                                    <p class="text-[10px] text-[#F7931A] font-bold uppercase tracking-widest">Crypto</p>
+                                    <p id="res-realized-crypto" class="text-3xl font-serif font-bold text-slate-800">--%
+                                    </p>
+                                    <p class="text-[9px] text-slate-400">Gen. Average Return</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Stats -->
+                        <div class="bg-white rounded-3xl p-8 shadow-sm border-2 border-slate-200 relative group">
+                            <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                                <div
+                                    class="absolute -right-6 -top-6 w-24 h-24 bg-[#F7931A] rounded-full opacity-10 group-hover:scale-110 transition-transform">
+                                </div>
+                            </div>
+                            <p
+                                class="text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-4 relative z-10 flex items-center justify-between">
+                                Portfolio Drawdowns
+                            <div class="group/tip relative inline-block">
+                                <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div
+                                    class="absolute bottom-full right-0 mb-3 w-72 p-4 bg-slate-900/95 backdrop-blur-md text-white text-[10px] rounded-2xl opacity-0 group-hover/tip:opacity-100 transition-all duration-300 pointer-events-none z-50 shadow-2xl border border-white/10 leading-relaxed font-sans normal-case tracking-normal">
+                                    <p
+                                        class="font-serif font-bold text-[#F7931A] text-xs mb-1.5 uppercase tracking-wider">
+                                        Peak-to-Trough Loss</p>
+                                    <strong>Max Drawdown</strong> is the largest percentage drop from a previous peak.
+                                    "Median" is the average experience, "Worst" is the single most brutal path
+                                    simulated across all iterations.
+                                </div>
+                            </div>
+                            </p>
+                            <div class="space-y-6 relative z-10">
+                                <div>
+                                    <p id="res-median-dd" class="text-4xl font-serif font-bold text-slate-800">--%</p>
+                                    <p class="text-[9px] text-slate-500 font-medium uppercase mt-1">Median Max Drawdown
+                                    </p>
+                                </div>
+                                <div class="pt-4 border-t border-slate-50">
+                                    <p id="res-worst-dd" class="text-2xl font-serif font-bold text-red-600">--%</p>
+                                    <p class="text-[9px] text-red-400 font-bold uppercase mt-1">Absolute Worst Case</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recovery Stats -->
+                        <div class="bg-white rounded-3xl p-8 shadow-sm border-2 border-slate-200 relative group">
+                            <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                                <div
+                                    class="absolute -right-6 -top-6 w-24 h-24 bg-[#F7931A] rounded-full opacity-10 group-hover:scale-110 transition-transform">
+                                </div>
+                            </div>
+                            <p
+                                class="text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-4 relative z-10 flex items-center justify-between">
+                                Recovery Duration
+                            <div class="group/tip relative inline-block">
+                                <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div
+                                    class="absolute bottom-full right-0 mb-3 w-72 p-4 bg-slate-900/95 backdrop-blur-md text-white text-[10px] rounded-2xl opacity-0 group-hover/tip:opacity-100 transition-all duration-300 pointer-events-none z-50 shadow-2xl border border-white/10 leading-relaxed font-sans normal-case tracking-normal">
+                                    <p
+                                        class="font-serif font-bold text-[#F7931A] text-xs mb-1.5 uppercase tracking-wider">
+                                        Market Droughts</p>
+                                    The time spent waiting for the portfolio to return to its previous all-time high. A
+                                    "Longest Drought" of 10+ years is common in sideways or bearish market cycles.
+                                </div>
+                            </div>
+                            </p>
+                            <div class="space-y-6 relative z-10">
+                                <div>
+                                    <p id="res-median-recovery" class="text-4xl font-serif font-bold text-slate-800">--
+                                        mo</p>
+                                    <p class="text-[9px] text-slate-500 font-medium uppercase mt-1">Median Under Water
+                                    </p>
+                                </div>
+                                <div class="pt-4 border-t border-slate-50">
+                                    <p id="res-worst-recovery" class="text-2xl font-serif font-bold text-blue-600">-- mo
+                                    </p>
+                                    <p class="text-[9px] text-blue-400 font-bold uppercase mt-1">Longest Drought</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Survival Margin -->
+                        <div class="bg-white rounded-3xl p-8 shadow-sm border-2 border-slate-200 relative group">
+                            <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                                <div
+                                    class="absolute -right-6 -top-6 w-24 h-24 bg-[#F7931A] rounded-full opacity-10 group-hover:scale-110 transition-transform">
+                                </div>
+                            </div>
+                            <p
+                                class="text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-4 relative z-10 flex items-center justify-between">
+                                Survival Margin
+                            <div class="group/tip relative inline-block">
+                                <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div
+                                    class="absolute bottom-full right-0 mb-3 w-72 p-4 bg-slate-900/95 backdrop-blur-md text-white text-[10px] rounded-2xl opacity-0 group-hover/tip:opacity-100 transition-all duration-300 pointer-events-none z-50 shadow-2xl border border-white/10 leading-relaxed font-sans normal-case tracking-normal">
+                                    <p
+                                        class="font-serif font-bold text-[#F7931A] text-xs mb-1.5 uppercase tracking-wider">
+                                        Depth of Dips</p>
+                                    How close did you come to zero? <strong>Median Lowest Capital</strong> shows the
+                                    typical depth reached during the simulations, while <strong>Absolute Floor</strong>
+                                    is the scariest single moment across all paths.
+                                </div>
+                            </div>
+                            </p>
+                            <div class="space-y-6 relative z-10">
+                                <div>
+                                    <p id="res-median-low-cap" class="text-4xl font-serif font-bold text-slate-800">--
+                                    </p>
+                                    <p class="text-[9px] text-slate-500 font-medium uppercase mt-1">Median Lowest
+                                        Capital</p>
+                                </div>
+                                <div class="pt-4 border-t border-slate-50">
+                                    <p id="res-absolute-low-cap" class="text-2xl font-serif font-bold text-green-600">--
+                                    </p>
+                                    <p class="text-[9px] text-green-400 font-bold uppercase mt-1">Absolute Floor Reached
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sanity Filter Checks -->
+                        <div class="bg-white rounded-3xl p-8 shadow-sm border-2 border-slate-200 relative group">
+                            <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                                <div
+                                    class="absolute -right-6 -top-6 w-24 h-24 bg-[#F7931A] rounded-full opacity-10 group-hover:scale-110 transition-transform">
+                                </div>
+                            </div>
+                            <p
+                                class="text-[10px] font-bold text-[#F7931A] uppercase tracking-widest mb-4 relative z-10 flex items-center justify-between">
+                                Sanity Filter Checks
+                            <div class="group/tip relative inline-block">
+                                <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div
+                                    class="absolute bottom-full right-0 mb-3 w-72 p-4 bg-slate-900/95 backdrop-blur-md text-white text-[10px] rounded-2xl opacity-0 group-hover/tip:opacity-100 transition-all duration-300 pointer-events-none z-50 shadow-2xl border border-white/10 leading-relaxed font-sans normal-case tracking-normal">
+                                    <p
+                                        class="font-serif font-bold text-[#F7931A] text-xs mb-1.5 uppercase tracking-wider">
+                                        Adaptive Modeling</p>
+                                    <strong>Mean Reversion</strong> triggers ensure the markets don't stay irrational
+                                    forever. If the generator creates too many bad years, it forces a recovery to
+                                    maintain long-term CAGR accuracy.
+                                </div>
+                            </div>
+                            </p>
+                            <div class="space-y-6 relative z-10">
+                                <div>
+                                    <p id="res-max-bad-streak" class="text-4xl font-serif font-bold text-slate-800">--
+                                        yrs
+                                    </p>
+                                    <p class="text-[9px] text-slate-500 font-medium uppercase mt-1">Max Bad Streak
+                                        Encountered</p>
+                                </div>
+                                <div class="pt-4 border-t border-slate-50">
+                                    <p id="res-filter-triggers" class="text-2xl font-serif font-bold text-slate-800">--
+                                    </p>
+                                    <p class="text-[9px] text-slate-500 font-medium uppercase mt-1">Mean Reversion
+                                        Triggers</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        </main>
+    </div>
+
+    </main>
     </div>
 
     <!-- VIEW: INFO / METHODOLOGY -->

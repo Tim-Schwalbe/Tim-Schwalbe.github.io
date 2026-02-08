@@ -102,13 +102,15 @@ async function runSimulation() {
     if (reqCapitalEl) reqCapitalEl.innerText = Formatters.formatCurrency(requiredCapital);
 
     const shortfallEl = document.getElementById('res-shortfall-val');
-    if (shortfallEl) {
+    const lblShortfall = document.getElementById('lbl-shortfall');
+    if (shortfallEl && lblShortfall) {
+        lblShortfall.classList.remove('text-red-600', 'text-green-600', 'text-red-400', 'text-green-400', 'text-white');
         if (shortfall > 0) {
             shortfallEl.innerText = "+ " + Formatters.formatCurrency(shortfall);
-            document.getElementById('lbl-shortfall')?.classList.add('text-red-600');
+            lblShortfall.classList.add('text-red-400');
         } else {
             shortfallEl.innerText = Formatters.formatCurrency(Math.abs(shortfall)) + " surplus";
-            document.getElementById('lbl-shortfall')?.classList.add('text-green-600');
+            lblShortfall.classList.add('text-green-400');
         }
     }
 
@@ -180,9 +182,57 @@ async function runSimulation() {
     document.getElementById('res-mix-bonds').innerText = bPct.toFixed(0) + "%";
     document.getElementById('res-mix-crypto').innerText = cPct.toFixed(0) + "%";
 
+    const inv = configs.INVESTED_AMOUNT || 0;
+    document.getElementById('res-mix-val-stocks').innerText = `(${Formatters.formatCurrency(inv * (sPct / 100), 0)})`;
+    document.getElementById('res-mix-val-bonds').innerText = `(${Formatters.formatCurrency(inv * (bPct / 100), 0)})`;
+    document.getElementById('res-mix-val-crypto').innerText = `(${Formatters.formatCurrency(inv * (cPct / 100), 0)})`;
+
     document.getElementById('bar-mix-stocks').style.width = sPct + "%";
     document.getElementById('bar-mix-bonds').style.width = bPct + "%";
     document.getElementById('bar-mix-crypto').style.width = cPct + "%";
+
+    // --- Deep-Dive Stats (The Mechanics) ---
+    if (res.stats) {
+        const { stats } = res;
+
+        // Asset Realized Performance
+        // Using log-sum to avoid numerical overflow (Infinity%)
+        const calcCAGR = (logReturns) => {
+            if (!logReturns || logReturns.length === 0) return 0;
+            let sumLog = 0;
+            for (let i = 0; i < logReturns.length; i++) {
+                sumLog += logReturns[i];
+            }
+            const avgLogMonthly = sumLog / logReturns.length;
+            return (Math.exp(avgLogMonthly * 12) - 1) * 100;
+        };
+
+        const rStocks = calcCAGR(marketData.stocks);
+        const rBonds = marketData.bonds ? calcCAGR(marketData.bonds) : 0;
+        const rCrypto = marketData.crypto ? calcCAGR(marketData.crypto) : 0;
+
+        document.getElementById('res-realized-stocks').innerText = rStocks.toFixed(2) + "%";
+        document.getElementById('res-realized-bonds').innerText = rBonds.toFixed(2) + "%";
+        document.getElementById('res-realized-crypto').innerText = rCrypto.toFixed(2) + "%";
+
+        // Risk Stats
+        document.getElementById('res-median-dd').innerText = (stats.medianMaxDrawdown * 100).toFixed(1) + "%";
+        document.getElementById('res-worst-dd').innerText = (stats.worstDrawdown * 100).toFixed(1) + "%";
+
+        // Recovery stats
+        document.getElementById('res-median-recovery').innerText = stats.medianDrawdownDuration + " mo";
+        document.getElementById('res-worst-recovery').innerText = stats.worstDrawdownDuration + " mo";
+
+        // Survival Margin
+        document.getElementById('res-median-low-cap').innerText = Formatters.formatCurrency(stats.medianLowestCapital, 0);
+        document.getElementById('res-absolute-low-cap').innerText = Formatters.formatCurrency(stats.absoluteLowestCapital, 0);
+
+        // Sanity Filter Checks
+        if (marketData.info) {
+            document.getElementById('res-max-bad-streak').innerText = marketData.info.maxStreakEncountered + " yrs";
+            document.getElementById('res-filter-triggers').innerText = marketData.info.constraintHits.toLocaleString();
+        }
+    }
 
     // Show results and hide placeholder
     const resultsContainer = document.getElementById('results-container');

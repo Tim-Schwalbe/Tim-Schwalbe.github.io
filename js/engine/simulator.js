@@ -24,11 +24,22 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
 
     const initialAnnualWithdrawal = effectiveAnnualWithdrawal;
     const finalWealths = [];
+    const pathStats = {
+        maxDrawdowns: [],
+        drawdownDurations: [],
+        lowestCapitals: []
+    };
 
     for (let s = 0; s < numSims; s++) {
         let portfolio = INVESTED_AMOUNT;
         let cashBalance = configs.CASH_BUFFER || 0;
         let survived = true;
+
+        let peakTotalWealth = portfolio + cashBalance;
+        let currentMaxDrawdown = 0;
+        let currentDrawdownDuration = 0;
+        let maxDrawdownDuration = 0;
+        let lowestTotalWealth = peakTotalWealth;
 
         let currentAnnualWithdrawal = initialAnnualWithdrawal;
         let currentBaseNeed = initialAnnualWithdrawal;
@@ -48,6 +59,19 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
             const rLinPort = (wS * (Math.exp(rLogS) - 1)) + (wB * (Math.exp(rLogB) - 1)) + (wC * (Math.exp(rLogC) - 1));
             const growthFactor = 1 + rLinPort;
             portfolio *= growthFactor;
+
+            // Stats Tracking
+            const currentTotalWealth = portfolio + cashBalance;
+            if (currentTotalWealth > peakTotalWealth) {
+                peakTotalWealth = currentTotalWealth;
+                maxDrawdownDuration = Math.max(maxDrawdownDuration, currentDrawdownDuration);
+                currentDrawdownDuration = 0;
+            } else {
+                const dd = (peakTotalWealth - currentTotalWealth) / peakTotalWealth;
+                currentMaxDrawdown = Math.max(currentMaxDrawdown, dd);
+                currentDrawdownDuration++;
+            }
+            lowestTotalWealth = Math.min(lowestTotalWealth, currentTotalWealth);
 
             const isUnderwater = portfolio < INVESTED_AMOUNT;
             const isMarketDown = growthFactor < 1.0;
@@ -82,48 +106,52 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
             }
 
             if ((m + 1) % 12 === 0) {
-                // Update Inflation Trackers
+                // ... (rest of the inflation/withdrawal logic)
                 currentBaseNeed *= accumulatedInflation12m;
-
-                // Determine Ceiling % for this year
                 const yearNum = Math.floor((m + 1) / 12);
-                const ceilingPct = (yearNum <= 10
-                    ? (configs.CEILING_EARLY || 150)
-                    : (configs.CEILING_LATE || 150)) / 100;
-
-                // Calculate Upside Potential (Variable Portion)
-                // If portfolio grew, 4% (or initial rate) of NEW portfolio is > base need.
+                const ceilingPct = (yearNum <= 10 ? (configs.CEILING_EARLY || 150) : (configs.CEILING_LATE || 150)) / 100;
                 const initialSWR = initialAnnualWithdrawal / (INVESTED_AMOUNT || 1);
                 const variableSpend = portfolio * initialSWR;
                 const maxCap = currentBaseNeed * ceilingPct;
-
-                // Decision Logic:
-                // 1. FLOOR: Respect Min Spend % (Default 100% = Inflation Adjusted Base)
-                // 2. UPSIDE: Spend Variable Amount if higher...
-                // 3. CAP: ...but limit it to Ceiling.
-
                 const floorPct = (configs.FLOOR_PCT || 100) / 100;
                 const effectiveFloor = currentBaseNeed * floorPct;
-
-                currentAnnualWithdrawal = Math.max(
-                    effectiveFloor,
-                    Math.min(variableSpend, maxCap)
-                );
-
+                currentAnnualWithdrawal = Math.max(effectiveFloor, Math.min(variableSpend, maxCap));
                 currentMonthlyWithdrawal = currentAnnualWithdrawal / 12;
                 accumulatedInflation12m = 1.0;
             }
         }
 
         if (survived) successCount++;
-        finalWealths.push(portfolio);
+        finalWealths.push(portfolio + cashBalance);
+
+        // Save path stats
+        pathStats.maxDrawdowns.push(currentMaxDrawdown);
+        pathStats.drawdownDurations.push(Math.max(maxDrawdownDuration, currentDrawdownDuration));
+        pathStats.lowestCapitals.push(lowestTotalWealth);
     }
 
     if (!configs.SILENT) {
         logSimulationSummary(configs, initialAnnualWithdrawal, successCount / numSims, wS, wB, wC);
     }
 
-    return { successRate: successCount / numSims, wealths: finalWealths };
+    // Aggregate stats
+    const median = arr => {
+        const s = [...arr].sort((a, b) => a - b);
+        return s[Math.floor(s.length / 2)];
+    };
+
+    return {
+        successRate: successCount / numSims,
+        wealths: finalWealths,
+        stats: {
+            medianMaxDrawdown: median(pathStats.maxDrawdowns),
+            worstDrawdown: Math.max(...pathStats.maxDrawdowns),
+            medianLowestCapital: median(pathStats.lowestCapitals),
+            absoluteLowestCapital: Math.min(...pathStats.lowestCapitals),
+            medianDrawdownDuration: median(pathStats.drawdownDurations),
+            worstDrawdownDuration: Math.max(...pathStats.drawdownDurations)
+        }
+    };
 }
 
 function logSimulationSummary(configs, initialWithdrawal, successRate, wS, wB, wC) {
