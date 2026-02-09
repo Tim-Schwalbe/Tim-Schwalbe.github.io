@@ -53,11 +53,13 @@ window.generateMarketData = function (numSims, years, configs) {
     let maxGlobalBadStreak = 0;
 
     for (let s = 0; s < numSims; s++) {
+        let monthsSinceCrash = 100; // Initialize recovery counter (safe default)
+
         for (let m = 0; m < months; m++) {
             const idx = s * months + m;
             const t = (months > 1) ? m / (months - 1) : 0;
 
-            // 1. Inflation
+
             const zI = Stats.randomNormal(0, 1);
             const inflM = (INFL_MEAN / 12) + (INFL_VOL / Math.sqrt(12)) * zI;
 
@@ -106,7 +108,83 @@ window.generateMarketData = function (numSims, years, configs) {
             // Crypto
             const cCagr = C_CAGR_START * (1 - t) + C_CAGR_END * t;
             const cVol = C_VOL_START * (1 - t) + C_VOL_END * t;
-            cryptoLogReturns[idx] = (Math.log(1 + cCagr) / 12) + (cVol / Math.sqrt(12)) * zC;
+
+            // Fat Tail Logic for Crypto (3-Regime Model)
+            const useFatTails = Config.getConfig(configs, 'USE_FAT_TAILS', true);
+            const useMoonshots = Config.getConfig(configs, 'USE_MOONSHOTS', true);
+            const probCrash = Config.getConfig(configs, 'PROB_CRASH', 0.05);
+            const probMoonshotBase = Config.getConfig(configs, 'PROB_MOONSHOT', 0.05);
+
+            let zC_final = zC; // Default to Standard Normal (Regime 1)
+
+            if (useFatTails) {
+                // REGIME 2: CRASH (The "Idiosyncratic Shock")
+                // Independent roll for crash event
+                const isCrashMonth = Stats.random() < probCrash;
+
+                if (isCrashMonth) {
+                    // Force strictly negative shock (Crypto Winter)
+                    // OLD LOGIC: -|N(2.5, 1.5)| * 1.5
+                    // NEW LOGIC: Uniform random drop between MIN and MAX config
+                    const crashMin = Config.getConfig(configs, 'CRASH_MAG_MIN', 0.30);
+                    const crashMax = Config.getConfig(configs, 'CRASH_MAG_MAX', 0.60);
+                    const dropPct = crashMin + (crashMax - crashMin) * Stats.random();
+
+                    // Convert % drop to log return: log(1 - drop)
+                    // Formula: ret = drift + vol * z
+                    // z = (ret - drift) / vol
+                    const targetLogReturn = Math.log(1 - dropPct);
+                    const drift = (Math.log(1 + cCagr) / 12);
+                    const volTerm = (cVol / Math.sqrt(12));
+
+                    zC_final = (targetLogReturn - drift) / volTerm;
+
+                    // Reset recovery counter
+                    monthsSinceCrash = 0;
+                }
+                else if (useMoonshots) {
+                    // REGIME 3: MOONSHOT (The "Rubber Band" Recovery)
+                    // Probability increases if we are in "Recovery Window" (post-crash)
+                    let currentProbMoonshot = probMoonshotBase;
+
+                    // "Rubber Band" Effect: Increase odds of moonshot in first 12 months after a crash
+                    // Tuned to avoid excessive alpha (was 24m / 2x)
+                    if (monthsSinceCrash < 12) {
+                        currentProbMoonshot = probMoonshotBase * 1.5;
+                    }
+
+                    const isMoonshotMonth = Stats.random() < currentProbMoonshot;
+
+                    if (isMoonshotMonth) {
+                        // Positive Skew: 
+                        // OLD LOGIC: +|N(2.0, 1.0)| * 1.5
+                        // NEW LOGIC: Uniform random rally between MIN and MAX config
+                        const moonMin = Config.getConfig(configs, 'MOONSHOT_MAG_MIN', 0.20);
+                        const moonMax = Config.getConfig(configs, 'MOONSHOT_MAG_MAX', 0.50);
+                        const rallyPct = moonMin + (moonMax - moonMin) * Stats.random();
+
+                        // Convert % rally to log return: log(1 + rally)
+                        const targetLogReturn = Math.log(1 + rallyPct);
+                        const drift = (Math.log(1 + cCagr) / 12);
+                        const volTerm = (cVol / Math.sqrt(12));
+
+                        zC_final = (targetLogReturn - drift) / volTerm;
+                    } else {
+                        // DAMPEN normal component to avoid tail double-counting
+                        // We want "Skinny Peak" (Leptokurtic) distribution.
+                        // Since we have added significant variance via Crashes and Moonshots,
+                        // we reduce the "background noise" variance.
+                        zC_final = zC * 0.55;
+                    }
+
+                    if (!isCrashMonth) monthsSinceCrash++;
+                }
+            } else {
+                // If Fat Tails disabled, reset counter just in case
+                monthsSinceCrash = 100;
+            }
+
+            cryptoLogReturns[idx] = (Math.log(1 + cCagr) / 12) + (cVol / Math.sqrt(12)) * zC_final;
 
             // 3. Forced Crash Stress Test
             if (FORCE_CRASH) {

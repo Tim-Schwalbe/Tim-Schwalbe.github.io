@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Calc - Extensive Verification Suite (v2)</title>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: monospace;
+        }
+
+        .pass {
+            color: green;
+        }
+
+        .fail {
+            color: red;
+            font-weight: bold;
+        }
+
+        .warn {
+            color: orange;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-300 p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl text-white mb-4">Verification Suite v2.0</h1>
+        <div id="status" class="mb-4 text-sm text-slate-400">Initializing...</div>
+
+        <div class="mb-6 flex gap-2">
+            <button onclick="runSuite()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Run 200-Test
+                Suite</button>
+            <button onclick="window.location.reload()"
+                class="bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-600">Reset</button>
+        </div>
+
+        <div id="results"
+            class="space-y-2 text-xs font-mono bg-slate-800 p-4 rounded border border-slate-700 h-[600px] overflow-y-auto">
+            <!-- Results here -->
+        </div>
+
+        <div id="summary" class="mt-6 p-4 bg-slate-800 border-t border-slate-700 rounded sticky bottom-0">
+            Results: Waiting to run...
+        </div>
+    </div>
+
+    <!-- Mocks for Config/Deps -->
+    <script src="js/utils/config.js"></script>
+    <script src="js/ui/formatters.js"></script>
+
+    <!-- Engine Modules -->
+    <script src="js/engine/stats.js"></script>
+    <script src="js/engine/market.js"></script>
+    <script src="js/engine/simulator.js"></script>
+
+    <!-- Test Suite -->
+    <script src="js/tests/suite_v2.js"></script>
+
+</body>
+
+</html>

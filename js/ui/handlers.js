@@ -182,6 +182,18 @@ window.Handlers = {
         const icon = document.getElementById('icon-sim-params');
         panel.classList.toggle('open');
         icon.style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+    },
+
+    toggleMoonshotControls() {
+        const chk = document.getElementById('chk-fat-tails');
+        const ctrls = document.getElementById('ctl-moonshots');
+        if (chk && ctrls) {
+            if (chk.checked) {
+                ctrls.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                ctrls.classList.add('opacity-50', 'pointer-events-none');
+            }
+        }
     }
 };
 
@@ -191,3 +203,4 @@ window.toggleAdvanced = window.Handlers.toggleAdvanced;
 window.toggleAssetAlloc = window.Handlers.toggleAssetAlloc;
 window.toggleGuardrails = window.Handlers.toggleGuardrails;
 window.toggleSimParams = window.Handlers.toggleSimParams;
+window.toggleMoonshotControls = window.Handlers.toggleMoonshotControls;

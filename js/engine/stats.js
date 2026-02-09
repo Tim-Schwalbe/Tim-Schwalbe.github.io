@@ -23,6 +23,10 @@ window.Stats = {
         return _seededRandom ? _seededRandom() : Math.random();
     },
 
+    random() {
+        return this._random();
+    },
+
     randomNormal(mean = 0, std = 1) {
         let u = 0, v = 0;
         while (u === 0) u = this._random();
