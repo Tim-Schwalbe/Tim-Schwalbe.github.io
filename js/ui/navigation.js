@@ -4,7 +4,7 @@
 
 window.Navigation = {
     switchView(viewName) {
-        ['calculator', 'info', 'satoshi'].forEach(v => {
+        ['calculator', 'info', 'satoshi', 'morningstar'].forEach(v => {
             const el = document.getElementById('view-' + v);
             const nav = document.getElementById('nav-' + v);
             if (el) el.classList.add('hidden');

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Bitcoin Retirement Calculator logic and simulation engine.",
   "scripts": {
-    "test": "node tests/sanity.js && node tests/verify_bad_years.js"
+    "test": "node tests/run_suite.js"
   },
   "author": "",
   "license": "ISC"

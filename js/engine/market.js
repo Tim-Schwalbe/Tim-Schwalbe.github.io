@@ -112,8 +112,8 @@ window.generateMarketData = function (numSims, years, configs) {
             // Fat Tail Logic for Crypto (3-Regime Model)
             const useFatTails = Config.getConfig(configs, 'USE_FAT_TAILS', true);
             const useMoonshots = Config.getConfig(configs, 'USE_MOONSHOTS', true);
-            const probCrash = Config.getConfig(configs, 'PROB_CRASH', 0.05);
-            const probMoonshotBase = Config.getConfig(configs, 'PROB_MOONSHOT', 0.05);
+            const probCrash = Config.getConfig(configs, 'PROB_CRASH', 0.035);
+            const probMoonshotBase = Config.getConfig(configs, 'PROB_MOONSHOT', 0.060);
 
             let zC_final = zC; // Default to Standard Normal (Regime 1)
 
@@ -126,8 +126,8 @@ window.generateMarketData = function (numSims, years, configs) {
                     // Force strictly negative shock (Crypto Winter)
                     // OLD LOGIC: -|N(2.5, 1.5)| * 1.5
                     // NEW LOGIC: Uniform random drop between MIN and MAX config
-                    const crashMin = Config.getConfig(configs, 'CRASH_MAG_MIN', 0.30);
-                    const crashMax = Config.getConfig(configs, 'CRASH_MAG_MAX', 0.60);
+                    const crashMin = Config.getConfig(configs, 'CRASH_MAG_MIN', 0.35);
+                    const crashMax = Config.getConfig(configs, 'CRASH_MAG_MAX', 0.40);
                     const dropPct = crashMin + (crashMax - crashMin) * Stats.random();
 
                     // Convert % drop to log return: log(1 - drop)
@@ -159,8 +159,8 @@ window.generateMarketData = function (numSims, years, configs) {
                         // Positive Skew: 
                         // OLD LOGIC: +|N(2.0, 1.0)| * 1.5
                         // NEW LOGIC: Uniform random rally between MIN and MAX config
-                        const moonMin = Config.getConfig(configs, 'MOONSHOT_MAG_MIN', 0.20);
-                        const moonMax = Config.getConfig(configs, 'MOONSHOT_MAG_MAX', 0.50);
+                        const moonMin = Config.getConfig(configs, 'MOONSHOT_MAG_MIN', 0.30);
+                        const moonMax = Config.getConfig(configs, 'MOONSHOT_MAG_MAX', 0.60);
                         const rallyPct = moonMin + (moonMax - moonMin) * Stats.random();
 
                         // Convert % rally to log return: log(1 + rally)

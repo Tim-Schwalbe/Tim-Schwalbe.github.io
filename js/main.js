@@ -69,8 +69,8 @@ async function runSimulation() {
         ENFORCE_MAX_BAD_STREAK: true,
         USE_FAT_TAILS: document.getElementById('chk-fat-tails') ? document.getElementById('chk-fat-tails').checked : false,
         USE_MOONSHOTS: document.getElementById('chk-moonshots') ? document.getElementById('chk-moonshots').checked : false,
-        PROB_CRASH: parseInput('inp-prob-crash', 4.2, false) / 100,
-        PROB_MOONSHOT: parseInput('inp-prob-moonshot', 8.4, false) / 100,
+        PROB_CRASH: parseInput('inp-prob-crash', 3.5, false) / 100, // ~1 crash every 2.5 years (Hist: 4.5%)
+        PROB_MOONSHOT: parseInput('inp-prob-moonshot', 6.0, false) / 100, // ~1 moonshot every 1.5 years (Hist: 18%)
 
         // Magnitude Configs (New)
         CRASH_MAG_MIN: parseInput('inp-crash-min', 35, false) / 100,
@@ -322,10 +322,14 @@ async function runSimulation() {
     }
 
     // Show results and hide placeholder
+    // Show results and hide placeholder/intro
     const resultsContainer = document.getElementById('results-container');
     const resultsPlaceholder = document.getElementById('results-placeholder');
+    const introContainer = document.getElementById('intro-container');
+
     if (resultsContainer) resultsContainer.classList.remove('hidden');
     if (resultsPlaceholder) resultsPlaceholder.classList.add('hidden');
+    if (introContainer) introContainer.classList.add('hidden');
 
     // Render histogram after DOM is visible and layout is complete
     // Use requestAnimationFrame to ensure layout/paint cycle completes

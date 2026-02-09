@@ -335,6 +335,8 @@
                 class="nav-link active pb-3 hover:text-[#F7931A] transition">Calculator</button>
             <button onclick="switchView('info')" id="nav-info"
                 class="nav-link pb-3 hover:text-[#F7931A] transition">Methodology</button>
+            <button onclick="switchView('morningstar')" id="nav-morningstar"
+                class="nav-link pb-3 hover:text-[#F7931A] transition">Morningstar 2026</button>
             <button onclick="switchView('satoshi')" id="nav-satoshi"
                 class="nav-link pb-3 hover:text-[#F7931A] transition">Satoshi Nakamoto</button>
             <div class="flex-1 min-w-[20px] sm:min-w-0"></div>
@@ -685,17 +687,18 @@
                                                 Reality Check (2013-2024 Data):
                                                 <ul class="list-disc list-inside mt-2 ml-1 space-y-1.5 text-slate-300">
                                                     <li><span class="text-slate-100">The "4-Year Cycle"</span>: Is real,
-                                                        but happens monthly.
+                                                        but happens monthly in our sim.
                                                     </li>
-                                                    <li><span class="text-red-400">Crashes (>30% Drop)</span>: Occurred
-                                                        7 times (~4.5%). Frequency: Every 1.85 years. (Your 1.7yr
-                                                        estimate was spot on!).
+                                                    <li><span class="text-red-400">Crashes (>35% Drop)</span>: Occurred
+                                                        7 times (~4.5%). Frequency: Every 1.85 years.
                                                     </li>
                                                     <li><span class="text-emerald-400">Moonshots (>30% Rally)</span>:
                                                         Occurred 24 times (~15.3%)! Frequency: Every 6.5 months.</li>
-                                                    <li><span class="text-slate-100">Our Setting</span>: We use 8.4%
-                                                        (1/yr) for Moonshots to be conservative, halving the actual
-                                                        frequency.</li>
+                                                    <li><span class="text-slate-100">Our Setting</span>: We use <span
+                                                            class="font-bold text-white">1.5%</span> (Crash) & <span
+                                                            class="font-bold text-white">2.5%</span> (Moonshot) to be
+                                                        conservative, targeting a <span class="text-[#F7931A]">~4-Year
+                                                            Cycle</span>.</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -760,14 +763,14 @@
                                     <div>
                                         <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Crash
                                             Prob (%)</label>
-                                        <input type="number" step="0.1" id="inp-prob-crash" value="4.2" min="0"
+                                        <input type="number" step="0.1" id="inp-prob-crash" value="3.5" min="0"
                                             max="100"
                                             class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-red-400 focus:outline-none">
                                         <div class="flex gap-1 mt-1">
                                             <input type="number" id="inp-crash-min" value="35"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Min%" title="Min Drop % (Hist: -37% Nov '18)">
-                                            <input type="number" id="inp-crash-max" value="65"
+                                            <input type="number" id="inp-crash-max" value="40"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Max%" title="Max Drop % (Hist: -50% Mar '20)">
                                         </div>
@@ -779,14 +782,14 @@
                                     <div>
                                         <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Moonshot
                                             Prob (%)</label>
-                                        <input type="number" step="0.1" id="inp-prob-moonshot" value="8.4" min="0"
+                                        <input type="number" step="0.1" id="inp-prob-moonshot" value="6.0" min="0"
                                             max="100"
                                             class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-emerald-400 focus:outline-none">
                                         <div class="flex gap-1 mt-1">
                                             <input type="number" id="inp-moonshot-min" value="30"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Min%" title="Min Rally % (Hist: +30-40%)">
-                                            <input type="number" id="inp-moonshot-max" value="80"
+                                            <input type="number" id="inp-moonshot-max" value="60"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Max%" title="Max Rally % (Hist: +47% Dec '20)">
                                         </div>
@@ -903,6 +906,12 @@
                                             </div>
                                         </div>
 
+
+
+
+
+
+                                        <!-- Scripts -->
                                         <!-- Crypto -->
                                         <div>
                                             <div class="flex justify-between">
@@ -1163,31 +1172,23 @@
         <!-- Main Content: Results -->
         <main id="main-results-panel" class="flex-1 bg-slate-50 p-4 sm:p-6 lg:px-10 lg:py-6 relative">
 
-            <!-- Enhanced Intro / Methodology Summary -->
-            <div id="results-placeholder" class="max-w-full space-y-8 animate-fade-in">
+            <!-- INTRO CONTAINER (Visible Initially) -->
+            <div id="intro-container" class="max-w-full space-y-8 animate-fade-in">
 
-                <!-- Hero Section -->
-                <div class="text-center space-y-4 mb-10">
-                    <div
-                        class="inline-flex items-center gap-2 mb-2 px-3 py-1 bg-gold-50 border border-gold-200 rounded-full">
-                        <span class="w-2 h-2 rounded-full bg-[#F7931A]"></span>
-                        <span class="text-[10px] font-bold text-gold-800 uppercase tracking-widest">Morningstar 2025
-                            Baseline Loaded</span>
-                    </div>
-                    <h2 class="text-3xl md:text-4xl font-serif font-bold text-slate-800">
-                        Ready to Stress Test Your <span class="text-[#F7931A]">Retirement</span>?
-                    </h2>
-                    <p class="text-slate-500 max-w-2xl mx-auto text-sm leading-relaxed">
-                        Retirement calculations based on "Average Returns" are dangerous. To find a truly Safe
-                        Withdrawal Rate (SWR),
+                <div class="max-w-4xl mb-16 px-2">
+                    <h1 class="text-2xl md:text-3xl lg:text-4xl font-serif text-slate-800 leading-snug mb-4">
+                        Retirement calculations based on <span class="italic text-slate-900">"Average Returns"</span>
+                        are dangerous.
+                    </h1>
+                    <p class="text-lg md:text-xl font-serif text-slate-500 leading-relaxed max-w-3xl">
+                        To find a truly <span class="text-slate-800 border-b border-orange-200 font-medium pb-0.5">Safe
+                            Withdrawal Rate (SWR)</span>,
                         you must survive the worst possible futures. We simulate thousands of them.
                     </p>
                 </div>
 
-                <!-- Educational Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                    <!-- Card 1: The Problem -->
+                    <!-- Card 1: The Trap -->
                     <div
                         class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden group hover:border-red-200 transition-colors">
                         <div
@@ -1238,15 +1239,13 @@
                         <div class="bg-blue-50/50 p-2 rounded-lg border border-blue-100 relative z-10">
                             <p class="text-[10px] font-bold text-blue-800 uppercase mb-1">Goal</p>
                             <p class="text-[10px] text-blue-700">To achieve a <span class="font-bold">90%+ Success
-                                    Rate</span>, meaning you are safe in all but the worst 10% of extreme
-                                scenarios.</p>
+                                    Rate</span>, meaning you are safe in all but the worst 10% of extreme scenarios.</p>
                         </div>
                     </div>
 
-                    <!-- Card 3: The Opportunity -->
+                    <!-- Card 3: The Baseline (Morningstar) -->
                     <div
                         class="bg-slate-900 p-6 rounded-2xl shadow-xl border border-slate-700 relative overflow-hidden group">
-                        <!-- Bitcoin Background Effect -->
                         <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:opacity-20 transition-opacity">
                             <svg class="w-32 h-32 text-[#F7931A]" fill="currentColor" viewBox="0 0 24 24">
                                 <path
@@ -1256,19 +1255,19 @@
 
                         <h3
                             class="text-xs font-black text-white uppercase tracking-widest mb-3 relative z-10 flex items-center gap-2">
-                            <span class="text-[#F7931A]">●</span> The Strategy
+                            <span class="text-[#F7931A]">●</span> The Baseline
                         </h3>
                         <p class="text-[11px] text-slate-300 leading-relaxed mb-4 relative z-10">
-                            Most portfolios (e.g., 60/40) struggle to safely withdraw >4%. Bitcoin, as a non-correlated
-                            "Satellite" asset,
-                            can potentially boost this rate via rebalancing bonuses.
+                            Built on <span class="font-bold text-white">Morningstar's 2026 Research</span>.
+                            We use their exact <span class="font-bold text-[#F7931A]">3.9% Safe Withdrawal Rate</span>
+                            and <span class="font-bold text-white">40/60 Allocation</span> as the starting point.
                         </p>
                         <div class="bg-white/5 p-3 rounded-lg border border-white/10 relative z-10">
                             <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Your Mission</p>
                             <p class="text-[10px] text-white">
-                                Start with the default <span class="font-bold text-white">Classic Allocations</span>.
-                                Then, slowly add <span class="font-bold text-[#F7931A]">Bitcoin (1-5%)</span> to see if
-                                it improves your SWR.
+                                Start with this institutional baseline. Then, slowly add <span
+                                    class="font-bold text-[#F7931A]">Bitcoin (1-5%)</span> to see if it improves your
+                                SWR.
                             </p>
                         </div>
                     </div>
@@ -1280,20 +1279,17 @@
                         class="inline-block p-[2px] rounded-2xl bg-gradient-to-r from-orange-200 via-[#F7931A] to-orange-200 mb-2">
                         <div class="bg-white rounded-2xl p-4 px-10">
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Current
-                                Configuration</p>
+                                Configuration (Morningstar Default)</p>
                             <p class="text-lg font-bold text-slate-900">40% Stocks / 60% Bonds / 0% Crypto</p>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500 mt-4 animate-pulse">← Configure parameters on the left to specificy
+                    <p class="text-xs text-slate-500 mt-4 animate-pulse">← Configure parameters on the left to specify
                         your scenario</p>
                 </div>
-
             </div>
 
-            <!-- Results Container (Hidden initially) -->
+            <!-- RESULTS CONTAINER (Hidden Initially) -->
             <div id="results-container" class="hidden space-y-16 max-w-6xl ml-0 mr-auto animate-fade-in pb-20">
-
-                <!-- Simulation Setup Summary -->
                 <div id="setup-section" class="space-y-6">
                     <div class="flex items-center gap-4">
                         <h2 class="text-xs font-black text-black uppercase tracking-[0.2em] whitespace-nowrap">The Setup
@@ -1977,7 +1973,8 @@
                                 <div class="space-y-6 relative z-10">
                                     <div>
                                         <p id="res-cash-shield-rate"
-                                            class="text-4xl font-serif font-bold text-slate-800">--%
+                                            class="text-4xl font-serif font-bold text-slate-800">
+                                            --%
                                         </p>
                                         <p class="text-[9px] text-slate-500 font-medium uppercase mt-1">Downturns
                                             Covered</p>
@@ -2169,8 +2166,23 @@
                     <span>2. Data Sources and Assumptions</span>
                 </div>
                 <div class="space-y-4">
-                    <p class="text-sm text-slate-600 leading-relaxed">Defaults are based on Morningstar's 2026 "State of
-                        Retirement Income" report for conservatism. Crypto is an extension.</p>
+                    <div class="bg-orange-50/50 border border-orange-100 rounded-xl p-4 mb-6">
+                        <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2">
+                            <span class="text-[#F7931A]">●</span> Morningstar 2026 Baseline
+                        </h4>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-3">
+                            Our "Anti-Satoshi" baseline is derived directly from Morningstar's <em>"State of Retirement
+                                Income 2026"</em>.
+                            Key benchmarks used:
+                        </p>
+                        <ul class="list-disc list-inside text-xs text-slate-600 space-y-1 ml-1">
+                            <li><strong>Safe Withdrawal Rate (SWR):</strong> 3.9% (up from 3.7% in previous years).</li>
+                            <li><strong>Equity/Bond Split:</strong> 40/60 Conservative Allocation.</li>
+                            <li><strong>Success Target:</strong> 90% Probability of success over 30 years.</li>
+                        </ul>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">Defaults are based on these institutional findings
+                        for conservatism. Crypto is overlaid as an extension.</p>
                     <table class="w-full border-collapse text-sm">
                         <thead>
                             <tr class="bg-slate-100">
@@ -2683,6 +2695,105 @@
                     2026</p>
             </div>
         </article>
+    </div>
+
+    <!-- VIEW: MORNINGSTAR -->
+    <div id="view-morningstar" class="hidden flex-1 overflow-y-auto bg-white p-6 sm:p-10 animate-fade-in pb-32">
+        <div class="max-w-4xl mx-auto space-y-12">
+
+            <header class="text-center border-b border-gold-200 pb-8">
+                <div
+                    class="inline-block bg-[#F7931A] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4">
+                    Latest Research</div>
+                <h2 class="text-3xl sm:text-5xl font-serif font-bold text-slate-900 mb-4">State of Retirement Income
+                    2026</h2>
+                <p class="text-slate-500 font-mono text-sm uppercase tracking-widest">Analysis & Baseline Benchmarks</p>
+            </header>
+
+            <div class="prose prose-slate max-w-none">
+                <p class="text-lg leading-relaxed text-slate-700">
+                    Morningstar's 2026 report, <em>"The State of Retirement Income,"</em> provides the latest benchmarks
+                    for Safe Withdrawal Rates (SWR).
+                    Our calculator aligns its baseline assumptions with these findings to ensure your starting point is
+                    grounded in rigorous institutional research before you add crypto volatility.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-10">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                        <h3 class="text-xl font-serif font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <span class="text-[#F7931A]">●</span> Key Findings
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex justify-between border-b border-slate-200 pb-2">
+                                <span>Safe Withdrawal Rate</span>
+                                <span class="font-bold text-slate-900">3.9%</span>
+                            </li>
+                            <li class="flex justify-between border-b border-slate-200 pb-2">
+                                <span>Portfolio Mix</span>
+                                <span class="font-bold text-slate-900">40% Equity / 60% Bond</span>
+                            </li>
+                            <li class="flex justify-between border-b border-slate-200 pb-2">
+                                <span>Success Target</span>
+                                <span class="font-bold text-slate-900">90% Probability</span>
+                            </li>
+                            <li class="flex justify-between pt-1">
+                                <span>Horizon</span>
+                                <span class="font-bold text-slate-900">30 Years</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-orange-50/50 p-6 rounded-2xl border border-orange-100">
+                        <h3 class="text-xl font-serif font-bold text-slate-800 mb-4">Why It Matters</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                            While the "4% Rule" is famous, market valuations and bond yields fluctuate. The 2026 update
+                            suggests slightly more conservatism (3.9%) due to projected lower equity premiums and
+                            inflation volatility.
+                        </p>
+                        <p class="text-sm text-slate-600 leading-relaxed font-bold">
+                            This calculator uses these exact parameters as the "Anti-Satoshi" (0% Crypto) baseline.
+                        </p>
+                    </div>
+                </div>
+
+                <h3 class="font-serif text-2xl font-bold text-slate-800 mt-10 mb-4">Official Sources</h3>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="https://www.morningstar.com/business/insights/research/the-state-of-retirement-income"
+                        target="_blank"
+                        class="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-[#F7931A] hover:shadow-md transition group">
+                        <div
+                            class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-orange-50 transition">
+                            <svg class="w-5 h-5 text-slate-500 group-hover:text-[#F7931A]" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900 text-sm">Read the Report</p>
+                            <p class="text-xs text-slate-500">Morningstar Insights</p>
+                        </div>
+                    </a>
+
+                    <div class="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <div
+                            class="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-slate-100">
+                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 1 0 01-2 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900 text-sm">swr_morning_star.pdf</p>
+                            <p class="text-xs text-slate-500">Local Reference (Project Folder)</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <!-- TUTORIAL OVERLAY -->
