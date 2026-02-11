@@ -112,12 +112,19 @@ window.generateMarketData = function (numSims, years, configs) {
             // Fat Tail Logic for Crypto (3-Regime Model)
             const useFatTails = Config.getConfig(configs, 'USE_FAT_TAILS', true);
             const useMoonshots = Config.getConfig(configs, 'USE_MOONSHOTS', true);
+            const limitFatTails10y = Config.getConfig(configs, 'LIMIT_FAT_TAILS_10Y', false);
             const probCrash = Config.getConfig(configs, 'PROB_CRASH', 0.035);
             const probMoonshotBase = Config.getConfig(configs, 'PROB_MOONSHOT', 0.060);
 
             let zC_final = zC; // Default to Standard Normal (Regime 1)
 
-            if (useFatTails) {
+            // Determine if Fat Tails should apply this month
+            let applyFatTails = useFatTails;
+            if (limitFatTails10y && idx >= 120) {
+                applyFatTails = false;
+            }
+
+            if (applyFatTails) {
                 // REGIME 2: CRASH (The "Idiosyncratic Shock")
                 // Independent roll for crash event
                 const isCrashMonth = Stats.random() < probCrash;

@@ -656,7 +656,7 @@
                         </svg>
                     </button>
 
-                    <div id="pnl-advanced" class="advanced-panel space-y-6 pt-4">
+                    <div id="pnl-advanced" class="advanced-panel space-y-4 pt-4">
 
                         <!-- Methodology Note -->
 
@@ -746,7 +746,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <p class="text-[9px] text-slate-400">Positive Skew (Moonshots) after Crashes</p>
+                                        <p class="text-[9px] text-slate-400">Enable Mean Reversion (Rallies)</p>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="chk-moonshots" class="sr-only peer" checked>
@@ -755,49 +755,76 @@
                                         </div>
                                     </label>
                                 </div>
+                            </div>
 
-                                <!-- Probabilities -->
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Crash
-                                            Prob (%)</label>
-                                        <input type="number" step="0.1" id="inp-prob-crash" value="2.0" min="0"
-                                            max="100"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-red-400 focus:outline-none">
-                                        <div class="flex gap-1 mt-1">
-                                            <input type="number" id="inp-crash-min" value="30"
-                                                class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                                placeholder="Min%" title="Min Drop % (Hist: -37% Nov '18)">
-                                            <input type="number" id="inp-crash-max" value="50"
-                                                class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                                placeholder="Max%" title="Max Drop % (Hist: -50% Mar '20)">
+                            <!-- Limit to 10 Years Toggle -->
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-100/50">
+                                <div class="flex items-center gap-1">
+                                    <label for="chk-limit-fat-tails-10y"
+                                        class="text-xs font-bold text-slate-500 cursor-pointer">Limit to First
+                                        10y</label>
+                                    <div class="relative group">
+                                        <svg class="w-3 h-3 text-slate-300 cursor-help hover:text-blue-500 transition-colors"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                            </path>
+                                        </svg>
+                                        <div
+                                            class="absolute left-0 top-5 w-48 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none border border-white/10">
+                                            Applies Crashes & Moonshots only for the first 10 years (120 months), then
+                                            reverts to standard growth (GBM).
                                         </div>
-                                        <p id="txt-prob-crash-example"
-                                            class="text-[9px] text-slate-400 italic mt-1 leading-tight">
-                                            --
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Moonshot
-                                            Prob (%)</label>
-                                        <input type="number" step="0.1" id="inp-prob-moonshot" value="7.0" min="0"
-                                            max="100"
-                                            class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-emerald-400 focus:outline-none">
-                                        <div class="flex gap-1 mt-1">
-                                            <input type="number" id="inp-moonshot-min" value="25"
-                                                class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                                placeholder="Min%" title="Min Rally % (Hist: +30-40%)">
-                                            <input type="number" id="inp-moonshot-max" value="50"
-                                                class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                                placeholder="Max%" title="Max Rally % (Hist: +47% Dec '20)">
-                                        </div>
-                                        <p id="txt-prob-moonshot-example"
-                                            class="text-[9px] text-slate-400 italic mt-1 leading-tight">
-                                            --
-                                        </p>
                                     </div>
                                 </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="chk-limit-fat-tails-10y" class="sr-only peer">
+                                    <div
+                                        class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500">
+                                    </div>
+                                </label>
                             </div>
+
+                            <!-- Probabilities -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Crash
+                                        Prob (%)</label>
+                                    <input type="number" step="0.1" id="inp-prob-crash" value="2.0" min="0" max="100"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-red-400 focus:outline-none">
+                                    <div class="flex gap-1 mt-1">
+                                        <input type="number" id="inp-crash-min" value="30"
+                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
+                                            placeholder="Min%" title="Min Drop % (Hist: -37% Nov '18)">
+                                        <input type="number" id="inp-crash-max" value="50"
+                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
+                                            placeholder="Max%" title="Max Drop % (Hist: -50% Mar '20)">
+                                    </div>
+                                    <p id="txt-prob-crash-example"
+                                        class="text-[9px] text-slate-400 italic mt-1 leading-tight">
+                                        --
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Moonshot
+                                        Prob (%)</label>
+                                    <input type="number" step="0.1" id="inp-prob-moonshot" value="7.0" min="0" max="100"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-emerald-400 focus:outline-none">
+                                    <div class="flex gap-1 mt-1">
+                                        <input type="number" id="inp-moonshot-min" value="25"
+                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
+                                            placeholder="Min%" title="Min Rally % (Hist: +30-40%)">
+                                        <input type="number" id="inp-moonshot-max" value="50"
+                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
+                                            placeholder="Max%" title="Max Rally % (Hist: +47% Dec '20)">
+                                    </div>
+                                    <p id="txt-prob-moonshot-example"
+                                        class="text-[9px] text-slate-400 italic mt-1 leading-tight">
+                                        --
+                                    </p>
+                                </div>
+                            </div>
+
                         </div>
 
                         <!-- Stress Test Parameters -->
@@ -817,7 +844,8 @@
                                             class="font-serif font-bold text-[#F7931A] text-xs mb-2 uppercase tracking-wider border-b border-white/20 pb-1.5">
                                             Mean
                                             Reversion (The "Sanity Filter")</p>
-                                        <p class="mb-2 text-white/90">Prevents "infinite doom" scenarios where markets
+                                        <p class="mb-2 text-white/90">Prevents "infinite doom" scenarios where
+                                            markets
                                             never recover. </p>
 
                                         <div class="space-y-2 mb-3">
@@ -825,7 +853,8 @@
                                                     Logic:</span> Low prices eventually attract buyers, snapping the
                                                 market back to historical averages.</p>
                                             <p class="text-white/90"><span class="text-[#F7931A] font-bold">The
-                                                    Hard Override:</span> This is 100% true. If the limit is hit, the
+                                                    Hard Override:</span> This is 100% true. If the limit is hit,
+                                                the
                                                 sim ignores the random dice roll. It calculates the exact <span
                                                     class="bg-white/20 px-1 rounded font-bold text-white">mathematical
                                                     boost</span> needed to force exactly <span class="font-bold">+2%
@@ -842,8 +871,10 @@
                                             <ul class="space-y-1 text-white/70 font-mono text-[9px]">
                                                 <li><span class="text-white">2 Years:</span> ~16% (Common)</li>
                                                 <li><span class="text-white">5 Years:</span> ~1% (Rare)</li>
-                                                <li><span class="text-white">10 Years:</span> ~0.01% (Very Rare)</li>
-                                                <li><span class="text-white">15+ Years:</span> Exogenous Shock (Sanity
+                                                <li><span class="text-white">10 Years:</span> ~0.01% (Very Rare)
+                                                </li>
+                                                <li><span class="text-white">15+ Years:</span> Exogenous Shock
+                                                    (Sanity
                                                     check)</li>
                                             </ul>
                                         </div>
@@ -858,7 +889,8 @@
                                     <input type="number" id="inp-max-consecutive-bad-years" value="15"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
                                     <p class="text-[9px] text-slate-600 font-bold mt-0.5">
-                                        If an asset fails to beat inflation for this many years, the sim forces a +2%
+                                        If an asset fails to beat inflation for this many years, the sim forces a
+                                        +2%
                                         real recovery year (Mean Reversion).
                                     </p>
                                 </div>
@@ -887,12 +919,14 @@
 
                                     <!-- Crash Intensity Inputs -->
                                     <div class="space-y-2">
-                                        <p class="text-[10px] font-bold text-slate-500">Monthly Return Floors (Cap)</p>
+                                        <p class="text-[10px] font-bold text-slate-500">Monthly Return Floors (Cap)
+                                        </p>
 
                                         <!-- Stocks -->
                                         <div>
                                             <div class="flex justify-between">
-                                                <label class="text-[9px] text-slate-400">Stocks (Monthly Limit)</label>
+                                                <label class="text-[9px] text-slate-400">Stocks (Monthly
+                                                    Limit)</label>
                                                 <span id="disp-crash-annual-stocks"
                                                     class="text-[9px] text-red-400 font-mono">~ -46% Annual</span>
                                             </div>
@@ -913,7 +947,8 @@
                                         <!-- Crypto -->
                                         <div>
                                             <div class="flex justify-between">
-                                                <label class="text-[9px] text-slate-400">Crypto (Monthly Limit)</label>
+                                                <label class="text-[9px] text-slate-400">Crypto (Monthly
+                                                    Limit)</label>
                                                 <span id="disp-crash-annual-crypto"
                                                     class="text-[9px] text-red-400 font-mono">~ -71% Annual</span>
                                             </div>
@@ -928,7 +963,8 @@
                                         <!-- Bonds -->
                                         <div>
                                             <div class="flex justify-between">
-                                                <label class="text-[9px] text-slate-400">Bonds (Monthly Limit)</label>
+                                                <label class="text-[9px] text-slate-400">Bonds (Monthly
+                                                    Limit)</label>
                                                 <span id="disp-crash-annual-bonds"
                                                     class="text-[9px] text-red-400 font-mono">~ -11% Annual</span>
                                             </div>
@@ -958,17 +994,20 @@
                                         <!-- Tooltip Content -->
                                         <div
                                             class="absolute bottom-full left-0 mb-2 w-64 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all z-50 pointer-events-none border border-white/10">
-                                            <p class="font-bold text-[#F7931A] mb-1">Mechanics: Forced Negativity</p>
+                                            <p class="font-bold text-[#F7931A] mb-1">Mechanics: Forced Negativity
+                                            </p>
                                             <p class="mb-2 leading-relaxed">
                                                 During the crash period, we <span
-                                                    class="font-bold text-red-300">force</span> monthly returns to be at
+                                                    class="font-bold text-red-300">force</span> monthly returns to
+                                                be at
                                                 least this bad.
                                             </p>
                                             <div class="bg-white/10 p-1.5 rounded mb-2 font-mono text-[9px]">
                                                 return = MIN(random_return, limit)
                                             </div>
                                             <p class="leading-relaxed">
-                                                If the random roll is +2%, it becomes -5%. If it's -8%, it stays -8%.
+                                                If the random roll is +2%, it becomes -5%. If it's -8%, it stays
+                                                -8%.
                                                 This guarantees a brutal, relentless downturn.
                                             </p>
                                         </div>
@@ -1010,7 +1049,8 @@
                                         <p
                                             class="font-serif font-bold text-[#F7931A] text-xs mb-2 uppercase tracking-wider border-b border-white/20 pb-1.5">
                                             Diversification Power</p>
-                                        <p class="mb-2 text-white/90">Controls how closely asset classes move together.
+                                        <p class="mb-2 text-white/90">Controls how closely asset classes move
+                                            together.
                                         </p>
 
                                         <div class="space-y-2">
@@ -1019,8 +1059,10 @@
                                                 Assets lock-step. If Stocks crash, everything crashes. <span
                                                     class="italic opacity-75">No safety net.</span></p>
                                             <p class="text-white/90"><span class="text-green-300 font-bold">0.0
-                                                    (Low):</span> Assets ignore each other. When one zig, others zag.
-                                                <span class="italic opacity-75">Rebalancing bonuses occur here.</span>
+                                                    (Low):</span> Assets ignore each other. When one zig, others
+                                                zag.
+                                                <span class="italic opacity-75">Rebalancing bonuses occur
+                                                    here.</span>
                                             </p>
                                             <p class="text-white/90"><span class="text-[#F7931A] font-bold">Default
                                                     (0.20):</span> Slight positive link. Realistic for modern global
@@ -1119,6 +1161,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <!-- 4. Simulation Config (Collapsible) -->
                 <div class="border-t border-orange-100/30 pt-3 pb-4">
