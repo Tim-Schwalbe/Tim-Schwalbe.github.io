@@ -185,21 +185,21 @@ async function runSimulation() {
     if (safeMonthlyEl) safeMonthlyEl.innerText = Formatters.formatCurrency(safeMonthly, 0);
     if (targetPtrEl) targetPtrEl.innerText = configs.TARGET_SUCCESS_PERCENT.toFixed(0);
 
-    // Calculate other risk profiles (99% and 90%)
+    // Calculate other risk profiles (99% and 95%)
     const swr99 = window.findSWR(0.99, marketData, configs);
-    const swr90 = window.findSWR(0.90, marketData, configs);
+    const swrAggressive = window.findSWR(0.95, marketData, configs);
     const monthly99 = (totalCapital * swr99) / 12;
-    const monthly90 = (totalCapital * swr90) / 12;
+    const monthlyAggressive = (totalCapital * swrAggressive) / 12;
 
     const safe99El = document.getElementById('res-safe-99');
-    const safe90El = document.getElementById('res-safe-90');
+    const safeAggressiveEl = document.getElementById('res-safe-aggressive');
     const swr99El = document.getElementById('res-swr-99');
-    const swr90El = document.getElementById('res-swr-90');
+    const swrAggressiveEl = document.getElementById('res-swr-aggressive');
 
     if (safe99El) safe99El.innerText = Formatters.formatCurrency(monthly99, 0);
-    if (safe90El) safe90El.innerText = Formatters.formatCurrency(monthly90, 0);
+    if (safeAggressiveEl) safeAggressiveEl.innerText = Formatters.formatCurrency(monthlyAggressive, 0);
     if (swr99El) swr99El.innerText = (swr99 * 100).toFixed(2);
-    if (swr90El) swr90El.innerText = (swr90 * 100).toFixed(2);
+    if (swrAggressiveEl) swrAggressiveEl.innerText = (swrAggressive * 100).toFixed(2);
 
     // Max monthly (realized during the simulation)
     const maxMonthlyEl = document.getElementById('res-max-monthly');

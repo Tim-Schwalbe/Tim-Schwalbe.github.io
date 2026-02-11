@@ -683,22 +683,20 @@
                                             <div
                                                 class="absolute left-0 top-5 w-72 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-4 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
                                                 <span class="text-[#F7931A] font-bold uppercase">3-Regime
-                                                    Model (Historical)</span><br>
-                                                Reality Check (2013-2024 Data):
+                                                    Model (Forecast)</span><br>
+                                                Future Maturity (2026-2036):
                                                 <ul class="list-disc list-inside mt-2 ml-1 space-y-1.5 text-slate-300">
-                                                    <li><span class="text-slate-100">The "4-Year Cycle"</span>: Is real,
-                                                        but happens monthly in our sim.
+                                                    <li><span class="text-slate-100">Declining Volatility</span>:
+                                                        Assumes BTC matures like Gold/Tech, with reduced extreme
+                                                        variance.
                                                     </li>
-                                                    <li><span class="text-red-400">Crashes (>35% Drop)</span>: Occurred
-                                                        7 times (~4.5%). Frequency: Every 1.85 years.
+                                                    <li><span class="text-red-400">Crashes (>30% Drop)</span>: 2.0% prob
+                                                        (~1 every 4.2 years). Mags: -30% to -50%.
                                                     </li>
-                                                    <li><span class="text-emerald-400">Moonshots (>30% Rally)</span>:
-                                                        Occurred 24 times (~15.3%)! Frequency: Every 6.5 months.</li>
-                                                    <li><span class="text-slate-100">Our Setting</span>: We use <span
-                                                            class="font-bold text-white">1.5%</span> (Crash) & <span
-                                                            class="font-bold text-white">2.5%</span> (Moonshot) to be
-                                                        conservative, targeting a <span class="text-[#F7931A]">~4-Year
-                                                            Cycle</span>.</li>
+                                                    <li><span class="text-emerald-400">Moonshots (>25% Rally)</span>:
+                                                        7.0% prob (~1 every 1.2 years). Mags: +25% to +50%.</li>
+                                                    <li><span class="text-slate-100">Projected Goal</span>: Sustainable
+                                                        growth (~25-40% CAGR) aiming for $1M/BTC by 2036.</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -763,14 +761,14 @@
                                     <div>
                                         <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Crash
                                             Prob (%)</label>
-                                        <input type="number" step="0.1" id="inp-prob-crash" value="3.5" min="0"
+                                        <input type="number" step="0.1" id="inp-prob-crash" value="2.0" min="0"
                                             max="100"
                                             class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-red-400 focus:outline-none">
                                         <div class="flex gap-1 mt-1">
-                                            <input type="number" id="inp-crash-min" value="35"
+                                            <input type="number" id="inp-crash-min" value="30"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Min%" title="Min Drop % (Hist: -37% Nov '18)">
-                                            <input type="number" id="inp-crash-max" value="40"
+                                            <input type="number" id="inp-crash-max" value="50"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Max%" title="Max Drop % (Hist: -50% Mar '20)">
                                         </div>
@@ -782,14 +780,14 @@
                                     <div>
                                         <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Moonshot
                                             Prob (%)</label>
-                                        <input type="number" step="0.1" id="inp-prob-moonshot" value="6.0" min="0"
+                                        <input type="number" step="0.1" id="inp-prob-moonshot" value="7.0" min="0"
                                             max="100"
                                             class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-emerald-400 focus:outline-none">
                                         <div class="flex gap-1 mt-1">
-                                            <input type="number" id="inp-moonshot-min" value="30"
+                                            <input type="number" id="inp-moonshot-min" value="25"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Min%" title="Min Rally % (Hist: +30-40%)">
-                                            <input type="number" id="inp-moonshot-max" value="60"
+                                            <input type="number" id="inp-moonshot-max" value="50"
                                                 class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
                                                 placeholder="Max%" title="Max Rally % (Hist: +47% Dec '20)">
                                         </div>
@@ -1051,12 +1049,12 @@
                             <div class="grid grid-cols-2 gap-2 mb-2">
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                    <input type="number" step="0.1" id="inp-c-cagr-start" value="32.0"
+                                    <input type="number" step="0.1" id="inp-c-cagr-start" value="18.0"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                    <input type="number" step="0.1" id="inp-c-cagr-end" value="8.0"
+                                    <input type="number" step="0.1" id="inp-c-cagr-end" value="5.0"
                                         class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
                                 </div>
                             </div>
@@ -1445,11 +1443,13 @@
                                             id="res-swr-target-label">--</span>% | Recommended</p>
                                 </div>
                                 <div class="space-y-2">
-                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Aggressive
-                                        (90%)</p>
-                                    <p id="res-safe-90" class="text-3xl font-serif font-bold text-slate-700">-- $</p>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Safe /
+                                        Growth
+                                        (95%)</p>
+                                    <p id="res-safe-aggressive" class="text-3xl font-serif font-bold text-slate-700">--
+                                        $</p>
                                     <p class="text-[10px] text-slate-500 font-medium italic">SWR: <span
-                                            id="res-swr-90">--</span>% | Higher risk</p>
+                                            id="res-swr-aggressive">--</span>% | Higher risk</p>
                                 </div>
                             </div>
 
@@ -2505,113 +2505,124 @@
                     </div>
                 </div>
 
-                <div class="space-y-4 pt-6 border-t border-slate-100 text-center">
-                    <p class="text-xs text-slate-400 italic">Stress Tests: Optional floors and bad-year limits
+                <div class="space-y-4 pt-6 border-t border-slate-100 px-6">
+                    <p class="text-xs text-slate-500 italic border-l-2 border-slate-300 pl-3">Stress Tests: Optional
+                        floors and bad-year limits
                         ensure realism even in extreme markets. Verified in code: no infinite dooms.</p>
                 </div>
-        </div>
-        </section>
+            </section>
 
-        <!-- 4. Portfolio and Withdrawals -->
-        <section class="space-y-4">
-            <div
-                class="flex justify-between items-center text-xs font-black text-slate-900 uppercase tracking-widest pb-2 border-b-2 border-slate-100">
-                <span>4. Portfolio Dynamics and Withdrawals</span>
-            </div>
-            <div class="space-y-4">
-                <p class="text-sm text-slate-600 leading-relaxed">Every month, we grow the portfolio based on
-                    weighted returns, adjust spending for inflation, and apply guardrails to decide the final
-                    withdrawal amount.</p>
+            <!-- 4. Portfolio and Withdrawals -->
+
+            <section class="space-y-4 max-w-5xl mx-auto mt-12">
                 <div
-                    class="bg-indigo-900 text-indigo-100 p-6 rounded-xl font-mono text-sm overflow-x-auto shadow-inner">
-                    \[ \text{Withdrawal} = \max(\text{Floor}, \min(\text{Portfolio} \times \text{Initial SWR},
-                    \text{Ceiling} \times \text{Inflated Need})) \]
-                    <p class="text-[10px] text-indigo-300 mt-4 uppercase tracking-widest leading-relaxed">Logic:
-                        Guarantees your basic floor while capping spending to preserve capital for future years.</p>
+                    class="flex justify-between items-center text-xs font-black text-slate-900 uppercase tracking-widest pb-2 border-b-2 border-slate-100">
+                    <span>4. Portfolio Dynamics and Withdrawals</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <h5 class="font-bold text-slate-800 text-xs uppercase mb-2">Prime Harvesting</h5>
-                        <p class="text-[11px] text-slate-500 leading-relaxed">If markets drop, we pull from the
-                            <strong>Cash Buffer</strong> first. We avoid selling stocks at a loss to prevent
-                            sequence-of-returns death spirals.
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-600 leading-relaxed">Every month, we grow the portfolio based on
+                        weighted returns, adjust spending for inflation, and apply guardrails to decide the final
+                        withdrawal amount.</p>
+                    <div
+                        class="bg-indigo-900 text-indigo-100 p-6 rounded-xl font-mono text-sm overflow-x-auto shadow-inner">
+                        \[ \text{Withdrawal} = \max(\text{Floor}, \min(\text{Portfolio} \times \text{Initial SWR},
+                        \text{Ceiling} \times \text{Inflated Need})) \]
+                        <p class="text-[10px] text-indigo-300 mt-4 uppercase tracking-widest leading-relaxed">Logic:
+                            Guarantees your basic floor while capping spending to preserve capital for future years.
                         </p>
                     </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <h5 class="font-bold text-slate-800 text-xs uppercase mb-2">Monthly Rebalancing</h5>
-                        <p class="text-[11px] text-slate-500 leading-relaxed">The engine assumes <strong>perfect
-                                monthly rebalancing</strong>. In every single month, it resets your portfolio to
-                            your exact target percentages (e.g., 50% Stocks, 50% Bonds).</p>
-                        <p class="text-[10px] text-slate-400 mt-2 italic leading-tight">This captures the real-world
-                            utility of diversification: it forces the portfolio to automatically "Sell High"
-                            (trimming winners) and "Buy Low" (buying laggards) every 30 days.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <h5 class="font-bold text-slate-800 text-xs uppercase mb-2">Prime Harvesting</h5>
+                            <p class="text-[11px] text-slate-500 leading-relaxed">If markets drop, we pull from the
+                                <strong>Cash Buffer</strong> first. We avoid selling stocks at a loss to prevent
+                                sequence-of-returns death spirals.
+                            </p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <h5 class="font-bold text-slate-800 text-xs uppercase mb-2">Monthly Rebalancing</h5>
+                            <p class="text-[11px] text-slate-500 leading-relaxed">The engine assumes <strong>perfect
+                                    monthly rebalancing</strong>. In every single month, it resets your portfolio to
+                                your exact target percentages (e.g., 50% Stocks, 50% Bonds).</p>
+                            <p class="text-[10px] text-slate-400 mt-2 italic leading-tight">This captures the
+                                real-world
+                                utility of diversification: it forces the portfolio to automatically "Sell High"
+                                (trimming winners) and "Buy Low" (buying laggards) every 30 days.</p>
+                        </div>
                     </div>
+                    <p class="text-xs text-slate-500 italic mt-2">Proof: Simulated steps match manual calcs exactly
+                        (e.g., 60/30/10 mix, -5% month: blended return and cash usage verified correct).</p>
                 </div>
-                <p class="text-xs text-slate-500 italic mt-2">Proof: Simulated steps match manual calcs exactly
-                    (e.g., 60/30/10 mix, -5% month: blended return and cash usage verified correct).</p>
-            </div>
-        </section>
+            </section>
 
-        <!-- 5. SWR Optimization -->
-        <section class="space-y-4">
-            <div
-                class="flex justify-between items-center text-xs font-black text-slate-900 uppercase tracking-widest pb-2 border-b-2 border-slate-100">
-                <span>5. Safe Withdrawal Rate (SWR) Optimization</span>
-            </div>
-            <div class="space-y-4">
-                <p class="text-sm text-slate-600 leading-relaxed">We use <strong>Bisection Search</strong> to find
-                    the maximum possible SWR that achieves your Target Success Probability (e.g., 90%).</p>
-                <div class="bg-slate-900 text-slate-400 p-6 rounded-xl font-mono text-xs space-y-2">
-                    <p class="text-white font-bold tracking-widest uppercase mb-1">Bisection Loop Example</p>
-                    <p>> TRY 4.0%... Result: 88% Success (Fail)</p>
-                    <p>> TRY 3.0%... Result: 98% Success (Pass)</p>
-                    <p>> TRY 3.5%... Result: 94% Success (Pass)</p>
-                    <p class="text-emerald-400">> Converging to precise 3.92%... (25 iterations)</p>
+            <!-- 5. SWR Optimization -->
+            <section class="space-y-4 max-w-5xl mx-auto mt-12">
+                <div
+                    class="flex justify-between items-center text-xs font-black text-slate-900 uppercase tracking-widest pb-2 border-b-2 border-slate-100">
+                    <span>5. Safe Withdrawal Rate (SWR) Optimization</span>
                 </div>
-                <p class="text-sm text-slate-600 italic">Proof: Our model converges to ~3.9% for a standard 40/60
-                    portfolio, precisely matching Morningstar 2026 data. The small safety margin accounts for
-                    simulation variance.</p>
-            </div>
-        </section>
-
-        <!-- 6. Proofs and Limitations -->
-        <section class="space-y-4">
-            <div
-                class="flex justify-between items-center text-xs font-black text-slate-900 uppercase tracking-widest pb-2 border-b-2 border-slate-100">
-                <span>6. Proofs, Limitations, and Transparency</span>
-            </div>
-            <div class="space-y-6">
                 <div class="space-y-4">
-                    <p class="text-sm text-slate-600 leading-relaxed font-bold">Code Verification Summary</p>
-                    <p class="text-sm text-slate-600 leading-relaxed">All core engine code has been verified through
-                        empirical tests. No flaws found in asset mixing, CAGR realization, or simulation loops.
-                        Asset correlations match targets within 0.01-0.02 variance across 10,000 runs.</p>
+                    <p class="text-sm text-slate-600 leading-relaxed">We use <strong>Bisection Search</strong> to
+                        find
+                        the maximum possible SWR that achieves your Target Success Probability (e.g., 95%).</p>
+                    <div class="bg-slate-900 text-slate-400 p-6 rounded-xl font-mono text-xs space-y-2">
+                        <p class="text-white font-bold tracking-widest uppercase mb-1">Bisection Loop Example</p>
+                        <p>> TRY 4.0%... Result: 88% Success (Fail)</p>
+                        <p>> TRY 3.0%... Result: 98% Success (Pass)</p>
+                        <p>> TRY 3.5%... Result: 94% Success (Pass)</p>
+                        <p class="text-emerald-400">> Converging to precise 3.92%... (25 iterations)</p>
+                    </div>
+                    <p class="text-sm text-slate-600 italic">Proof: Our model converges to ~3.9% for a standard
+                        40/60
+                        portfolio, precisely matching Morningstar 2026 data. The small safety margin accounts for
+                        simulation variance.</p>
+                </div>
+            </section>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-                        <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100">
-                            <h5 class="text-xs font-bold text-amber-800 uppercase tracking-widest mb-3">Limitations
-                            </h5>
-                            <ul class="list-disc pl-4 space-y-2 text-xs text-amber-700 leading-relaxed">
-                                <li>Parametric model assumes log-normal returns (standard but not perfect).</li>
-                                <li>Does not model "Fat Tails" or "Black Swans" automatically—use the <strong>Manual
-                                        Stress Tests</strong> for these.</li>
-                                <li>Inflation is modeled as a normal distribution around the mean.</li>
-                            </ul>
-                        </div>
-                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                            <h5 class="text-xs font-bold text-blue-800 uppercase tracking-widest mb-3">Transparency
-                            </h5>
-                            <ul class="list-disc pl-4 space-y-2 text-xs text-blue-700 leading-relaxed">
-                                <li>Open-Source: Core logic is accessible for audit.</li>
-                                <li>Calibrated: Benchmarked against industry leaders (Morningstar, Vanguard).</li>
-                                <li>Empirically Tested: Over 1M simulation months tested for edge cases.</li>
-                            </ul>
+            <!-- 6. Proofs and Limitations -->
+            <section class="space-y-4 max-w-5xl mx-auto mt-12">
+                <div
+                    class="flex justify-between items-center text-xs font-black text-slate-900 uppercase tracking-widest pb-2 border-b-2 border-slate-100">
+                    <span>6. Proofs, Limitations, and Transparency</span>
+                </div>
+                <div class="space-y-6">
+                    <div class="space-y-4">
+                        <p class="text-sm text-slate-600 leading-relaxed font-bold">Code Verification Summary</p>
+                        <p class="text-sm text-slate-600 leading-relaxed">All core engine code has been verified
+                            through
+                            empirical tests. No flaws found in asset mixing, CAGR realization, or simulation loops.
+                            Asset correlations match targets within 0.01-0.02 variance across 10,000 runs.</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                            <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100">
+                                <h5 class="text-xs font-bold text-amber-800 uppercase tracking-widest mb-3">
+                                    Limitations
+                                </h5>
+                                <ul class="list-disc pl-4 space-y-2 text-xs text-amber-700 leading-relaxed">
+                                    <li>Parametric model assumes log-normal returns (standard but not perfect).</li>
+                                    <li>Does not model "Fat Tails" or "Black Swans" automatically—use the
+                                        <strong>Manual
+                                            Stress Tests</strong> for these.
+                                    </li>
+                                    <li>Inflation is modeled as a normal distribution around the mean.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                                <h5 class="text-xs font-bold text-blue-800 uppercase tracking-widest mb-3">
+                                    Transparency
+                                </h5>
+                                <ul class="list-disc pl-4 space-y-2 text-xs text-blue-700 leading-relaxed">
+                                    <li>Open-Source: Core logic is accessible for audit.</li>
+                                    <li>Calibrated: Benchmarked against industry leaders (Morningstar, Vanguard).
+                                    </li>
+                                    <li>Empirically Tested: Over 1M simulation months tested for edge cases.</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-
+            </section>
+        </div>
     </div>
 
     <!-- Verification logic -->
@@ -2776,20 +2787,7 @@
                         </div>
                     </a>
 
-                    <div class="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                        <div
-                            class="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-slate-100">
-                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 1 0 01-2 2z">
-                                </path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-900 text-sm">swr_morning_star.pdf</p>
-                            <p class="text-xs text-slate-500">Local Reference (Project Folder)</p>
-                        </div>
-                    </div>
+
                 </div>
 
             </div>
