@@ -7,7 +7,7 @@
  * @param {object} configs - Configuration object containing CAGR, Volatility, Correlation params.
  * @returns {object} - Object containing Float64Arrays for stocks, bonds, crypto, inflation.
  */
-window.generateMarketData = function (numSims, years, configs) {
+window.generateMarketData = async function (numSims, years, configs) {
     const months = years * 12;
     const stockLogReturns = new Float64Array(numSims * months);
     const bondLogReturns = new Float64Array(numSims * months);
@@ -54,6 +54,7 @@ window.generateMarketData = function (numSims, years, configs) {
     let maxGlobalBadStreak = 0;
 
     for (let s = 0; s < numSims; s++) {
+        if (s > 0 && s % 500 === 0 && typeof setTimeout !== 'undefined') await new Promise(r => setTimeout(r, 0));
         let prevCryptoReturn = 0;
 
         for (let m = 0; m < months; m++) {

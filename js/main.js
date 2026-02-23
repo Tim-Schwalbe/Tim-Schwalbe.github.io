@@ -114,13 +114,19 @@ async function runSimulation() {
         configs.CRASH_FLOOR_BONDS = parseInput('inp-crash-floor-bonds', -1.0, false) / 100;
     }
 
+    const showLoadOverlay = configs.numSims > 1000;
+    if (showLoadOverlay) {
+        if (window.Animations) window.Animations.showLoadingOverlay(true);
+        await new Promise(r => setTimeout(r, 50));
+    }
+
     // 2. Generate Market Data
     // Note: generateMarketData is now global
-    const marketData = window.generateMarketData(configs.numSims, configs.years, configs);
+    const marketData = await window.generateMarketData(configs.numSims, configs.years, configs);
 
     // 3. Run Calibration (SWR)
     const targetOdds = configs.TARGET_SUCCESS_PERCENT / 100;
-    const swr = window.findSWR(targetOdds, marketData, configs);
+    const swr = await window.findSWR(targetOdds, marketData, configs);
     const safeWithdrawalAmount = (configs.INVESTED_AMOUNT + configs.CASH_BUFFER) * swr;
 
     // 4. Run Main Simulation (at requested spend)
@@ -178,8 +184,13 @@ async function runSimulation() {
     if (targetPtrEl) targetPtrEl.innerText = configs.TARGET_SUCCESS_PERCENT.toFixed(0);
 
     // Calculate other risk profiles (99% and 95%)
-    const swr99 = window.findSWR(0.99, marketData, configs);
-    const swrAggressive = window.findSWR(0.95, marketData, configs);
+    // These are heavy calculations, yield between them so the fade-out/scroll animation doesn't stutter
+    const swr99 = await window.findSWR(0.99, marketData, configs);
+    if (showLoadOverlay) await new Promise(r => setTimeout(r, 0));
+
+    const swrAggressive = await window.findSWR(0.95, marketData, configs);
+    // Removed the subsequent timeout, as we now wait until all DOM is updated before fading
+
     const monthly99 = (totalCapital * swr99) / 12;
     const monthlyAggressive = (totalCapital * swrAggressive) / 12;
 
@@ -323,26 +334,54 @@ async function runSimulation() {
     if (resultsPlaceholder) resultsPlaceholder.classList.add('hidden');
     if (introContainer) introContainer.classList.add('hidden');
 
-    // Render histogram after DOM is visible and layout is complete
-    // Use requestAnimationFrame to ensure layout/paint cycle completes
+    // Render histogram after DOM is visible and layout is complete.
+    // We defer this heavy DOM execution to 800ms so it happens AFTER the smooth scroll 
+    // finishes, ensuring the scroll animation is buttery smooth and not blocked by JS. 
     requestAnimationFrame(() => {
         setTimeout(() => {
             Renderer.renderHistogram(res.wealths, 'res-histogram');
-        }, 50);
+        }, showLoadOverlay ? 800 : 50);
     });
 
     // 6. Navigation Logic (Universal Scroll to Results)
-    // Using a slightly longer delay to ensure DOM and animations have settled
-    setTimeout(() => {
-        const setupSection = document.getElementById('setup-section');
-        if (setupSection) {
-            setupSection.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-                inline: 'nearest'
+    const executeScroll = () => {
+        const setupSection = document.getElementById('view-calculator');
+        const resultsContainer = document.getElementById('results-container');
+        if (setupSection && resultsContainer) {
+            // On mobile, the configuration pane is very tall. Scrolling to the top of the calculator 
+            // hides the results. So we scroll straight to the results container on small screens.
+            const isMobile = window.innerWidth < 1024;
+            const targetElement = isMobile ? resultsContainer : setupSection;
+
+            // Calculate the exact pixel position of the content wrapper
+            // This aligns the browser window perfectly with the border just below the navigation/target
+            let targetPosition = targetElement.offsetTop;
+
+            // Add a small 24px padding so it breathes a bit on mobile
+            if (isMobile) targetPosition -= 24;
+
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
             });
+
+            // Also ensure any internal scrolling on the results panel is reset
+            const mainPanel = document.getElementById("main-results-panel");
+            if (mainPanel) mainPanel.scrollTop = 0;
+            // Also reset the sidebar scroll just in case
+            const aside = document.querySelector("#view-calculator aside");
+            if (aside) aside.scrollTop = 0;
         }
-    }, 150);
+    };
+
+    if (showLoadOverlay) {
+        if (window.Animations) window.Animations.hideLoadingOverlay();
+        // Give the browser 50ms to start the fade-out then execute scroll immediately along with it
+        setTimeout(executeScroll, 50);
+    } else {
+        // Run instantly if no overlay
+        setTimeout(executeScroll, 10);
+    }
 }
 
 // Global alias for inline onclick handlers

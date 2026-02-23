@@ -8,7 +8,7 @@
  * @param {object} configs - Simulation configurations
  * @returns {number} - Optimized SWR as a decimal
  */
-window.findSWR = function (targetOdds, marketData, configs) {
+window.findSWR = async function (targetOdds, marketData, configs) {
     let low = 0.001;
     let high = 0.30;
     let best = 0.001;
@@ -25,6 +25,7 @@ window.findSWR = function (targetOdds, marketData, configs) {
     const requiredSuccess = Math.min(0.999, targetOdds + safetyMargin);
 
     for (let i = 0; i < 25; i++) {
+        if (i > 0 && i % 5 === 0 && typeof setTimeout !== 'undefined') await new Promise(r => setTimeout(r, 0));
         let mid = (low + high) / 2;
         let res = window.simulatePortfolio(mid, marketData, { ...configs, SILENT: true });
         const actualSuccess = res.successRate;

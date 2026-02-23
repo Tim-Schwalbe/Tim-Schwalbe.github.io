@@ -16,7 +16,9 @@ const sandbox = {
     Array: Array,
     Object: Object,
     isNaN: isNaN,
-    isFinite: isFinite
+    isFinite: isFinite,
+    setTimeout: setTimeout,
+    Promise: Promise
 };
 sandbox.window = sandbox; // Self-reference for window.Config, window.Stats
 vm.createContext(sandbox);
@@ -46,9 +48,9 @@ console.log("✅ Engine Loaded.");
 let totalPass = 0;
 let totalFail = 0;
 
-const runTest = (name, fn) => {
+const runTest = async (name, fn) => {
     try {
-        fn();
+        await fn();
         // console.log(`  ✅ ${name}`);
         process.stdout.write('.');
         totalPass++;
@@ -72,9 +74,11 @@ const assertRange = (actual, min, max, msg) => {
 };
 
 // --- UNIT TESTS: calculateMonthlyStep ---
+
+(async function() {
 console.log("\n🧪 Running Unit Tests...");
 
-runTest('Step: Simple Growth (0% infl, 0% w/d)', () => {
+await runTest('Step: Simple Growth (0% infl, 0% w/d)', async () => {
     const inputs = { stockReturn: Math.log(1.1), bondReturn: 0, cryptoReturn: 0, inflation: 0 };
     const state = { portfolio: 1000, cash: 0, accumulatedInflation: 1.0, currentBaseNeed: 0, currentMonthlyWithdrawal: 0, monthIdx: 0 };
     const config = { wS: 1.0, wB: 0, wC: 0, INVESTED_AMOUNT: 1000 };
@@ -82,7 +86,7 @@ runTest('Step: Simple Growth (0% infl, 0% w/d)', () => {
     assertClose(res.portfolio, 1100, 0.01);
 });
 
-runTest('Step: Inflation Accumulation', () => {
+await runTest('Step: Inflation Accumulation', async () => {
     const inputs = { stockReturn: 0, bondReturn: 0, cryptoReturn: 0, inflation: 0.02 };
     const state = { portfolio: 1000, cash: 0, accumulatedInflation: 1.0, currentBaseNeed: 0, currentMonthlyWithdrawal: 0, monthIdx: 0 };
     const config = { wS: 1, wB: 0, wC: 0 };
@@ -97,7 +101,7 @@ runTest('Step: Inflation Accumulation', () => {
     assertClose(res.accumulatedInflation, 1.02, 0.0001);
 });
 
-runTest('Step: Annual Adjustment (Index 11 -> Month 12)', () => {
+await runTest('Step: Annual Adjustment (Index 11 -> Month 12)', async () => {
     // End of year, should adjust inflation
     const state = { portfolio: 1000, cash: 0, accumulatedInflation: 1.05, currentBaseNeed: 1000, currentMonthlyWithdrawal: 100, monthIdx: 11 };
     const inputs = { stockReturn: 0, bondReturn: 0, cryptoReturn: 0, inflation: 0.0 };
@@ -115,7 +119,7 @@ runTest('Step: Annual Adjustment (Index 11 -> Month 12)', () => {
 
 // --- MARKET DATA TESTS ---
 console.log("\n📊 Running Market & Statistical Tests...");
-runTest('Market: Crash Frequency (Fat Tails)', () => {
+await runTest('Market: Crash Frequency (Fat Tails)', async () => {
     // Config: 5.2% crash prob, 100 years, 100 sims = 120,000 months
     const numSims = 100;
     const years = 100;
@@ -132,7 +136,7 @@ runTest('Market: Crash Frequency (Fat Tails)', () => {
     // log(1-0.35) = -0.43.
 
     // Re-verify `market.js` logic: It writes to `cryptoLogReturns`.
-    const data = generateMarketData(numSims, years, configs);
+    const data = await generateMarketData(numSims, years, configs);
     const returns = data.crypto;
     let crashCount = 0;
     const crashThreshold = Math.log(1 - 0.34); // -34% drop (slightly permissive)
@@ -146,7 +150,7 @@ runTest('Market: Crash Frequency (Fat Tails)', () => {
     assertRange(rate, 0.01, 0.08, `Crash Rate 5.2% (Actual: ${(rate * 100).toFixed(2)}%)`);
 });
 
-runTest('Market: Moonshot Frequency', () => {
+await runTest('Market: Moonshot Frequency', async () => {
     // Config: 14% moonshot prob.
     const numSims = 100;
     const years = 100;
@@ -157,7 +161,7 @@ runTest('Market: Moonshot Frequency', () => {
         USE_FAT_TAILS: false, USE_MOONSHOTS: true, USE_EXPLICIT_JUMPS: true
     };
 
-    const data = generateMarketData(numSims, years, configs);
+    const data = await generateMarketData(numSims, years, configs);
     const returns = data.crypto;
     let moonCount = 0;
     const moonThreshold = Math.log(1 + 0.29); // +29% rally (slightly permissive)
@@ -175,7 +179,7 @@ runTest('Market: Moonshot Frequency', () => {
 // --- SIMULATION TESTS ---
 console.log("\n💰 Running Simulation Tests...");
 
-runTest('Sim: 4% Rule Baseline (90-100% Success)', () => {
+await runTest('Sim: 4% Rule Baseline (90-100% Success)', async () => {
     const config = {
         years: 30,
         INVESTED_AMOUNT: 1000000,
@@ -186,15 +190,15 @@ runTest('Sim: 4% Rule Baseline (90-100% Success)', () => {
         INFL_MEAN: 0.025, INFL_VOL: 0.01,
         numSims: 100
     };
-    const market = generateMarketData(100, 30, config);
-    const res = simulatePortfolio(0.04, market, config);
+    const market = await generateMarketData(100, 30, config);
+    const res = await simulatePortfolio(0.04, market, config);
 
     // 60/40 should be pretty safe with these numbers.
     assertRange(res.successRate, 0.50, 1.0, "Success rate reasonable");
     assertRange(res.stats.medianTotalSpend, 0, 100000000, "Spend positive");
 });
 
-runTest('Sim: 100% Failure (Withdraw 100%/yr)', () => {
+await runTest('Sim: 100% Failure (Withdraw 100%/yr)', async () => {
     const config = {
         years: 30,
         INVESTED_AMOUNT: 1000,
@@ -202,8 +206,8 @@ runTest('Sim: 100% Failure (Withdraw 100%/yr)', () => {
         ALLOC_STOCKS: 1,
         numSims: 50
     };
-    const market = generateMarketData(50, 30, config);
-    const res = simulatePortfolio(1.0, market, config); // Withdrawal rate > 100% implies huge.
+    const market = await generateMarketData(50, 30, config);
+    const res = await simulatePortfolio(1.0, market, config); // Withdrawal rate > 100% implies huge.
     // Actually simulatePortfolio(withdrawalRate). 1.0 = 100% of portfolio initially? 
     // If wRate is 1.0, initial w/d is 1000. 
     // Portfolio 1000. Month 1 w/d = 1000/12 = 83.
@@ -244,12 +248,12 @@ const createFixedMarket = (years, numSims, returns) => {
 // --- PROPERTY-BASED MATH FUZZING (1000 RUNS EACH) ---
 console.log("\n🎲 Running Property-Based Math Fuzzing (1000 Runs Each)...");
 
-const runFuzzTest = (name, iterations, generator, verifier) => {
+const runFuzzTest = async (name, iterations, generator, verifier) => {
     let passed = 0;
     for (let i = 0; i < iterations; i++) {
         try {
             const inputs = generator();
-            verifier(inputs);
+            await verifier(inputs);
             passed++;
         } catch (e) {
             console.error(`\n❌ Fuzz Fail [${name}] Iteration ${i}:`);
@@ -268,13 +272,13 @@ const runFuzzTest = (name, iterations, generator, verifier) => {
 
 // 1. Fuzz: Simple Compounding
 // Verify: Final = Start * (1+Rate)^Years
-runFuzzTest('Compounding Math', 1000,
+await runFuzzTest('Compounding Math', 1000,
     () => ({
         rate: (Math.random() * 0.20) - 0.05, // -5% to +15%
         years: Math.floor(Math.random() * 50) + 1, // 1 to 50 years
         principal: 1000 + Math.random() * 10000
     }),
-    ({ rate, years, principal }) => {
+    async ({ rate, years, principal }) => {
         const config = {
             years: years, numSims: 1,
             INVESTED_AMOUNT: principal,
@@ -282,7 +286,7 @@ runFuzzTest('Compounding Math', 1000,
             CASH_BUFFER: 0, TARGET_ANNUAL_EXP: 0
         };
         const market = createFixedMarket(years, 1, { stocks: rate });
-        const res = simulatePortfolio(-1, market, config);
+        const res = await simulatePortfolio(-1, market, config);
 
         const expected = principal * Math.pow(1 + rate, years);
         // Tolerance scales with magnitude/years strictly? 
@@ -296,7 +300,7 @@ runFuzzTest('Compounding Math', 1000,
 // Verify: Portfolio Yield = wS*rS + wB*rB + wC*rC (Continuously Rebalanced)
 // Actually we determined engine uses linear combination of monthly returns.
 // rPort_mo = wS*rS_mo + wB*rB_mo + ...
-runFuzzTest('Asset Allocation Math', 1000,
+await runFuzzTest('Asset Allocation Math', 1000,
     () => {
         const r1 = Math.random();
         const r2 = Math.random();
@@ -311,7 +315,7 @@ runFuzzTest('Asset Allocation Math', 1000,
             rC: Math.random() * 0.50
         };
     },
-    ({ wS, wB, wC, rS, rB, rC }) => {
+    async ({ wS, wB, wC, rS, rB, rC }) => {
         const config = {
             years: 5, numSims: 1,
             INVESTED_AMOUNT: 1000,
@@ -319,7 +323,7 @@ runFuzzTest('Asset Allocation Math', 1000,
             CASH_BUFFER: 0, TARGET_ANNUAL_EXP: 0
         };
         const market = createFixedMarket(5, 1, { stocks: rS, bonds: rB, crypto: rC });
-        const res = simulatePortfolio(-1, market, config);
+        const res = await simulatePortfolio(-1, market, config);
 
         // Expected Logic:
         // Monthly returns
@@ -344,12 +348,12 @@ runFuzzTest('Asset Allocation Math', 1000,
 
 // 3. Fuzz: Inflation & Real Wealth
 // Verify: Real = Nominal / (1+Infl)^Years
-runFuzzTest('Inflation Math', 1000,
+await runFuzzTest('Inflation Math', 1000,
     () => ({
         infl: Math.random() * 0.10, // 0-10% inflation
         years: Math.floor(Math.random() * 50) + 1
     }),
-    ({ infl, years }) => {
+    async ({ infl, years }) => {
         const config = {
             years: years, numSims: 1,
             INVESTED_AMOUNT: 1000,
@@ -357,7 +361,7 @@ runFuzzTest('Inflation Math', 1000,
             CASH_BUFFER: 0, TARGET_ANNUAL_EXP: 0
         };
         const market = createFixedMarket(years, 1, { bonds: 0, inflation: infl });
-        const res = simulatePortfolio(-1, market, config);
+        const res = await simulatePortfolio(-1, market, config);
 
         // Nominal should be 1000 exactly (0% growth)
         assertClose(res.wealths[0], 1000, 0.0001, "Nominal preserved");
@@ -370,13 +374,13 @@ runFuzzTest('Inflation Math', 1000,
 
 // 4. Fuzz: Ceiling Guardrail
 // Verify: Spending never exceeds Ceiling * Base even in Bull Market
-runFuzzTest('Guardrail Cap', 1000,
+await runFuzzTest('Guardrail Cap', 1000,
     () => ({
         bullRun: 0.10 + Math.random() * 0.90, // +10% to +100% per year
         ceilingPct: 105 + Math.random() * 45, // 105% to 150% cap
         years: 10
     }),
-    ({ bullRun, ceilingPct, years }) => {
+    async ({ bullRun, ceilingPct, years }) => {
         const config = {
             years: years, numSims: 1,
             INVESTED_AMOUNT: 1000000,
@@ -386,7 +390,7 @@ runFuzzTest('Guardrail Cap', 1000,
             FLOOR_PCT: 0
         };
         const market = createFixedMarket(years, 1, { stocks: bullRun, inflation: 0.0 });
-        const res = simulatePortfolio(0.04, market, config);
+        const res = await simulatePortfolio(0.04, market, config);
 
         // Max Allowed Spend = Base * Ceiling%
         // Base = 40k. 
@@ -450,14 +454,14 @@ for (let i = 0; i < SCENARIOS; i++) {
             SILENT: true // Suppress logs
         };
 
-        const market = generateMarketData(config.numSims, config.years, config);
+        const market = await generateMarketData(config.numSims, config.years, config);
 
         // 1. Data Integrity sanity check
         if (market.stocks.some(isNaN) || market.crypto.some(isNaN) || market.inflation.some(isNaN)) {
             throw new Error("Market data contains NaN");
         }
 
-        const res = simulatePortfolio(rand() * 0.08, market, config);
+        const res = await simulatePortfolio(rand() * 0.08, market, config);
 
         // 2. Result Sanity Check
         if (isNaN(res.successRate)) throw new Error("Success Rate is NaN");
@@ -488,3 +492,5 @@ if (totalFail > 0) {
     console.log("✅ SUITE PASSED");
     process.exit(0);
 }
+
+})();
