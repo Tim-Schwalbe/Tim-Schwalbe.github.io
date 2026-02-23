@@ -17,11 +17,14 @@ window.generateMarketData = function (numSims, years, configs) {
     const seed = Config.getConfig(configs, 'RANDOM_SEED', null);
     Stats.seed(seed);
 
-    // 0. Pre-fetch Configs (Hoist out of loop for performance)
+    // 0. Pre-fetch Configs
     const INFL_MEAN = Config.getConfig(configs, 'INFL_MEAN', 0.025);
     const INFL_VOL = Config.getConfig(configs, 'INFL_VOL', 0.015);
-    const CORR_START = Config.getConfig(configs, 'CORR_START', 0.20);
-    const CORR_END = Config.getConfig(configs, 'CORR_END', 0.20);
+
+    // V6 Fix: Dynamic Correlation Defaults (0.05 -> 0.40)
+    const CORR_START = Config.getConfig(configs, 'CORR_START', 0.05);
+    const CORR_END = Config.getConfig(configs, 'CORR_END', 0.40);
+
     const ENFORCE_MAX_BAD_STREAK = Config.getConfig(configs, 'ENFORCE_MAX_BAD_STREAK', false);
 
     const S_CAGR_START = Config.getConfig(configs, 'S_CAGR_START', 0.080);
@@ -32,179 +35,145 @@ window.generateMarketData = function (numSims, years, configs) {
     const B_CAGR_START = Config.getConfig(configs, 'B_CAGR_START', 0.045);
     const B_VOL_START = Config.getConfig(configs, 'B_VOL_START', 0.06);
 
-    const C_CAGR_START = Config.getConfig(configs, 'C_CAGR_START', 0.15);
-    const C_CAGR_END = Config.getConfig(configs, 'C_CAGR_END', 0.15);
-    const C_VOL_START = Config.getConfig(configs, 'C_VOL_START', 0.60);
-    const C_VOL_END = Config.getConfig(configs, 'C_VOL_END', 0.60);
+    // V4: Explicit Empirical Defaults (2013-2024)
+    const C_CAGR_START = Config.getConfig(configs, 'C_CAGR_START', 1.00);
+    const C_CAGR_END = Config.getConfig(configs, 'C_CAGR_END', 0.60);
+    const C_VOL_START = Config.getConfig(configs, 'C_VOL_START', 0.75);
+    const C_VOL_END = Config.getConfig(configs, 'C_VOL_END', 0.75);
+
+    const HALVING_BOOST = Config.getConfig(configs, 'HALVING_BOOST', 0.20);
+    const REVERSION_STRENGTH = Config.getConfig(configs, 'REVERSION_STRENGTH', 0.05);
 
     const FORCE_CRASH = Config.getConfig(configs, 'FORCE_CRASH', false);
     const CRASH_DURATION = Config.getConfig(configs, 'CRASH_DURATION', 3);
 
-    // Optimize Correlation if constant
-    const isConstantCorr = (CORR_START === CORR_END);
-    let cachedSqrtRho, cachedSqrtOneMinusRho;
-    if (isConstantCorr) {
-        const safeRho = Math.max(0, Math.min(1, CORR_START));
-        cachedSqrtRho = Math.sqrt(safeRho);
-        cachedSqrtOneMinusRho = Math.sqrt(1 - safeRho);
-    }
+    // Optimize Correlation if constant (Only if no panic logic used? No, panic logic overrides)
+    // We will calculate dynamically now for V6 accuracy.
 
     let totalConstraintHits = 0;
     let maxGlobalBadStreak = 0;
 
     for (let s = 0; s < numSims; s++) {
-        let monthsSinceCrash = 100; // Initialize recovery counter (safe default)
+        let prevCryptoReturn = 0;
 
         for (let m = 0; m < months; m++) {
             const idx = s * months + m;
             const t = (months > 1) ? m / (months - 1) : 0;
 
-
             const zI = Stats.randomNormal(0, 1);
-            const inflM = (INFL_MEAN / 12) + (INFL_VOL / Math.sqrt(12)) * zI;
-
-            // Note: Conventional arithmetic inflation model used here.
+            const inflLogRet = (Math.log(1 + INFL_MEAN) / 12) + (INFL_VOL / Math.sqrt(12)) * zI;
+            const inflM = Math.exp(inflLogRet) - 1;
             inflationPath[idx] = inflM;
 
-            // 2. Correlation & Asset Returns (Common Shock Model)
-            let sqrtRho, sqrtOneMinusRho;
+            // --- V6: Realistic 4-Year Cycle Math (Deterministic Macros) ---
+            const useCycles = Config.getConfig(configs, 'USE_FAT_TAILS', true);
+            const limitCycles10y = Config.getConfig(configs, 'LIMIT_FAT_TAILS_10Y', false);
+            const applyCycles = useCycles && (!limitCycles10y || m < 120);
 
-            if (isConstantCorr) {
-                sqrtRho = cachedSqrtRho;
-                sqrtOneMinusRho = cachedSqrtOneMinusRho;
-            } else {
-                const rho = CORR_START * (1 - t) + CORR_END * t;
-                const safeRho = Math.max(0, Math.min(1, rho));
-                sqrtRho = Math.sqrt(safeRho);
-                sqrtOneMinusRho = Math.sqrt(1 - safeRho);
+            const cCagrTarget = C_CAGR_START * (1 - t) + C_CAGR_END * t;
+            const cVolTarget = C_VOL_START * (1 - t) + C_VOL_END * t;
+
+            let cycleDriftAdder = 0;
+            let targetVolMonthly = cVolTarget / Math.sqrt(12);
+            let isMacroBear = false;
+
+            if (applyCycles) {
+                const cycleMonth = m % 48;
+
+                // Target performance for this exact 4-year window based on the user's CAGR settings
+                const cycleMultiplier = Math.pow(1 + cCagrTarget, 4);
+
+                // Historically, peak multipliers are massive but scale with target CAGR
+                const peakMult = Math.max(cycleMultiplier * 2.0, 4.0);
+
+                // Historical bear markets drop approx 75% from Peak
+                const troughMult = peakMult * 0.25;
+
+                // Phase 1: Bull Market (Months 0 - 17, 18 months)
+                if (cycleMonth < 18) {
+                    const requiredMonthlyDrift = Math.log(peakMult) / 18.0;
+                    cycleDriftAdder = requiredMonthlyDrift - (Math.log(1 + cCagrTarget) / 12);
+                }
+                // Phase 2: Bear Market (Months 18 - 29, 12 months)
+                else if (cycleMonth < 30) {
+                    const requiredMonthlyDrift = Math.log(0.25) / 12.0;
+                    cycleDriftAdder = requiredMonthlyDrift - (Math.log(1 + cCagrTarget) / 12);
+                    isMacroBear = true;
+                    // Bear markets are highly volatile
+                    targetVolMonthly = Math.max(targetVolMonthly, 0.90 / Math.sqrt(12));
+                }
+                // Phase 3: Recovery/Sideways (Months 30 - 47, 18 months)
+                else {
+                    const requiredMonthlyDrift = Math.log(cycleMultiplier / troughMult) / 18.0;
+                    cycleDriftAdder = requiredMonthlyDrift - (Math.log(1 + cCagrTarget) / 12);
+                }
             }
 
+            // Correlation (Spike in macro panic)
+            let rho = CORR_START * (1 - t) + CORR_END * t;
+            if (isMacroBear) {
+                rho = Math.max(rho, 0.80);
+            }
+            const safeRho = Math.max(0, Math.min(1, rho));
+            const sqrtRho = Math.sqrt(safeRho);
+            const sqrtOneMinusRho = Math.sqrt(1 - safeRho);
+
+            // Common Shock
             const zCommon = Stats.randomNormal(0, 1);
             const zS_id = Stats.randomNormal(0, 1);
             const zB_id = Stats.randomNormal(0, 1);
-            const zC_id = Stats.randomNormal(0, 1);
 
-            // Correlated standard normals
             const zS = sqrtRho * zCommon + sqrtOneMinusRho * zS_id;
             const zB = sqrtRho * zCommon + sqrtOneMinusRho * zB_id;
-            const zC = sqrtRho * zCommon + sqrtOneMinusRho * zC_id;
 
-            // Stocks (Log Returns)
+            // Stocks
             const sCagr = S_CAGR_START * (1 - t) + S_CAGR_END * t;
             const sVol = S_VOL_START * (1 - t) + S_VOL_END * t;
-
-            // DRIFT NOTE:
-            // We use `drift = log(1 + CAGR)/12` instead of `drift = log(1+CAGR)/12 - 0.5*vol^2/12`.
-            // This simplification aligns the Median path with the input CAGR, which is intuitive for users.
-            // A rigorous Geometric Brownian Motion would subtract variance drag, resulting in a lower Median but correct Mean.
-            // We stick to the Median-matching convention here.
-            stockLogReturns[idx] = (Math.log(1 + sCagr) / 12) + (sVol / Math.sqrt(12)) * zS;
+            const sDrag = 0; // Match Median (User setting historical norm)
+            stockLogReturns[idx] = (Math.log(1 + sCagr) / 12 - sDrag / 12) + (sVol / Math.sqrt(12)) * zS;
 
             // Bonds
             const bCagr = B_CAGR_START;
             const bVol = B_VOL_START;
-            bondLogReturns[idx] = (Math.log(1 + bCagr) / 12) + (bVol / Math.sqrt(12)) * zB;
+            const bDrag = 0; // Match Median
+            bondLogReturns[idx] = (Math.log(1 + bCagr) / 12 - bDrag / 12) + (bVol / Math.sqrt(12)) * zB;
 
-            // Crypto
-            const cCagr = C_CAGR_START * (1 - t) + C_CAGR_END * t;
-            const cVol = C_VOL_START * (1 - t) + C_VOL_END * t;
+            // Crypto parameters
+            const cDrag = 0.5 * (cVolTarget ** 2);
+            const cDriftBase = Math.log(1 + cCagrTarget) / 12 - cDrag / 12;
 
-            // Fat Tail Logic for Crypto (3-Regime Model)
-            const useFatTails = Config.getConfig(configs, 'USE_FAT_TAILS', true);
-            const useMoonshots = Config.getConfig(configs, 'USE_MOONSHOTS', true);
-            const limitFatTails10y = Config.getConfig(configs, 'LIMIT_FAT_TAILS_10Y', false);
-            const probCrash = Config.getConfig(configs, 'PROB_CRASH', 0.035);
-            const probMoonshotBase = Config.getConfig(configs, 'PROB_MOONSHOT', 0.060);
+            // Effective Drift
+            let effectiveDrift = cDriftBase + cycleDriftAdder;
 
-            let zC_final = zC; // Default to Standard Normal (Regime 1)
-
-            // Determine if Fat Tails should apply this month
-            let applyFatTails = useFatTails;
-            if (limitFatTails10y && idx >= 120) {
-                applyFatTails = false;
-            }
-
-            if (applyFatTails) {
-                // REGIME 2: CRASH (The "Idiosyncratic Shock")
-                // Independent roll for crash event
-                const isCrashMonth = Stats.random() < probCrash;
-
-                if (isCrashMonth) {
-                    // Force strictly negative shock (Crypto Winter)
-                    // OLD LOGIC: -|N(2.5, 1.5)| * 1.5
-                    // NEW LOGIC: Uniform random drop between MIN and MAX config
-                    const crashMin = Config.getConfig(configs, 'CRASH_MAG_MIN', 0.35);
-                    const crashMax = Config.getConfig(configs, 'CRASH_MAG_MAX', 0.40);
-                    const dropPct = crashMin + (crashMax - crashMin) * Stats.random();
-
-                    // Convert % drop to log return: log(1 - drop)
-                    // Formula: ret = drift + vol * z
-                    // z = (ret - drift) / vol
-                    const targetLogReturn = Math.log(1 - dropPct);
-                    const drift = (Math.log(1 + cCagr) / 12);
-                    const volTerm = (cVol / Math.sqrt(12));
-
-                    zC_final = (targetLogReturn - drift) / volTerm;
-
-                    // Reset recovery counter
-                    monthsSinceCrash = 0;
-                }
-                else if (useMoonshots) {
-                    // REGIME 3: MOONSHOT (The "Rubber Band" Recovery)
-                    // Probability increases if we are in "Recovery Window" (post-crash)
-                    let currentProbMoonshot = probMoonshotBase;
-
-                    // "Rubber Band" Effect: Increase odds of moonshot in first 12 months after a crash
-                    // Tuned to avoid excessive alpha (was 24m / 2x)
-                    if (monthsSinceCrash < 12) {
-                        currentProbMoonshot = probMoonshotBase * 1.5;
-                    }
-
-                    const isMoonshotMonth = Stats.random() < currentProbMoonshot;
-
-                    if (isMoonshotMonth) {
-                        // Positive Skew: 
-                        // OLD LOGIC: +|N(2.0, 1.0)| * 1.5
-                        // NEW LOGIC: Uniform random rally between MIN and MAX config
-                        const moonMin = Config.getConfig(configs, 'MOONSHOT_MAG_MIN', 0.30);
-                        const moonMax = Config.getConfig(configs, 'MOONSHOT_MAG_MAX', 0.60);
-                        const rallyPct = moonMin + (moonMax - moonMin) * Stats.random();
-
-                        // Convert % rally to log return: log(1 + rally)
-                        const targetLogReturn = Math.log(1 + rallyPct);
-                        const drift = (Math.log(1 + cCagr) / 12);
-                        const volTerm = (cVol / Math.sqrt(12));
-
-                        zC_final = (targetLogReturn - drift) / volTerm;
-                    } else {
-                        // DAMPEN normal component to avoid tail double-counting
-                        // We want "Skinny Peak" (Leptokurtic) distribution.
-                        // Since we have added significant variance via Crashes and Moonshots,
-                        // we reduce the "background noise" variance.
-                        zC_final = zC * 0.55;
-                    }
-
-                    if (!isCrashMonth) monthsSinceCrash++;
-                }
+            // Crypto Shock
+            let finalZ;
+            if (applyCycles && isMacroBear) {
+                // Fatter tails in bear markets
+                const zC_id_t = Stats.randomT(3);
+                finalZ = sqrtRho * zCommon + sqrtOneMinusRho * zC_id_t;
+                // Scale targetVolMonthly to account for T-distribution variance boost
+                const stdBoost = Math.sqrt(3 - 2 * safeRho);
+                if (stdBoost > 0) targetVolMonthly /= stdBoost;
             } else {
-                // If Fat Tails disabled, reset counter just in case
-                monthsSinceCrash = 100;
+                const zC_id = Stats.randomNormal(0, 1);
+                finalZ = sqrtRho * zCommon + sqrtOneMinusRho * zC_id;
             }
 
-            cryptoLogReturns[idx] = (Math.log(1 + cCagr) / 12) + (cVol / Math.sqrt(12)) * zC_final;
+            cryptoLogReturns[idx] = effectiveDrift + targetVolMonthly * finalZ;
 
-            // 3. Forced Crash Stress Test
-            if (FORCE_CRASH) {
-                // Apply crash logic for the first N years (CRASH_DURATION)
-                if (Math.floor(m / 12) < CRASH_DURATION) {
-                    const floorS = Config.getConfig(configs, 'CRASH_FLOOR_STOCKS', -0.05);
-                    const floorC = Config.getConfig(configs, 'CRASH_FLOOR_CRYPTO', -0.10);
-                    const floorB = Config.getConfig(configs, 'CRASH_FLOOR_BONDS', -0.01);
+            // Clamping
+            const MIN_LOG_RET = -2.30;
+            const MAX_LOG_RET = 3.05;
+            cryptoLogReturns[idx] = Math.max(MIN_LOG_RET, Math.min(MAX_LOG_RET, cryptoLogReturns[idx]));
 
-                    stockLogReturns[idx] = Math.min(stockLogReturns[idx], floorS);
-                    cryptoLogReturns[idx] = Math.min(cryptoLogReturns[idx], floorC);
-                    bondLogReturns[idx] = Math.min(bondLogReturns[idx], floorB);
-                }
+            // Forced Crash
+            if (FORCE_CRASH && Math.floor(m / 12) < CRASH_DURATION) {
+                const floorC = Config.getConfig(configs, 'CRASH_FLOOR_CRYPTO', -0.10);
+                const floorS = Config.getConfig(configs, 'CRASH_FLOOR_STOCKS', -0.20);
+                const floorB = Config.getConfig(configs, 'CRASH_FLOOR_BONDS', -0.05);
+                cryptoLogReturns[idx] = Math.min(cryptoLogReturns[idx], floorC);
+                stockLogReturns[idx] = Math.min(stockLogReturns[idx], floorS);
+                bondLogReturns[idx] = Math.min(bondLogReturns[idx], floorB);
             }
         }
 
@@ -213,6 +182,43 @@ window.generateMarketData = function (numSims, years, configs) {
             totalConstraintHits += constraints.hits;
             maxGlobalBadStreak = Math.max(maxGlobalBadStreak, constraints.maxStreak);
         }
+    }
+
+    // V5: Enhanced Empirical Stats Validation
+    if (!configs.SILENT && numSims > 0) {
+        const sampleCount = Math.min(numSims, 20);
+        let sumCagr = 0, sumVol = 0, sumCorrSB = 0;
+
+        for (let s = 0; s < sampleCount; s++) {
+            const logC = cryptoLogReturns.subarray(s * months, (s + 1) * months);
+            let meanC = 0;
+            for (let v of logC) meanC += v;
+            meanC /= months;
+
+            let varC = 0;
+            for (let v of logC) varC += (v - meanC) ** 2;
+            varC /= months;
+
+            sumCagr += Math.exp(meanC * 12) - 1;
+            sumVol += Math.sqrt(varC * 12);
+
+            // Sample S-C Correlation (Path 0 only to fit in loop or all?)
+            // Let's do all in sample
+            const logS = stockLogReturns.subarray(s * months, (s + 1) * months);
+            let meanS = 0; for (let v of logS) meanS += v; meanS /= months;
+
+            let cov = 0, varS = 0;
+            for (let i = 0; i < months; i++) {
+                cov += (logC[i] - meanC) * (logS[i] - meanS);
+                varS += (logS[i] - meanS) ** 2;
+            }
+            // Avoid div/0
+            if (varC > 0 && varS > 0) {
+                sumCorrSB += (cov / months) / (Math.sqrt(varC) * Math.sqrt(varS));
+            }
+        }
+
+        console.log(`[V5 Crypto Stats Sample N=${sampleCount}] Avg CAGR: ${(sumCagr / sampleCount * 100).toFixed(1)}% | Avg Ann Vol: ${(sumVol / sampleCount * 100).toFixed(1)}% | Avg S-C Corr: ${(sumCorrSB / sampleCount).toFixed(2)}`);
     }
 
     return {

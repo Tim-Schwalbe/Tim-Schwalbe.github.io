@@ -11,11 +11,9 @@ const ENGINE_FILES = [
 ];
 
 const TEST_FILES = [
-    'js/tests/simulator_tests.js',
     'test_market_refinement.js',
     'test_crash_logic.js',
-    'tests/unit_test_calc_step.js',
-    'tests/simulation_tests.js'
+    'tests/run_suite.js'
 ];
 
 // --- Mock Browser Environment ---

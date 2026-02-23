@@ -185,10 +185,6 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         pathStats.lowestCapitals.push(lowestTotalWealth);
     }
 
-    if (!configs.SILENT) {
-        logSimulationSummary(configs, initialAnnualWithdrawal, successCount / numSims, wS, wB, wC);
-    }
-
     // Aggregate stats
     const median = arr => {
         if (arr.length === 0) return 0;
@@ -196,40 +192,57 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         return s[Math.floor(s.length / 2)];
     };
 
+    // Helper for percentiles
+    const percentile = (arr, p) => {
+        if (arr.length === 0) return 0;
+        const s = [...arr].sort((a, b) => a - b);
+        const index = Math.floor(p * s.length);
+        return s[Math.min(index, s.length - 1)];
+    };
+
     const avgTotalSpend = pathStats.totalSpends.reduce((a, b) => a + b, 0) / (pathStats.totalSpends.length || 1);
+
+    const stats = {
+        medianMaxDrawdown: median(pathStats.maxDrawdowns),
+        worstDrawdown: Math.max(...pathStats.maxDrawdowns),
+        medianLowestCapital: median(pathStats.lowestCapitals),
+        absoluteLowestCapital: Math.min(...pathStats.lowestCapitals),
+        medianDrawdownDuration: median(pathStats.drawdownDurations),
+        worstDrawdownDuration: Math.max(...pathStats.drawdownDurations),
+
+        // Legacy / Real Wealth
+        medianRealFinalWealth: median(pathStats.realFinalWealths),
+        p10RealFinalWealth: percentile(pathStats.realFinalWealths, 0.10),
+        p90RealFinalWealth: percentile(pathStats.realFinalWealths, 0.90),
+
+        // Lifestyle Stats
+        medianTotalSpend: median(pathStats.totalSpends),
+        avgAnnualSpend: (avgTotalSpend / years),
+        medianMonthlySpend: (median(pathStats.totalSpends) / (years * 12)),
+        maxMonthlySpend: pathStats.maxMonthlyAcrossAll,
+        ceilingHitRate: (pathStats.ceilingHits * 12) / (pathStats.totalSurvivorMonths || 1),
+        floorHitRate: (pathStats.floorHits * 12) / (pathStats.totalSurvivorMonths || 1),
+
+        // New Metric: Cash Shield Efficiency
+        cashShieldSuccessRate: pathStats.downMarketMonths > 0 ? (pathStats.cashCoveredMonths / pathStats.downMarketMonths) : 1,
+        cashShieldMonths: pathStats.cashCoveredMonths / numSims,
+        pctCashUsed: (pathStats.totalSurvivorMonths > 0) ? (pathStats.cashCoveredMonths / pathStats.totalSurvivorMonths) : 0,
+
+        // Advanced Metrics
+        fragilityScore: calcFragilityScore(finalWealths, pathStats.earlyBadPaths, numSims),
+        longevityExtension: calcLongevityExtension(median(finalWealths), (avgTotalSpend / years), years),
+        stabilityIndex: calcStabilityIndex(pathStats.spendingVolatility, numSims),
+        estateStrength: calcEstateStrength(pathStats.realFinalWealths, INVESTED_AMOUNT)
+    };
+
+    if (!configs.SILENT) {
+        logSimulationSummary(configs, initialAnnualWithdrawal, successCount / numSims, wS, wB, wC, stats);
+    }
 
     return {
         successRate: successCount / numSims,
         wealths: finalWealths,
-        stats: {
-            medianMaxDrawdown: median(pathStats.maxDrawdowns),
-            worstDrawdown: Math.max(...pathStats.maxDrawdowns),
-            medianLowestCapital: median(pathStats.lowestCapitals),
-            absoluteLowestCapital: Math.min(...pathStats.lowestCapitals),
-            medianDrawdownDuration: median(pathStats.drawdownDurations),
-            worstDrawdownDuration: Math.max(...pathStats.drawdownDurations),
-
-            // Legacy / Real Wealth
-            medianRealFinalWealth: median(pathStats.realFinalWealths),
-
-            // Lifestyle Stats
-            medianTotalSpend: median(pathStats.totalSpends),
-            avgAnnualSpend: (avgTotalSpend / years),
-            medianMonthlySpend: (median(pathStats.totalSpends) / (years * 12)),
-            maxMonthlySpend: pathStats.maxMonthlyAcrossAll,
-            ceilingHitRate: (pathStats.ceilingHits * 12) / (pathStats.totalSurvivorMonths || 1),
-            floorHitRate: (pathStats.floorHits * 12) / (pathStats.totalSurvivorMonths || 1),
-
-            // New Metric: Cash Shield Efficiency
-            cashShieldSuccessRate: pathStats.downMarketMonths > 0 ? (pathStats.cashCoveredMonths / pathStats.downMarketMonths) : 1,
-            cashShieldMonths: pathStats.cashCoveredMonths / numSims, // Normalized to average per simulation
-
-            // Advanced Metrics
-            fragilityScore: calcFragilityScore(finalWealths, pathStats.earlyBadPaths, numSims),
-            longevityExtension: calcLongevityExtension(median(finalWealths), (avgTotalSpend / years), years),
-            stabilityIndex: calcStabilityIndex(pathStats.spendingVolatility, numSims),
-            estateStrength: calcEstateStrength(pathStats.realFinalWealths, INVESTED_AMOUNT)
-        }
+        stats: stats
     };
 }
 
@@ -389,7 +402,7 @@ window.calculateMonthlyStep = function (state, inputs, config) {
     };
 }
 
-function logSimulationSummary(configs, initialWithdrawal, successRate, wS, wB, wC) {
+function logSimulationSummary(configs, initialWithdrawal, successRate, wS, wB, wC, stats) {
     const totalCap = configs.INVESTED_AMOUNT + (configs.CASH_BUFFER || 0);
     const sRate = (successRate * 100).toFixed(1);
     const swr = ((initialWithdrawal / totalCap) * 100).toFixed(2);
@@ -398,10 +411,18 @@ function logSimulationSummary(configs, initialWithdrawal, successRate, wS, wB, w
     const cap = `${(configs.INVESTED_AMOUNT / 1000).toFixed(0)}k+${((configs.CASH_BUFFER || 0) / 1000).toFixed(0)}k`;
     const spend = `${(initialWithdrawal / 1000).toFixed(1)}k`;
     const allocs = `S:${(wS * 100).toFixed(0)}/B:${(wB * 100).toFixed(0)}/C:${(wC * 100).toFixed(0)}`;
-    const rets = `Ret:S${(Config.getConfig(configs, 'S_CAGR_START', 0.103) * 100).toFixed(1)}/B${(Config.getConfig(configs, 'B_CAGR_START', 0.052) * 100).toFixed(1)}/C${(Config.getConfig(configs, 'C_CAGR_START', 0.15) * 100).toFixed(1)}`;
-    const vols = `Vol:S${(Config.getConfig(configs, 'S_VOL_START', 0.20) * 100).toFixed(1)}/B${(Config.getConfig(configs, 'B_VOL_START', 0.06) * 100).toFixed(1)}/C${(Config.getConfig(configs, 'C_VOL_START', 0.60) * 100).toFixed(1)}`;
-    const inf = `Inf:${(Config.getConfig(configs, 'INFL_MEAN', 0.031) * 100).toFixed(1)}(v${(Config.getConfig(configs, 'INFL_VOL', 0.015) * 100).toFixed(1)})`;
+    const rets = `Ret:S${(Config.getConfig(configs, 'S_CAGR_START', 0.08) * 100).toFixed(1)}/B${(Config.getConfig(configs, 'B_CAGR_START', 0.045) * 100).toFixed(1)}/C${(Config.getConfig(configs, 'C_CAGR_START', 1.00) * 100).toFixed(1)}`;
+    const vols = `Vol:S${(Config.getConfig(configs, 'S_VOL_START', 0.17) * 100).toFixed(1)}/B${(Config.getConfig(configs, 'B_VOL_START', 0.06) * 100).toFixed(1)}/C${(Config.getConfig(configs, 'C_VOL_START', 0.75) * 100).toFixed(1)}`;
+    const inf = `Inf:${(Config.getConfig(configs, 'INFL_MEAN', 0.025) * 100).toFixed(1)}(v${(Config.getConfig(configs, 'INFL_VOL', 0.015) * 100).toFixed(1)})`;
     const tgt = configs.TARGET_SUCCESS_PERCENT ? ` | Tgt:${configs.TARGET_SUCCESS_PERCENT}%` : "";
 
-    console.log(`[SIM_FULL] Yrs:${yrs} | Cap:${cap} | Spend:${spend} | ${allocs} | ${rets} | ${vols} | ${inf}${tgt} => Succ:${sRate}% | SWR:${swr}%`);
+    let extra = "";
+    if (stats) {
+        const medW = (stats.medianRealFinalWealth / 1000).toFixed(0);
+        const p10W = (stats.p10RealFinalWealth / 1000).toFixed(0);
+        const p90W = (stats.p90RealFinalWealth / 1000).toFixed(0);
+        extra = ` | Wealth:${medW}k(P10:${p10W}k-P90:${p90W}k) | CashUse:${(stats.pctCashUsed * 100).toFixed(1)}%`;
+    }
+
+    console.log(`[SIM_FULL] Yrs:${yrs} | Cap:${cap} | Spend:${spend} | ${allocs} | ${rets} | ${vols} | ${inf}${tgt} => Succ:${sRate}% | SWR:${swr}%${extra}`);
 }

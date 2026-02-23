@@ -656,22 +656,19 @@
                         </svg>
                     </button>
 
-                    <div id="pnl-advanced" class="advanced-panel space-y-4 pt-4">
-
-                        <!-- Methodology Note -->
-
+                    <div id="pnl-advanced" class="advanced-panel space-y-3 pt-5">
 
                         <!-- Crypto Volatility Box -->
-                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                        <div class="bg-indigo-50/20 rounded-lg p-3 border border-indigo-100">
 
 
-                            <!-- Fat Tails Toggle -->
+                            <!-- 4-Year Cycle Toggle -->
                             <div class="flex items-center justify-between mb-3">
                                 <div>
                                     <div class="flex items-center gap-1">
                                         <label for="chk-fat-tails"
-                                            class="text-xs font-bold text-slate-700 cursor-pointer">Realistic Crypto
-                                            Volatility</label>
+                                            class="text-xs font-bold text-slate-700 cursor-pointer">4-Year Cycle
+                                            Model</label>
                                         <!-- Tooltips -->
                                         <div class="relative group">
                                             <svg class="w-3 h-3 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
@@ -682,86 +679,39 @@
                                             </svg>
                                             <div
                                                 class="absolute left-0 top-5 w-72 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-4 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
-                                                <span class="text-[#F7931A] font-bold uppercase">3-Regime
-                                                    Model (Forecast)</span><br>
-                                                Future Maturity (2026-2036):
+                                                <span class="text-[#F7931A] font-bold uppercase">Historical 4-Year
+                                                    Cycles</span><br>
+                                                Simulates the Sequence of Return Risk of the last 2 cycles (2017-2024):
                                                 <ul class="list-disc list-inside mt-2 ml-1 space-y-1.5 text-slate-300">
-                                                    <li><span class="text-slate-100">Declining Volatility</span>:
-                                                        Assumes BTC matures like Gold/Tech, with reduced extreme
-                                                        variance.
-                                                    </li>
-                                                    <li><span class="text-red-400">Crashes (>30% Drop)</span>: 2.0% prob
-                                                        (~1 every 4.2 years). Mags: -30% to -50%.
-                                                    </li>
-                                                    <li><span class="text-emerald-400">Moonshots (>25% Rally)</span>:
-                                                        7.0% prob (~1 every 1.2 years). Mags: +25% to +50%.</li>
-                                                    <li><span class="text-slate-100">Projected Goal</span>: Sustainable
-                                                        growth (~25-40% CAGR) aiming for $1M/BTC by 2036.</li>
+                                                    <li><span class="text-emerald-400">Bull Phase (18m)</span>: Huge
+                                                        run-up.</li>
+                                                    <li><span class="text-red-400">Bear Phase (12m)</span>: Harsh -75%
+                                                        macro drop.</li>
+                                                    <li><span class="text-blue-400">Recovery Phase (18m)</span>:
+                                                        Sideways/upward.</li>
+                                                    <li><span class="text-slate-100">Math</span>: Peak multipliers are
+                                                        dynamically shaped to exactly hit your requested CAGR settings
+                                                        over every 48-month window.</li>
                                                 </ul>
                                             </div>
                                         </div>
                                     </div>
-                                    <p class="text-[9px] text-slate-400">Enable Fat Tails (Crashes) & Moonshots</p>
+                                    <p class="text-[9px] text-slate-400">Calculate realistic sequence of returns risk
+                                    </p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="chk-fat-tails" class="sr-only peer" checked
-                                        onchange="toggleMoonshotControls()">
+                                    <input type="checkbox" id="chk-fat-tails" class="sr-only peer" checked>
                                     <div
                                         class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#F7931A]">
                                     </div>
                                 </label>
                             </div>
 
-                            <!-- Moonshot Toggle (Nested) -->
-                            <div id="ctl-moonshots" class="pl-4 border-l-2 border-slate-100 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="flex items-center gap-1">
-                                            <label for="chk-moonshots"
-                                                class="text-xs font-bold text-slate-700 cursor-pointer">Enable Mean
-                                                Reversion</label>
-                                            <!-- Tooltips -->
-                                            <div class="relative group">
-                                                <svg class="w-3 h-3 text-slate-300 cursor-help hover:text-emerald-500 transition-colors"
-                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                    </path>
-                                                </svg>
-                                                <div
-                                                    class="absolute left-0 top-5 w-64 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
-                                                    <span class="text-emerald-400 font-bold uppercase">Rubber Band
-                                                        Effect</span><br>
-                                                    Simulates the tendency for crypto to "snap back" violently after a
-                                                    crash.
-                                                    <br><br>
-                                                    <span class="text-slate-300 font-bold">The Math:</span> If a Crash
-                                                    (Crypto Winter) occurred in the last <span
-                                                        class="text-white font-bold">12 months</span>, the probability
-                                                    of a Moonshot Rally is <span
-                                                        class="text-emerald-400 font-bold">boosted by
-                                                        50%</span> (e.g. 5% &rightarrow; 7.5%) to simulate
-                                                    opportunistic buying.
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p class="text-[9px] text-slate-400">Enable Mean Reversion (Rallies)</p>
-                                    </div>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="chk-moonshots" class="sr-only peer" checked>
-                                        <div
-                                            class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500">
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
                             <!-- Limit to 10 Years Toggle -->
                             <div class="flex items-center justify-between pt-2 border-t border-slate-100/50">
                                 <div class="flex items-center gap-1">
                                     <label for="chk-limit-fat-tails-10y"
-                                        class="text-xs font-bold text-slate-500 cursor-pointer">Limit to First
+                                        class="text-xs font-bold text-slate-500 cursor-pointer">Limit Cycles to First
                                         10y</label>
                                     <div class="relative group">
                                         <svg class="w-3 h-3 text-slate-300 cursor-help hover:text-blue-500 transition-colors"
@@ -772,8 +722,9 @@
                                         </svg>
                                         <div
                                             class="absolute left-0 top-5 w-48 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none border border-white/10">
-                                            Applies Crashes & Moonshots only for the first 10 years (120 months), then
-                                            reverts to standard growth (GBM).
+                                            Applies the chaotic 4-Year Cycles only for the first 10 years (120 months),
+                                            then reverts to smooth, mature growth (Geometric Brownian Motion) based on
+                                            your CAGR settings.
                                         </div>
                                     </div>
                                 </div>
@@ -785,46 +736,165 @@
                                 </label>
                             </div>
 
-                            <!-- Probabilities -->
-                            <div class="grid grid-cols-2 gap-3">
+
+
+                            <!-- Cycle Model Info -->
+                            <div class="bg-indigo-50/50 rounded-lg p-3 border border-indigo-100 mt-3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-[10px] uppercase font-bold text-indigo-500">Cycle Math</p>
+                                    <span
+                                        class="bg-indigo-100 text-indigo-600 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Active</span>
+                                </div>
+                                <p class="text-[10px] text-slate-600 leading-relaxed">
+                                    The 4-Year Cycle exactly respects your CAGR settings over each 48-month window, but
+                                    forces the portfolio through a massive <strong>-75% Sequence of Return Risk</strong>
+                                    mid-cycle to test resilience.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Crypto Params -->
+                        <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
+                            <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
                                 <div>
-                                    <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Crash
-                                        Prob (%)</label>
-                                    <input type="number" step="0.1" id="inp-prob-crash" value="2.0" min="0" max="100"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-red-400 focus:outline-none">
-                                    <div class="flex gap-1 mt-1">
-                                        <input type="number" id="inp-crash-min" value="30"
-                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                            placeholder="Min%" title="Min Drop % (Hist: -37% Nov '18)">
-                                        <input type="number" id="inp-crash-max" value="50"
-                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                            placeholder="Max%" title="Max Drop % (Hist: -50% Mar '20)">
-                                    </div>
-                                    <p id="txt-prob-crash-example"
-                                        class="text-[9px] text-slate-400 italic mt-1 leading-tight">
-                                        --
-                                    </p>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                    <input type="number" step="0.1" id="inp-c-cagr-start" value="28.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
                                 </div>
                                 <div>
-                                    <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Moonshot
-                                        Prob (%)</label>
-                                    <input type="number" step="0.1" id="inp-prob-moonshot" value="7.0" min="0" max="100"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono focus:border-emerald-400 focus:outline-none">
-                                    <div class="flex gap-1 mt-1">
-                                        <input type="number" id="inp-moonshot-min" value="25"
-                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                            placeholder="Min%" title="Min Rally % (Hist: +30-40%)">
-                                        <input type="number" id="inp-moonshot-max" value="50"
-                                            class="w-1/2 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9px] text-center"
-                                            placeholder="Max%" title="Max Rally % (Hist: +47% Dec '20)">
-                                    </div>
-                                    <p id="txt-prob-moonshot-example"
-                                        class="text-[9px] text-slate-400 italic mt-1 leading-tight">
-                                        --
-                                    </p>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                    <input type="number" step="0.1" id="inp-c-cagr-end" value="5.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
                                 </div>
                             </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                    <input type="number" step="0.1" id="inp-c-vol-start" value="40.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                    <input type="number" step="0.1" id="inp-c-vol-end" value="20.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Stock Params -->
+                        <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                            <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
+                                    <input type="number" step="0.1" id="inp-s-cagr-start" value="8.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
+                                    <input type="number" step="0.1" id="inp-s-cagr-end" value="8.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
+                                    <input type="number" step="0.1" id="inp-s-vol-start" value="17.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
+                                    <input type="number" step="0.1" id="inp-s-vol-end" value="17.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bond Params -->
+                        <div class="bg-green-50/50 rounded-lg p-3 border border-green-100">
+                            <p class="text-[10px] uppercase font-bold text-green-400 mb-2">Bond Assumptions</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR</label>
+                                    <input type="number" step="0.1" id="inp-b-cagr-start" value="4.5"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol</label>
+                                    <input type="number" step="0.1" id="inp-b-vol-start" value="6.0"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Correlation -->
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[10px] uppercase font-bold text-slate-400">Asset Correlation</p>
+                                <!-- Info Tooltip -->
+                                <div class="relative group">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div
+                                        class="absolute right-0 top-6 w-72 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-4 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
+                                        <p
+                                            class="font-serif font-bold text-[#F7931A] text-xs mb-2 uppercase tracking-wider border-b border-white/20 pb-1.5">
+                                            Diversification Power</p>
+                                        <p class="mb-2 text-white/90">Controls how closely asset classes move
+                                            together.
+                                        </p>
+
+                                        <div class="space-y-2">
+                                            <p class="text-white/90"><span class="text-red-300 font-bold">1.0
+                                                    (High):</span>
+                                                Assets lock-step. If Stocks crash, everything crashes. <span
+                                                    class="italic opacity-75">No safety net.</span></p>
+                                            <p class="text-white/90"><span class="text-green-300 font-bold">0.0
+                                                    (Low):</span> Assets ignore each other. When one zig, others
+                                                zag.
+                                                <span class="italic opacity-75">Rebalancing bonuses occur
+                                                    here.</span>
+                                            </p>
+                                            <p class="text-white/90"><span class="text-[#F7931A] font-bold">Default
+                                                    (0.20):</span> Slight positive link. Realistic for modern global
+                                                markets.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
+                                    <input type="number" step="0.05" id="inp-corr-start" value="0.20"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
+                                    <input type="number" step="0.05" id="inp-corr-end" value="0.20"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inflation -->
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
+                                    <input type="number" step="0.1" id="inp-infl-mean" value="2.5"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
+                                    <input type="number" step="0.001" id="inp-infl-vol" value="0.015"
+                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Stress Test Parameters -->
@@ -1016,198 +1086,55 @@
                             </div>
                         </div>
 
-                        <!-- Inflation -->
-                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                            <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Inflation Parameters</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Mean Inflation</label>
-                                    <input type="number" step="0.1" id="inp-infl-mean" value="2.5"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Inflation</label>
-                                    <input type="number" step="0.001" id="inp-infl-vol" value="0.015"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Correlation -->
-                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                            <div class="flex justify-between items-center mb-2">
-                                <p class="text-[10px] uppercase font-bold text-slate-400">Asset Correlation</p>
-                                <!-- Info Tooltip -->
-                                <div class="relative group">
-                                    <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-[#F7931A] transition-colors"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <div
-                                        class="absolute right-0 top-6 w-72 bg-slate-900/95 backdrop-blur-md text-white text-[10px] p-4 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none border border-white/10 leading-relaxed">
-                                        <p
-                                            class="font-serif font-bold text-[#F7931A] text-xs mb-2 uppercase tracking-wider border-b border-white/20 pb-1.5">
-                                            Diversification Power</p>
-                                        <p class="mb-2 text-white/90">Controls how closely asset classes move
-                                            together.
-                                        </p>
-
-                                        <div class="space-y-2">
-                                            <p class="text-white/90"><span class="text-red-300 font-bold">1.0
-                                                    (High):</span>
-                                                Assets lock-step. If Stocks crash, everything crashes. <span
-                                                    class="italic opacity-75">No safety net.</span></p>
-                                            <p class="text-white/90"><span class="text-green-300 font-bold">0.0
-                                                    (Low):</span> Assets ignore each other. When one zig, others
-                                                zag.
-                                                <span class="italic opacity-75">Rebalancing bonuses occur
-                                                    here.</span>
-                                            </p>
-                                            <p class="text-white/90"><span class="text-[#F7931A] font-bold">Default
-                                                    (0.20):</span> Slight positive link. Realistic for modern global
-                                                markets.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Start Correlation</label>
-                                    <input type="number" step="0.05" id="inp-corr-start" value="0.20"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">End Correlation</label>
-                                    <input type="number" step="0.05" id="inp-corr-end" value="0.20"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Crypto Params -->
-                        <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
-                            <p class="text-[10px] uppercase font-bold text-orange-400 mb-2">Crypto Assumptions</p>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                    <input type="number" step="0.1" id="inp-c-cagr-start" value="18.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                    <input type="number" step="0.1" id="inp-c-cagr-end" value="5.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
-                                    <input type="number" step="0.1" id="inp-c-vol-start" value="40.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
-                                    <input type="number" step="0.1" id="inp-c-vol-end" value="20.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-orange-600">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Stock Params -->
-                        <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
-                            <p class="text-[10px] uppercase font-bold text-blue-400 mb-2">Stock Assumptions</p>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR Start</label>
-                                    <input type="number" step="0.1" id="inp-s-cagr-start" value="8.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR End</label>
-                                    <input type="number" step="0.1" id="inp-s-cagr-end" value="8.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol Start</label>
-                                    <input type="number" step="0.1" id="inp-s-vol-start" value="17.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol End</label>
-                                    <input type="number" step="0.1" id="inp-s-vol-end" value="17.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-blue-600">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bond Params -->
-                        <div class="bg-green-50/50 rounded-lg p-3 border border-green-100">
-                            <p class="text-[10px] uppercase font-bold text-green-400 mb-2">Bond Assumptions</p>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">CAGR</label>
-                                    <input type="number" step="0.1" id="inp-b-cagr-start" value="4.5"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] text-slate-500 mb-1">Vol</label>
-                                    <input type="number" step="0.1" id="inp-b-vol-start" value="6.0"
-                                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-green-600">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- 4. Simulation Config (Collapsible) -->
-                <div class="border-t border-orange-100/30 pt-3 pb-4">
-                    <button onclick="toggleSimParams()"
-                        class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
-                        <span>Simulation Parameter</span>
-                        <svg id="icon-sim-params" class="w-4 h-4 transform transition-transform text-[#F7931A]"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
-                    </button>
-
-                    <div id="pnl-sim-params" class="advanced-panel space-y-4 pt-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="col-span-1">
-                                <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Sim Data
-                                    Points</label>
-                                <input type="number" id="inp-num-sims" value="1000"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
-                            </div>
-                            <div class="col-span-1">
-                                <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Target
-                                    Success (%)</label>
-                                <input type="number" step="1" id="inp-target-success" value="90"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
-                            </div>
-                        </div>
-
-
                     </div>
 
-                    <!-- Simulation Button -->
-                    <div class="pt-2 pb-6">
-                        <button id="btn-run" disabled
-                            class="w-full bg-[#F7931A] hover:bg-[#de760b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-200 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                    <!-- 4. Simulation Config (Collapsible) -->
+                    <div class="border-t border-orange-100/30 pt-3 pb-4">
+                        <button onclick="toggleSimParams()"
+                            class="w-full flex items-center justify-between text-xs font-black text-slate-900 uppercase tracking-widest hover:text-black transition outline-none">
+                            <span>Simulation Parameter</span>
+                            <svg id="icon-sim-params" class="w-4 h-4 transform transition-transform text-[#F7931A]"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                                    d="M19 9l-7 7-7-7">
                                 </path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <span>Run Simulation</span>
                         </button>
-                    </div>
+
+                        <div id="pnl-sim-params" class="advanced-panel space-y-4 pt-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="col-span-1">
+                                    <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Sim Data
+                                        Points</label>
+                                    <input type="number" id="inp-num-sims" value="1000"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-xs font-bold text-slate-900 uppercase mb-1">Target
+                                        Success (%)</label>
+                                    <input type="number" step="1" id="inp-target-success" value="90"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-sm focus:outline-none focus:border-[#F7931A] transition shadow-sm">
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <!-- Simulation Button -->
+                        <div class="pt-2 pb-6">
+                            <button id="btn-run" disabled
+                                class="w-full bg-[#F7931A] hover:bg-[#de760b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-200 transition transform active:scale-[0.98] flex justify-center items-center gap-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Run Simulation</span>
+                            </button>
+                        </div>
         </aside>
 
         <!-- Main Content: Results -->
@@ -2873,66 +2800,8 @@
         }
     </script>
     <script>
-        // Dynamic Fat Tail Examples
-        function updateFatTailExamples() {
-            const crashProb = parseFloat(document.getElementById('inp-prob-crash').value) || 0;
-            const moonshotProb = parseFloat(document.getElementById('inp-prob-moonshot').value) || 0;
-
-            const crashEl = document.getElementById('txt-prob-crash-example');
-            const moonshotEl = document.getElementById('txt-prob-moonshot-example');
-
-            // Crash Logic
-            if (crashProb > 0) {
-                const monthsPerCrash = 100 / crashProb;
-                const yearsPerCrashVal = monthsPerCrash / 12;
-
-                let freqText = "";
-                if (yearsPerCrashVal < 1) {
-                    freqText = `every ~${Math.round(monthsPerCrash)} months`;
-                } else {
-                    freqText = `every ~${yearsPerCrashVal.toFixed(1)} years`;
-                }
-
-                const crashMin = document.getElementById('inp-crash-min').value;
-                const crashMax = document.getElementById('inp-crash-max').value;
-
-                crashEl.innerHTML = `<span class="text-red-400 font-semibold">Risk:</span> ~1 crash ${freqText}.<br><span class="opacity-80">Drop: -${crashMin}% to -${crashMax}%</span>`;
-            } else {
-                crashEl.innerHTML = "Crashes disabled.";
-            }
-
-            // Moonshot Logic
-            if (moonshotProb > 0) {
-                const monthsPerMoon = 100 / moonshotProb;
-                const yearsPerMoon = monthsPerMoon / 12;
-
-                let freqText = "";
-                if (yearsPerMoon < 1) {
-                    freqText = `every ~${Math.round(monthsPerMoon)} months`;
-                } else {
-                    freqText = `every ~${yearsPerMoon.toFixed(1)} years`;
-                }
-
-                const moonMin = document.getElementById('inp-moonshot-min').value;
-                const moonMax = document.getElementById('inp-moonshot-max').value;
-
-                moonshotEl.innerHTML = `<span class="text-emerald-500 font-semibold">Opp:</span> ~1 moonshot ${freqText}.<br><span class="opacity-80">Rally: +${moonMin}% to +${moonMax}%</span>`;
-            } else {
-                moonshotEl.innerHTML = "Moonshots disabled.";
-            }
-        }
-
-        // Attach listeners
-        document.getElementById('inp-prob-crash').addEventListener('input', updateFatTailExamples);
-        document.getElementById('inp-prob-moonshot').addEventListener('input', updateFatTailExamples);
-        document.getElementById('inp-crash-min').addEventListener('input', updateFatTailExamples);
-        document.getElementById('inp-crash-max').addEventListener('input', updateFatTailExamples);
-        document.getElementById('inp-moonshot-min').addEventListener('input', updateFatTailExamples);
-        document.getElementById('inp-moonshot-max').addEventListener('input', updateFatTailExamples);
-
-        // Init
-        // Delay slightly to ensure DOM is ready if script runs early, though it's at end of body
-        setTimeout(updateFatTailExamples, 100);
+        // Empirical Regime Model is now active by default.
+        // No manual crash/moonshot configuration required.
     </script>
 </body>
 

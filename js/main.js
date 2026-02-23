@@ -68,16 +68,7 @@ async function runSimulation() {
         numSims: parseInput('inp-num-sims', 1000),
         ENFORCE_MAX_BAD_STREAK: true,
         USE_FAT_TAILS: document.getElementById('chk-fat-tails') ? document.getElementById('chk-fat-tails').checked : false,
-        USE_MOONSHOTS: document.getElementById('chk-moonshots') ? document.getElementById('chk-moonshots').checked : false,
         LIMIT_FAT_TAILS_10Y: document.getElementById('chk-limit-fat-tails-10y') ? document.getElementById('chk-limit-fat-tails-10y').checked : false,
-        PROB_CRASH: parseInput('inp-prob-crash', 3.5, false) / 100, // ~1 crash every 2.5 years (Hist: 4.5%)
-        PROB_MOONSHOT: parseInput('inp-prob-moonshot', 6.0, false) / 100, // ~1 moonshot every 1.5 years (Hist: 18%)
-
-        // Magnitude Configs (New)
-        CRASH_MAG_MIN: parseInput('inp-crash-min', 35, false) / 100,
-        CRASH_MAG_MAX: parseInput('inp-crash-max', 65, false) / 100,
-        MOONSHOT_MAG_MIN: parseInput('inp-moonshot-min', 30, false) / 100,
-        MOONSHOT_MAG_MAX: parseInput('inp-moonshot-max', 80, false) / 100,
 
         ...Config.getConfig(window, 'DEFAULT_CONFIGS', {}) // Fallback
     };
