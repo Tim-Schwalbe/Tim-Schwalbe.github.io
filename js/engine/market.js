@@ -78,8 +78,10 @@ window.generateMarketData = async function (numSims, years, configs) {
             let targetVolMonthly = cVolTarget / Math.sqrt(12);
             let isMacroBear = false;
 
+            const START_IN_BEAR_MARKET = Config.getConfig(configs, 'START_IN_BEAR_MARKET', false);
             if (applyCycles) {
-                const cycleMonth = m % 48;
+                const cycleOffset = START_IN_BEAR_MARKET ? 18 : 0;
+                const cycleMonth = (m + cycleOffset) % 48;
 
                 // Target performance for this exact 4-year window based on the user's CAGR settings
                 const cycleMultiplier = Math.pow(1 + cCagrTarget, 4);
@@ -87,8 +89,9 @@ window.generateMarketData = async function (numSims, years, configs) {
                 // Historically, peak multipliers are massive but scale with target CAGR
                 const peakMult = Math.max(cycleMultiplier * 2.0, 4.0);
 
-                // Historical bear markets drop approx 75% from Peak
-                const troughMult = peakMult * 0.25;
+                // Configurable Bear Market Drop (Default -75%)
+                const bearDepth = Config.getConfig(configs, 'BEAR_MARKET_DEPTH', -0.75);
+                const troughMult = peakMult * (1 + bearDepth);
 
                 // Phase 1: Bull Market (Months 0 - 17, 18 months)
                 if (cycleMonth < 18) {
@@ -97,7 +100,7 @@ window.generateMarketData = async function (numSims, years, configs) {
                 }
                 // Phase 2: Bear Market (Months 18 - 29, 12 months)
                 else if (cycleMonth < 30) {
-                    const requiredMonthlyDrift = Math.log(0.25) / 12.0;
+                    const requiredMonthlyDrift = Math.log(1 + bearDepth) / 12.0;
                     cycleDriftAdder = requiredMonthlyDrift - (Math.log(1 + cCagrTarget) / 12);
                     isMacroBear = true;
                     // Bear markets are highly volatile
@@ -140,7 +143,7 @@ window.generateMarketData = async function (numSims, years, configs) {
             bondLogReturns[idx] = (Math.log(1 + bCagr) / 12 - bDrag / 12) + (bVol / Math.sqrt(12)) * zB;
 
             // Crypto parameters
-            const cDrag = 0.5 * (cVolTarget ** 2);
+            const cDrag = 0; // Match Median (User setting historical norm, same as Stocks/Bonds)
             const cDriftBase = Math.log(1 + cCagrTarget) / 12 - cDrag / 12;
 
             // Effective Drift
@@ -169,10 +172,8 @@ window.generateMarketData = async function (numSims, years, configs) {
 
             // Forced Crash
             if (FORCE_CRASH && Math.floor(m / 12) < CRASH_DURATION) {
-                const floorC = Config.getConfig(configs, 'CRASH_FLOOR_CRYPTO', -0.10);
                 const floorS = Config.getConfig(configs, 'CRASH_FLOOR_STOCKS', -0.20);
                 const floorB = Config.getConfig(configs, 'CRASH_FLOOR_BONDS', -0.05);
-                cryptoLogReturns[idx] = Math.min(cryptoLogReturns[idx], floorC);
                 stockLogReturns[idx] = Math.min(stockLogReturns[idx], floorS);
                 bondLogReturns[idx] = Math.min(bondLogReturns[idx], floorB);
             }

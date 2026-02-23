@@ -39,7 +39,6 @@ window.updateCrashAnnualDisplay = function () {
     };
 
     updateField('inp-crash-floor-stocks', 'disp-crash-annual-stocks');
-    updateField('inp-crash-floor-crypto', 'disp-crash-annual-crypto');
     updateField('inp-crash-floor-bonds', 'disp-crash-annual-bonds');
 };
 
@@ -103,6 +102,10 @@ async function runSimulation() {
     const cutVal = parseFloat(document.getElementById('inp-floor-cut').value) || 0;
     configs.FLOOR_PCT = 100 - cutVal;
 
+    configs.START_IN_BEAR_MARKET = document.getElementById('chk-start-bear-market') ? document.getElementById('chk-start-bear-market').checked : false;
+    configs.BEAR_MARKET_DEPTH = parseInput('inp-bear-depth', -75.0, false) / 100;
+
+
     // Crash Settings
     if (document.getElementById('chk-force-start-crash').checked) {
         configs.FORCE_CRASH = true;
@@ -110,7 +113,6 @@ async function runSimulation() {
 
         // Read Floors (convert % to decimal)
         configs.CRASH_FLOOR_STOCKS = parseInput('inp-crash-floor-stocks', -5.0, false) / 100;
-        configs.CRASH_FLOOR_CRYPTO = parseInput('inp-crash-floor-crypto', -10.0, false) / 100;
         configs.CRASH_FLOOR_BONDS = parseInput('inp-crash-floor-bonds', -1.0, false) / 100;
     }
 
