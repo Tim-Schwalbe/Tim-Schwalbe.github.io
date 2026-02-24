@@ -282,6 +282,7 @@ window.generateMarketData = async function (numSims, years, configs) {
             }
             // Avoid div/0
             if (varC > 0 && varS > 0) {
+                varS /= months;
                 sumCorrSB += (cov / months) / (Math.sqrt(varC) * Math.sqrt(varS));
             }
         }

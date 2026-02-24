@@ -15,6 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. Init Crash Displays
     if (window.updateCrashAnnualDisplay) window.updateCrashAnnualDisplay();
+
+    // 5. Init Allocations Displays
+    if (window.Handlers && window.Handlers.updateAllocations) {
+        window.Handlers.updateAllocations();
+    }
 });
 
 // Helper: Update Crash Annual Displays

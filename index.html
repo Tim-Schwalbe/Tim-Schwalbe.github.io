@@ -503,7 +503,10 @@
                                     <span class="flex items-center gap-1 font-bold text-slate-900">
                                         <span class="text-[#F7931A]">●</span> Bonds (FI)
                                     </span>
-                                    <span id="lbl-bonds-pct" class="font-bold text-[#F7931A]">60%</span>
+                                    <div class="flex items-baseline gap-2">
+                                        <span id="lbl-bonds-val" class="text-[10px] text-slate-400 font-mono"></span>
+                                        <span id="lbl-bonds-pct" class="font-bold text-[#F7931A]">60%</span>
+                                    </div>
                                 </div>
                                 <input type="range"
                                     class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
@@ -518,7 +521,10 @@
                                     <span class="flex items-center gap-1 font-bold text-slate-900">
                                         <span class="text-[#F7931A]">●</span> Stocks (ETF)
                                     </span>
-                                    <span id="lbl-stocks-pct" class="font-bold text-[#F7931A]">40%</span>
+                                    <div class="flex items-baseline gap-2">
+                                        <span id="lbl-stocks-val" class="text-[10px] text-slate-400 font-mono"></span>
+                                        <span id="lbl-stocks-pct" class="font-bold text-[#F7931A]">40%</span>
+                                    </div>
                                 </div>
                                 <input type="range"
                                     class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
@@ -532,7 +538,10 @@
                                     <span class="flex items-center gap-1 font-bold text-slate-900">
                                         <span class="text-[#F7931A]">●</span> Crypto (BTC)
                                     </span>
-                                    <span id="lbl-crypto-pct" class="font-bold text-[#F7931A]">0%</span>
+                                    <div class="flex items-baseline gap-2">
+                                        <span id="lbl-crypto-val" class="text-[10px] text-slate-400 font-mono"></span>
+                                        <span id="lbl-crypto-pct" class="font-bold text-[#F7931A]">0%</span>
+                                    </div>
                                 </div>
                                 <input type="range"
                                     class="w-full accent-[#F7931A] h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer hover:bg-slate-300 transition"
@@ -795,10 +804,10 @@
                                         Depth</label>
                                     <p class="text-[9px] text-slate-400">Target depth (-75% is historical average).</p>
                                 </div>
-                                <div class="w-20 relative">
-                                    <input type="number" id="inp-bear-depth" value="-75.0" max="-1" step="5"
-                                        class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-center font-mono text-red-600 font-bold focus:border-purple-400 focus:outline-none">
-                                    <span class="absolute right-2 top-2 text-[10px] text-slate-400">%</span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="number" id="inp-bear-depth" value="-75" min="-100" max="-1" step="5"
+                                        class="w-20 bg-white border border-slate-200 rounded-lg pl-2 pr-1 py-1.5 text-xs text-center font-mono text-red-600 font-bold focus:border-purple-400 focus:outline-none">
+                                    <span class="text-[11px] text-slate-400 font-bold">%</span>
                                 </div>
                             </div>
 

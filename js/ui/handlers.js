@@ -13,6 +13,10 @@ window.Handlers = {
         el.setSelectionRange(cursor + (newLen - oldLen), cursor + (newLen - oldLen));
 
         window.Handlers.updateTotalCapital();
+
+        if (el.id === 'inp-initial') {
+            window.Handlers.updateAllocations();
+        }
     },
 
     updateTotalCapital() {
@@ -150,6 +154,17 @@ window.Handlers = {
         document.getElementById('lbl-crypto-pct').innerText = cVal + "%";
         document.getElementById('lbl-stocks-pct').innerText = sVal + "%";
         document.getElementById('lbl-bonds-pct').innerText = bVal + "%";
+
+        // New Feature: Show Currency Values
+        const investedStr = document.getElementById('inp-initial').value;
+        // Formatters is expected to be loaded in window.Formatters
+        const invested = window.Formatters ? window.Formatters.parseFormattedValue(investedStr) : 0;
+
+        if (window.Formatters) {
+            document.getElementById('lbl-crypto-val').innerText = window.Formatters.formatCurrency(invested * (cVal / 100), 0);
+            document.getElementById('lbl-stocks-val').innerText = window.Formatters.formatCurrency(invested * (sVal / 100), 0);
+            document.getElementById('lbl-bonds-val').innerText = window.Formatters.formatCurrency(invested * (bVal / 100), 0);
+        }
 
         // Style consistency: Bonds now uses the same Orange theme as Stocks/Crypto
         const labelBonds = document.getElementById('lbl-bonds-pct');
