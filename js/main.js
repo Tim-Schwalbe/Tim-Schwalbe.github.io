@@ -363,8 +363,9 @@ async function runSimulation() {
             const targetElement = isMobile ? resultsContainer : setupSection;
 
             // Calculate the exact pixel position of the content wrapper
-            // This aligns the browser window perfectly with the border just below the navigation/target
-            let targetPosition = targetElement.offsetTop;
+            // This aligns the browser window perfectly with the target element
+            const rect = targetElement.getBoundingClientRect();
+            let targetPosition = rect.top + window.scrollY;
 
             // Add a small 24px padding so it breathes a bit on mobile
             if (isMobile) targetPosition -= 24;
