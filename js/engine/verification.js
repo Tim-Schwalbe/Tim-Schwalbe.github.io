@@ -77,7 +77,7 @@ window.Verification = {
     // TEST 3: Inflation Impact
     // Inputs: Cash Amount, Inflation Rate, Years
     testInflation: function (cash, inflationRate, years) {
-        let nominalals = cash;
+        const nominal = cash;
         let realValue = cash;
 
         // Compound decay
@@ -85,9 +85,9 @@ window.Verification = {
         realValue = cash / discountFactor;
 
         return {
-            nominal: nominalals,
+            nominal: nominal,
             real: realValue,
-            loss: nominalals - realValue
+            loss: nominal - realValue
         };
     },
 

@@ -13,16 +13,10 @@ window.findSWR = async function (targetOdds, marketData, configs) {
     let high = 0.30;
     let best = 0.001;
 
-    // V6 Fix: Dynamic Safety Margin based on Allocation Volatility
-    // Users with high-vol assets (Crypto) need larger margins for Monte Carlo stability.
-    // Scale: 0.5% (Stocks/Bonds) -> 4.0% (100% Crypto)
-    const allocC = Config.getConfig(configs, 'ALLOC_CRYPTO', 0); // 0-100
-    const baseMargin = 0.005;
-    const cryptoMarginAdder = (allocC / 100) * 0.035; // Adds up to 3.5%
-    const safetyMargin = baseMargin + cryptoMarginAdder;
-
-    // Cap at reasonable max (e.g., don't require > 99.9%)
-    const requiredSuccess = Math.min(0.999, targetOdds + safetyMargin);
+    // Use the user's exact target success rate. The UI exposes this setting directly,
+    // so adding a hidden margin on top would silently misrepresent the result.
+    // (A previous 4% margin caused SWR to appear ~30% lower than actual for 100% crypto.)
+    const requiredSuccess = Math.min(0.999, targetOdds);
 
     for (let i = 0; i < 25; i++) {
         if (i > 0 && i % 5 === 0 && typeof setTimeout !== 'undefined') await new Promise(r => setTimeout(r, 0));

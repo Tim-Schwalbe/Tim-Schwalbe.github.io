@@ -49,6 +49,7 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         floorHits: 0,
         maxMonthlyAcrossAll: 0,
         totalSurvivorMonths: 0,
+        totalSurvivorYears: 0,
         spendingVolatility: [],
         earlyBadPaths: 0,
         downMarketMonths: 0,
@@ -125,6 +126,7 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
             // Track Annual Spend for Volatility Calculation
             if ((m + 1) % 12 === 0) {
                 pathAnnualSpends.push(currentMonthlyWithdrawal * 12);
+                pathStats.totalSurvivorYears++;
             }
 
             pathSpend += currentMonthlyWithdrawal;
@@ -169,12 +171,12 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         pathStats.realFinalWealths.push(finalWealth / pathInflationFactor);
 
         // Calc Volatility for this path (StdDev of annual spends / Average Annual Spend)
-        if (pathAnnualSpends.length > 0) {
+        if (pathAnnualSpends.length > 1) {
             const avg = pathAnnualSpends.reduce((a, b) => a + b, 0) / pathAnnualSpends.length;
-            const variance = pathAnnualSpends.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / pathAnnualSpends.length;
+            // Use sample variance (n-1) for unbiased estimate
+            const variance = pathAnnualSpends.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / (pathAnnualSpends.length - 1);
             const stdDev = Math.sqrt(variance);
-            // Stability metric: 1 - CV (Coefficient of Variation)
-            // Use simple CV for now: stdDev / avg
+            // Stability metric: CV (Coefficient of Variation) = stdDev / mean
             if (avg > 0) pathStats.spendingVolatility.push(stdDev / avg);
         }
         if (earlyCrash) pathStats.earlyBadPaths++;
@@ -204,11 +206,11 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
 
     const stats = {
         medianMaxDrawdown: median(pathStats.maxDrawdowns),
-        worstDrawdown: Math.max(...pathStats.maxDrawdowns),
+        worstDrawdown: pathStats.maxDrawdowns.length > 0 ? Math.max(...pathStats.maxDrawdowns) : 0,
         medianLowestCapital: median(pathStats.lowestCapitals),
-        absoluteLowestCapital: Math.min(...pathStats.lowestCapitals),
+        absoluteLowestCapital: pathStats.lowestCapitals.length > 0 ? Math.min(...pathStats.lowestCapitals) : 0,
         medianDrawdownDuration: median(pathStats.drawdownDurations),
-        worstDrawdownDuration: Math.max(...pathStats.drawdownDurations),
+        worstDrawdownDuration: pathStats.drawdownDurations.length > 0 ? Math.max(...pathStats.drawdownDurations) : 0,
 
         // Legacy / Real Wealth
         medianRealFinalWealth: median(pathStats.realFinalWealths),
@@ -220,8 +222,8 @@ window.simulatePortfolio = function (withdrawalRate, marketData, configs) {
         avgAnnualSpend: (avgTotalSpend / years),
         medianMonthlySpend: (median(pathStats.totalSpends) / (years * 12)),
         maxMonthlySpend: pathStats.maxMonthlyAcrossAll,
-        ceilingHitRate: (pathStats.ceilingHits * 12) / (pathStats.totalSurvivorMonths || 1),
-        floorHitRate: (pathStats.floorHits * 12) / (pathStats.totalSurvivorMonths || 1),
+        ceilingHitRate: pathStats.ceilingHits / (pathStats.totalSurvivorYears || 1),
+        floorHitRate: pathStats.floorHits / (pathStats.totalSurvivorYears || 1),
 
         // New Metric: Cash Shield Efficiency
         cashShieldSuccessRate: pathStats.downMarketMonths > 0 ? (pathStats.cashCoveredMonths / pathStats.downMarketMonths) : 1,
@@ -288,6 +290,7 @@ function calcStabilityIndex(volatilitySum, count) {
 }
 
 function calcEstateStrength(realFinalWealths, initialInvestment) {
+    if (!realFinalWealths || realFinalWealths.length === 0) return 0;
     const wins = realFinalWealths.filter(w => w > initialInvestment).length;
     return wins / realFinalWealths.length;
 }

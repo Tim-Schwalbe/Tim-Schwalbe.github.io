@@ -55,6 +55,9 @@ async function runSimulation() {
 
     // 1. Gather Configs
     const configs = {
+        // Defaults come first so explicit UI values below take precedence
+        ...Config.getConfig(window, 'DEFAULT_CONFIGS', {}),
+
         years: parseInput('inp-years', 30),
         INVESTED_AMOUNT: Formatters.parseFormattedValue(document.getElementById('inp-initial').value),
         CASH_BUFFER: Formatters.parseFormattedValue(document.getElementById('inp-buffer').value),
@@ -68,15 +71,14 @@ async function runSimulation() {
         ENFORCE_MAX_BAD_STREAK: true,
         USE_FAT_TAILS: document.getElementById('chk-fat-tails') ? document.getElementById('chk-fat-tails').checked : false,
         LIMIT_FAT_TAILS_10Y: document.getElementById('chk-limit-fat-tails-10y') ? document.getElementById('chk-limit-fat-tails-10y').checked : false,
-
-        ...Config.getConfig(window, 'DEFAULT_CONFIGS', {}) // Fallback
     };
 
     // Advanced Configs override
     // 1. Percentage Parameters (Need /100)
     const percentParams = [
         'S_CAGR_START', 'S_CAGR_END', 'S_VOL_START', 'S_VOL_END',
-        'C_CAGR_START', 'C_CAGR_END', 'C_VOL_START', 'C_VOL_END',
+        'C_CAGR_START', 'C_CAGR_MID', 'C_CAGR_END',
+        'C_VOL_START', 'C_VOL_MID', 'C_VOL_END',
         'B_CAGR_START', 'B_VOL_START',
         'INFL_MEAN', 'INFL_VOL'
     ];
@@ -107,7 +109,7 @@ async function runSimulation() {
 
 
     // Crash Settings
-    if (document.getElementById('chk-force-start-crash').checked) {
+    if (document.getElementById('chk-force-start-crash')?.checked) {
         configs.FORCE_CRASH = true;
         configs.CRASH_DURATION = parseInput('inp-crash-duration', 3);
 
