@@ -110,7 +110,7 @@ async function runSimulation() {
     configs.FLOOR_PCT = 100 - cutVal;
 
     configs.START_IN_BEAR_MARKET = document.getElementById('chk-start-bear-market') ? document.getElementById('chk-start-bear-market').checked : false;
-    configs.BEAR_MARKET_DEPTH = parseInput('inp-bear-depth', -75.0, false) / 100;
+    configs.BEAR_MARKET_DEPTH = -Math.abs(parseInput('inp-bear-depth', -75.0, false)) / 100;
 
 
     // Crash Settings

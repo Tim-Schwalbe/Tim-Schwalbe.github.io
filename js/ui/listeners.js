@@ -20,6 +20,17 @@ window.Listeners = {
         const inpFloorCut = document.getElementById('inp-floor-cut');
         if (inpFloorCut) inpFloorCut.addEventListener('input', Handlers.updateFloorTooltips);
 
+        // Bear Market Depth Negative Enforcer
+        const inpBearDepth = document.getElementById('inp-bear-depth');
+        if (inpBearDepth) {
+            inpBearDepth.addEventListener('change', (e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && val > 0) {
+                    e.target.value = -Math.abs(val);
+                }
+            });
+        }
+
         // Ceiling Input
         const inpCeilingEarly = document.getElementById('inp-ceiling-early');
         if (inpCeilingEarly) inpCeilingEarly.addEventListener('input', Handlers.updateCeilingTooltips);
